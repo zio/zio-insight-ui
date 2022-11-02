@@ -7,5 +7,9 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [require('tw-elements//dist/plugin')],
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+    require('tw-elements//dist/plugin')
+  ],
 }

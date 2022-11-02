@@ -12,12 +12,10 @@ export const MetricKeySelector: React.FC<{}> = (props) => {
   const selectionChanged = (sel: C.MetricKey[]) =>
     console.log(`[${sel.map(C.keyAsString).join(",")}]`)
 
-  const [isDlgVisible, setDlgVisible] = React.useState<boolean>(false)
-
   return (
-    <div>
+    <div className="w-full flex flex-shrink">
       <button
-        className="py-2.5 px-6 text-white bg-blue-600 rounded uppercase shadow-md"
+        className={`mx-auto mt-10 py-2.5 px-6 text-white bg-blue-600 rounded uppercase shadow-md`}
         data-bs-toggle="modal"
         data-bs-target="#exampleModal">
         Select Metrics
@@ -33,7 +31,7 @@ export const MetricKeySelector: React.FC<{}> = (props) => {
               <h5
                 className="text-xl font-medium leading-normal text-gray-800"
                 id="exampleModal">
-                Modal title
+                Select Metrics ...
               </h5>
               <button
                 type="button"
@@ -46,19 +44,6 @@ export const MetricKeySelector: React.FC<{}> = (props) => {
                 initialSelection={[]}
                 onSelectionChanged={selectionChanged}
               />
-            </div>
-            <div className="modal-footer flex flex-shrink-0 flex-wrap  justify-end p-4 border-t border-gray-200 rounded-b-md">
-              <button
-                type="button"
-                className="inline-block px-6 py-2.5 bg-purple-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-purple-700 hover:shadow-lg focus:bg-purple-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-purple-800 active:shadow-lg transition duration-150 ease-in-out"
-                data-bs-dismiss="modal">
-                Close
-              </button>
-              <button
-                type="button"
-                className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out ml-1">
-                Save changes
-              </button>
             </div>
           </div>
         </div>
@@ -142,7 +127,7 @@ interface RowMetricKeyProps {
 const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
   <tr>
     <td>
-      <input type="checkbox"></input>
+      <input type="checkbox" onChange={() => props.toggled(props.metricKey)}></input>
     </td>
     <td>{props.metricKey.metricType}</td>
     <td>{props.metricKey.name}</td>

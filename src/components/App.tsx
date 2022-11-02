@@ -3,10 +3,8 @@ import { MetricKeySelector } from "@components/TableMetricKey"
 
 export function App() {
   return (
-    <div className="w-max h-max">
+    <div className="w-screen h-screen">
       <MetricKeySelector />
-   </div>
+    </div>
   )
-  
 }
-
