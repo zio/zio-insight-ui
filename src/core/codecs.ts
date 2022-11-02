@@ -1,5 +1,5 @@
 import * as T from '@effect/core/io/Effect'
-import { Chunk } from '@tsplus/stdlib/collections/Chunk'
+import * as Chunk from '@tsplus/stdlib/collections/Chunk'
 import { pipe } from '@tsplus/stdlib/data/Function'
 import * as Z from 'zod'
 
@@ -16,24 +16,19 @@ const metricTypeSchema = Z.enum(
 
 export type MetricType = Z.infer<typeof metricTypeSchema>
 
-const metricKeySchema = Z.tuple([
-  Z.string(),
-  Z.array(metricLabelSchema),
-  metricTypeSchema,
-  Z.string()
-])
+const metricKeySchema = Z.object({
+  id: Z.string(),
+  key: Z.object({
+    name: Z.string(),
+    labels: Z.array(metricLabelSchema),
+    metricType: metricTypeSchema
+  })
+})
 
-interface RawMetricKey extends Z.TypeOf<typeof metricKeySchema> {}
-
-export interface MetricKey {
-  name: string,
-  labels: MetricLabel[],
-  metricType: MetricType,
-  details: unknown
-}
+export interface MetricKey extends Z.TypeOf<typeof metricKeySchema> {}
 
 export const keyAsString = (mk: MetricKey) => 
-  `${mk.metricType}:${mk.name}:${mk.labels.map(l => l.key + "=" + l.value).join(',')}`
+  `${mk.key.metricType}:${mk.key.name}:${mk.key.labels.map(l => l.key + "=" + l.value).join(',')}`
 
 const AvailableMetrics = Z.object({
   keys: Z.array(metricKeySchema)
@@ -44,24 +39,13 @@ export class InvalidMetricKeys {
   constructor(readonly reason: string) {}
 }
 
-export const fromInsight : (value: unknown) => T.Effect<never, InvalidMetricKeys, Chunk<MetricKey>> = (value : unknown) => 
+export const fromInsight : (value: unknown) => T.Effect<never, InvalidMetricKeys, MetricKey[]> = (value : unknown) => 
   pipe(
     T.sync(() => AvailableMetrics.safeParse(value)),
     T.flatMap((result) => 
       result.success 
         ? T.succeed(result.data.keys)
         : T.fail(new InvalidMetricKeys(result.error.toString()))
-    ),
-    T.flatMap((rawKeys) => 
-      T.forEach(rawKeys, k => T.succeed(fromRawKey(k)))
     )
   )
 
-const fromRawKey : (raw: RawMetricKey) => MetricKey = (raw: RawMetricKey) => {
-  return {
-    name : raw[0],
-    labels: raw[1],
-    metricType: raw[2],
-    details: JSON.parse(raw[3])
-  }
-}

@@ -5,7 +5,6 @@ import * as FiberId from "@effect/core/io/FiberId"
 import * as C from "@core/codecs"
 import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
-import * as Chunk from "@tsplus/stdlib/collections/Chunk"
 import { getMetricKeys } from "@core/api"
 
 export const MetricKeySelector: React.FC<{}> = (props) => {
@@ -73,7 +72,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
   React.useEffect(() => {
     const interrupt = T.unsafeRunWith(getMetricKeys, (ex) => {
       if (Ex.isSuccess(ex)) {
-        setItems(Coll.toArray(Chunk.toCollection(ex.value)))
+        setItems(ex.value)
       } else {
         console.error(ex.cause)
       }
@@ -107,7 +106,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
       <tbody>
         {items.map((k, _1, _2) => (
           <RowMetricKey
-            key={C.keyAsString(k)}
+            key={k.id}
             metricKey={k}
             checked={isSelected(k)}
             toggled={toggled}
@@ -129,10 +128,10 @@ const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
     <td>
       <input type="checkbox" onChange={() => props.toggled(props.metricKey)}></input>
     </td>
-    <td>{props.metricKey.metricType}</td>
-    <td>{props.metricKey.name}</td>
+    <td>{props.metricKey.key.metricType}</td>
+    <td>{props.metricKey.key.name}</td>
     <td>
-      {props.metricKey.labels.map((l) => (
+      {props.metricKey.key.labels.map((l) => (
         <span>
           {l.key}={l.value}
         </span>
