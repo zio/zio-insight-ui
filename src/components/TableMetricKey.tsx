@@ -21,7 +21,7 @@ export const MetricKeySelector: React.FC<{}> = (props) => {
         Select Metrics
       </button>
       <div
-        className="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+        className="modal fade fixed top-0 left-0 hidden w-screen h-screen outline-none overflow-x-hidden overflow-y-auto"
         id="exampleModal"
         aria-labelledby="exampleModal"
         aria-hidden="true">
