@@ -1,10 +1,10 @@
 import * as React from "react"
-import { MyGrid } from "./Grid"
+import { MetricKeySelector } from "./TableMetricKey"
 
 export function App() {
   return (
-    <div className="w-screen h-screen">
-      <MyGrid />
+    <div className="w-screen h-screen" data-theme="corporate">
+      <MetricKeySelector />
     </div>
   )
 }

@@ -6,12 +6,12 @@ export interface LogService {
   readonly info: (msg: string) => T.Effect<never, never, void>
 }
 
-const LogServiceTag =Tag<LogService>()
+export const LogService =Tag<LogService>()
 
 export const consoleLogger : L.Layer<never, never, LogService> = 
-  L.fromValue(LogServiceTag, () => ({
-    info: (msg: string) => T.succeed(console.log(msg))
+  L.fromValue(LogService, () => ({
+    info: (msg: string) => T.succeed(console.log(`[INFO] -- ${msg}`))
   }))
 
 export const info = (msg: string) => 
-  T.serviceWithEffect(LogServiceTag, log => log.info(msg))
+  T.serviceWithEffect(LogService, log => log.info(msg))

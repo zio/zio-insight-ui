@@ -12,41 +12,16 @@ export const MetricKeySelector: React.FC<{}> = (props) => {
     console.log(`[${sel.map(C.keyAsString).join(",")}]`)
 
   return (
-    <div className="w-full flex flex-shrink">
-      <button
-        className={`mx-auto mt-10 py-2.5 px-6 text-white bg-blue-600 rounded uppercase shadow-md`}
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal">
+    <div className="w-full flex flex-shrink dark">
+      <label htmlFor="exampleModal" className="btn btn-primary">
         Select Metrics
-      </button>
-      <div
-        className="modal fade fixed top-0 left-0 hidden w-screen h-screen outline-none overflow-x-hidden overflow-y-auto"
-        id="exampleModal"
-        aria-labelledby="exampleModal"
-        aria-hidden="true">
-        <div className="max-w-6xl modal-dialog relative pointer-events-none">
-          <div className="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-white bg-clip-padding rounded-md outline-none text-current">
-            <div className="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-200 rounded-t-md">
-              <h5
-                className="text-xl font-medium leading-normal text-gray-800"
-                id="exampleModal">
-                Select Metrics ...
-              </h5>
-              <button
-                type="button"
-                className="btn-close box-content w-4 h-4 p-1 text-black border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
-                data-bs-dismiss="modal"
-                aria-label="Close"></button>
-            </div>
-            <div className="modal-body relative p-4 max-h-96 overflow-y-auto">
-              <TableMetricKeys
-                initialSelection={[]}
-                onSelectionChanged={selectionChanged}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      </label>
+      <input type="checkbox" id="exampleModal" className="modal-toggle" />
+      <label htmlFor="exampleModal" className="modal cursor-pointer">
+        <label className="modal-box relative" htmlFor="">
+          <h1>Hello Andreas</h1>
+        </label>
+      </label>
     </div>
   )
 }
