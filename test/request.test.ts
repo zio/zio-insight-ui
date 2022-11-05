@@ -4,7 +4,11 @@ import * as Log from '@core/logger'
 import * as Api from '@core/api'
 import { pipe } from '@tsplus/stdlib/data/Function'
 
-const layer : L.Layer<never, never, Api.ZIOMetrics> = pipe(
+// Pipe a console logger instance into the ZIO Metrics Live instance 
+// This gives us an overall Layer<never, never, ZIOMetrics>
+// Note that the console is not actually available in the constructed environment 
+// This could be achieved with "merge" rather then "provideTo"
+const layer = pipe(
   Log.consoleLogger,
   L.provideTo(Api.ZIOLive)
 )

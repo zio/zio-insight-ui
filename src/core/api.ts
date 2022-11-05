@@ -8,12 +8,16 @@ import * as Log from '@core/logger'
 
 type ZIOApiError = Request.FetchError | Request.InvalidJsonResponse | Codec.InvalidMetricKeys
 
+// As a best practice, do not require services in the individual methods of the interface
+// Rather, use Layer injection into the actual service 
 export interface ZIOMetrics {
   getMetricKeys: T.Effect<never, ZIOApiError, Codec.MetricKey[]>
 }
 
 const ZIOMetrics = Tag<ZIOMetrics>()
 
+// helper function to construct a ZIOMetrics implementation on top of a Log Service 
+// instance
 function makeMetrics(logger: Log.LogService) : ZIOMetrics {
   return ({
     getMetricKeys: pipe(
@@ -25,6 +29,7 @@ function makeMetrics(logger: Log.LogService) : ZIOMetrics {
   })
 }
 
+// Define a Layer with Dependency on a Log Service
 export const ZIOLive : L.Layer<Log.LogService, never, ZIOMetrics> = 
   L.fromEffect<ZIOMetrics>(ZIOMetrics)(
     pipe(
@@ -33,5 +38,6 @@ export const ZIOLive : L.Layer<Log.LogService, never, ZIOMetrics> =
     )
   )
 
+// Note that getMetricKeys does not require a Log Service
 export const getMetricKeys = T.serviceWithEffect(ZIOMetrics, api => api.getMetricKeys)
 
