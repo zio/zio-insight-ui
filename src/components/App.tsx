@@ -8,7 +8,7 @@ export const RuntimeContext = React.createContext(runtime)
 export function App() {
   return (
     <RuntimeContext.Provider value={runtime}>
-      <div className="w-screen h-screen" data-theme="corporate">
+      <div className="w-screen h-screen" data-theme="dark">
         <MetricKeySelector />
       </div>
     </RuntimeContext.Provider>

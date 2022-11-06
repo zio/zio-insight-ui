@@ -114,7 +114,7 @@ const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
     <td>{props.metricKey.key.name}</td>
     <td>
       {props.metricKey.key.labels.map((l) => (
-        <span key={l.key}>
+        <span className="badge" key={l.key}>
           {l.key}={l.value}
         </span>
       ))}
