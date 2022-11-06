@@ -11,7 +11,7 @@ describe("Logger", () => {
     const res = await T.unsafeRunPromiseExit(
       pipe(
         Log.info("Hello Andreas!"),
-        provideSomeLayer(Log.consoleLogger)
+        provideSomeLayer(Log.LoggerLive)
       )     
     )
 
