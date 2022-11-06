@@ -5,7 +5,7 @@ import "@styles/grid.css"
 
 export function MyGrid() {
   const layout: Layout[] = [
-    { i: "a", x: 0, y: 0, w: 1, h: 2, static: true },
+    { i: "a", x: 0, y: 0, w: 1, h: 2 },
     { i: "b", x: 1, y: 0, w: 2, h: 2 },
     { i: "c", x: 0, y: 1, w: 1, h: 2 }
   ]
@@ -25,7 +25,7 @@ export function MyGrid() {
       {elements.map((s: string) => (
         <div
           key={s}
-          className="tw-w-full tw-h-full tw-bg-yellow-200 tw-p-2 tw-rounded-md tw-border-2 tw-border-slate-600">
+          className="w-full h-full bg-yellow-200 p-2 rounded-md border-2 border-slate-600">
           {s}
         </div>
       ))}
