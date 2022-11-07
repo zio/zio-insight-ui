@@ -1,5 +1,4 @@
 import * as T from '@effect/core/io/Effect'
-import * as Chunk from '@tsplus/stdlib/collections/Chunk'
 import { pipe } from '@tsplus/stdlib/data/Function'
 import * as Z from 'zod'
 

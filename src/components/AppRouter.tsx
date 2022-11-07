@@ -1,25 +1,28 @@
 import * as React from "react"
 import { Routes, Route } from "react-router-dom"
-import { Fibers } from "./Fibers"
-import { Help } from "./Help"
-import { Home } from "./Home"
-import { Metrics } from "./Metrics"
-import { NotFound } from "./NotFound"
-import { Profiling } from "./Profiling"
-import { Services } from "./Services"
-import { Settings } from "./Settings"
+import { Fibers } from "@pages/Fibers"
+import { Help } from "@pages/Help"
+import { Home } from "@pages/Home"
+import { Metrics } from "@pages/Metrics"
+import { NotFound } from "@pages/NotFound"
+import { Profiling } from "@pages/Profiling"
+import { Services } from "@pages/Services"
+import { Settings } from "@pages/Settings"
+import { AppLayout } from "./AppLayout"
 
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/metrics" element={<Metrics />} />
-      <Route path="/services" element={<Services />} />
-      <Route path="/profiling" element={<Profiling />} />
-      <Route path="/fibers" element={<Fibers />} />
-      <Route path="/help" element={<Help />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="*" element={<NotFound />} />
+      <Route path="/" element={<AppLayout />}>
+        <Route index element={<Home />} />
+        <Route path="/metrics" element={<Metrics />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/profiling" element={<Profiling />} />
+        <Route path="/fibers" element={<Fibers />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
     </Routes>
   )
 }
