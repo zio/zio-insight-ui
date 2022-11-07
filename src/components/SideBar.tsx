@@ -53,6 +53,7 @@ export const SideBar: React.FC<{ shown: boolean; toggleSideBar: () => void }> = 
       <div className="pt-2 bg-neutral text-neutral-content h-full px-4 flex flex-col">
         {entries.map((e) => (
           <NavLink
+            key={e.path}
             className={({ isActive }) => {
               return `w-full flex flex-row btn ${isActive ? "btn-accent" : "btn-ghost"}`
             }}
