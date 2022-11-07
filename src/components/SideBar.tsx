@@ -48,26 +48,26 @@ const entries: NavEntry[] = [
 export const SideBar: React.FC<{ shown: boolean; toggleSideBar: () => void }> = (
   props
 ) => {
-  if (props.shown) {
-    return (
-      <div className="pt-2 bg-neutral text-neutral-content h-full px-4 flex flex-col">
-        {entries.map((e) => (
-          <NavLink
-            key={e.path}
-            className={({ isActive }) => {
-              return `w-full flex flex-row btn ${isActive ? "btn-accent" : "btn-ghost"}`
-            }}
-            to={e.path}
-            onClick={props.toggleSideBar}>
-            <div className="w-full flex flex-row justify-between">
-              <span>{e.icon}</span>
-              <span className="flex self-center">{e.title}</span>
-            </div>
-          </NavLink>
-        ))}
-      </div>
-    )
-  } else {
-    return null
-  }
+  //  if (props.shown) {
+  return (
+    <div className="pt-2 bg-neutral text-neutral-content h-full px-4 flex flex-col">
+      {entries.map((e) => (
+        <NavLink
+          key={e.path}
+          className={({ isActive }) => {
+            return `w-full flex flex-row btn ${isActive ? "btn-accent" : "btn-ghost"}`
+          }}
+          to={e.path}
+          onClick={props.toggleSideBar}>
+          <div className="w-full flex flex-row justify-between">
+            <span>{e.icon}</span>
+            <span className="flex self-center">{e.title}</span>
+          </div>
+        </NavLink>
+      ))}
+    </div>
+  )
+  // } else {
+  //   return null
+  // }
 }
