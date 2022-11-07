@@ -1,5 +1,6 @@
+import { Dummy } from "@components/Dummy"
 import * as React from "react"
 
 export function Services() {
-  return <h1>Services</h1>
+  return <Dummy title="Services" />
 }

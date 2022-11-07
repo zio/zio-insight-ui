@@ -1,5 +1,6 @@
+import { Dummy } from "@components/Dummy"
 import * as React from "react"
 
 export function Help() {
-  return <h1>Help</h1>
+  return <Dummy title="Help" />
 }

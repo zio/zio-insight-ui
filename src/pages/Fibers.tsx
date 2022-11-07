@@ -1,5 +1,6 @@
+import { Dummy } from "@components/Dummy"
 import * as React from "react"
 
 export function Fibers() {
-  return <h1>Fibers</h1>
+  return <Dummy title="Fibers" />
 }

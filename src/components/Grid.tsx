@@ -18,14 +18,13 @@ export function MyGrid() {
     <ResponsiveGridLayout
       className="layout w-full h-full"
       compactType="horizontal"
-      layouts={{ lg: layout }}
-      cols={{ lg: 12 }}
-      rowHeight={100}
-      width={1000}>
+      layouts={{ md: layout, lg: layout }}
+      cols={{ md: 8, lg: 12 }}
+      rowHeight={50}>
       {elements.map((s: string) => (
         <div
           key={s}
-          className="w-full h-full bg-yellow-200 p-2 rounded-md border-2 border-slate-600">
+          className="w-full h-full bg-neutral-content p-2 rounded-md border-2 border-base-200">
           {s}
         </div>
       ))}
