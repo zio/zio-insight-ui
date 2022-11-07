@@ -16,7 +16,7 @@ export function MyGrid() {
 
   return (
     <ResponsiveGridLayout
-      className="layout"
+      className="layout w-full h-full"
       compactType="horizontal"
       layouts={{ lg: layout }}
       cols={{ lg: 12 }}
