@@ -30,6 +30,7 @@
     "strictNullChecks": true,
     "baseUrl": ".",
     "paths": {
+      "@data/*": ["src/data/*"],
       "@core/*": ["src/core/*"],
       "@components/*": ["src/components/*"],
       "@pages/*": ["src/pages/*"],

@@ -1,0 +1,2118 @@
+{
+  "states": [
+    {
+      "id": "4575825a-373e-336a-bc1c-b26c73e8fa32",
+      "key": {
+        "name": "jvm_memory_pool_bytes_used",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Metaspace"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 44206888
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "84301ab2-472a-3677-9a77-5f49e53038a1",
+      "key": {
+        "name": "jvm_memory_bytes_used",
+        "labels": [
+          {
+            "key": "area",
+            "value": "nonheap"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 74693512
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "fb95f30e-79ea-317b-9c1f-16b62fe52229",
+      "key": {
+        "name": "process_cpu_seconds_total",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 137.641571
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "9432361d-dd2d-3cb0-8408-a97c288880d4",
+      "key": {
+        "name": "jvm_threads_state",
+        "labels": [
+          {
+            "key": "state",
+            "value": "BLOCKED"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "05d9ea2d-8c05-3cda-a58c-727e73a3b837",
+      "key": {
+        "name": "jvm_memory_bytes_committed",
+        "labels": [
+          {
+            "key": "area",
+            "value": "nonheap"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 80527360
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "7f29b1a9-cc39-3361-88ff-9cfad25b28cd",
+      "key": {
+        "name": "gauge2",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": -39.47982534263892
+        }
+      },
+      "timestamp": 1667911742303
+    },
+    {
+      "id": "1ae48bc1-89e6-36b9-9fc3-5969976809c7",
+      "key": {
+        "name": "jvm_memory_pool_bytes_max",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 5849088
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "d1bbafb1-f464-3114-aa7d-3b4cef9b0d87",
+      "key": {
+        "name": "jvm_threads_deadlocked",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "601ba3ec-8093-3576-a533-bb898076efcf",
+      "key": {
+        "name": "jvm_threads_state",
+        "labels": [
+          {
+            "key": "state",
+            "value": "NEW"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "c8f21d2d-74a4-3586-b39a-ab3d7be40883",
+      "key": {
+        "name": "zmxHistogram",
+        "labels": [],
+        "metricType": "Histogram",
+        "details": "{\"boundaries\":{\"values\":[0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,100.0,1.7976931348623157E308]}}"
+      },
+      "state": {
+        "Histogram": {
+          "buckets": [
+            [
+              0,
+              0
+            ],
+            [
+              10,
+              7526
+            ],
+            [
+              20,
+              15178
+            ],
+            [
+              30,
+              22943
+            ],
+            [
+              40,
+              30556
+            ],
+            [
+              50,
+              38227
+            ],
+            [
+              60,
+              45890
+            ],
+            [
+              70,
+              53644
+            ],
+            [
+              80,
+              61227
+            ],
+            [
+              90,
+              68764
+            ],
+            [
+              100,
+              76534
+            ],
+            [
+              1.7976931348623157e+308,
+              91793
+            ]
+          ],
+          "count": 91793,
+          "min": 0.0005421030267083182,
+          "max": 119.99929733241278,
+          "sum": 5510358.223098813
+        }
+      },
+      "timestamp": 1667911742303
+    },
+    {
+      "id": "74b0f6d3-edd8-368d-8197-514c234cdb06",
+      "key": {
+        "name": "jvm_buffer_pool_used_buffers",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "direct"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 33
+        }
+      },
+      "timestamp": 1667898417301
+    },
+    {
+      "id": "7f3e34f3-bc63-385f-a4c3-21b96c1f16aa",
+      "key": {
+        "name": "jvm_memory_bytes_used",
+        "labels": [
+          {
+            "key": "area",
+            "value": "heap"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 559535376
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "3bdb8b4d-2957-3e43-a456-28e64e0ce6d8",
+      "key": {
+        "name": "jvm_info",
+        "labels": [
+          {
+            "key": "version",
+            "value": "11.0.14+9-LTS"
+          },
+          {
+            "key": "vendor",
+            "value": "Azul Systems, Inc."
+          },
+          {
+            "key": "runtime",
+            "value": "OpenJDK Runtime Environment"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 1
+        }
+      },
+      "timestamp": 1667894807290
+    },
+    {
+      "id": "f997b0a5-e882-3b7e-91a9-518485910822",
+      "key": {
+        "name": "jvm_threads_state",
+        "labels": [
+          {
+            "key": "state",
+            "value": "TIMED_WAITING"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 3
+        }
+      },
+      "timestamp": 1667911677297
+    },
+    {
+      "id": "13919f7e-4d19-3fc2-b710-17cff9477e7e",
+      "key": {
+        "name": "jvm_buffer_pool_used_buffers",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "mapped"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "9361b295-7440-3bb6-8d7b-1e9adab32922",
+      "key": {
+        "name": "process_open_fds",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 54
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "14f12b03-adfd-305d-ba50-631fbdfdeb62",
+      "key": {
+        "name": "mySet",
+        "labels": [],
+        "metricType": "Frequency",
+        "details": "{}"
+      },
+      "state": {
+        "Frequency": {
+          "occurrences": {
+            "myKey-14": 4738,
+            "myKey-10": 4771,
+            "myKey-15": 4657,
+            "myKey-11": 4576,
+            "myKey-16": 4631,
+            "myKey-19": 4603,
+            "myKey-12": 4530,
+            "myKey-17": 4561,
+            "myKey-13": 4686,
+            "myKey-18": 4673
+          }
+        }
+      },
+      "timestamp": 1667911742303
+    },
+    {
+      "id": "6e0c3c31-d51d-3dc3-b3a4-f65b3aab5e5a",
+      "key": {
+        "name": "jvm_memory_pool_allocated_bytes_total",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-profiled nmethods'"
+          }
+        ],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 6410368
+        }
+      },
+      "timestamp": 1667907602305
+    },
+    {
+      "id": "d385f6bd-2903-3c2e-8cf0-d2c20b70d57b",
+      "key": {
+        "name": "jvm_threads_state",
+        "labels": [
+          {
+            "key": "state",
+            "value": "WAITING"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 13
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "8139ddaa-35ec-3b45-b80a-fd4782dc7a44",
+      "key": {
+        "name": "jvm_memory_pool_bytes_committed",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Survivor Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 8388608
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "88500092-4ba8-3bdd-9e2d-6cd209bb0570",
+      "key": {
+        "name": "jvm_threads_peak",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 24
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "22419264-e53d-3dce-b973-38de7626e475",
+      "key": {
+        "name": "jvm_classes_unloaded_total",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "39f06f9f-7fd0-34f2-8777-5c6f23a8c83f",
+      "key": {
+        "name": "jvm_memory_bytes_max",
+        "labels": [
+          {
+            "key": "area",
+            "value": "nonheap"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": -1
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "c1db45e8-6d6f-384f-a50c-bc8513273188",
+      "key": {
+        "name": "jvm_memory_pool_allocated_bytes_total",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Metaspace"
+          }
+        ],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 44177648
+        }
+      },
+      "timestamp": 1667907602305
+    },
+    {
+      "id": "093c1075-482c-383a-ab0c-30c9d55de5bb",
+      "key": {
+        "name": "jvm_memory_pool_bytes_used",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-profiled nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 6490112
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "d0ed49cf-8b2b-37cb-ba63-f3eeebba7750",
+      "key": {
+        "name": "jvm_memory_pool_bytes_init",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-profiled nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 2555904
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "acd46c8e-f8e8-3cba-9a55-fceb15be5a8f",
+      "key": {
+        "name": "jvm_memory_pool_allocated_bytes_total",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Old Gen"
+          }
+        ],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 2535136
+        }
+      },
+      "timestamp": 1667905867296
+    },
+    {
+      "id": "0575fcfc-ec83-3614-9cac-17d4e4618b73",
+      "key": {
+        "name": "jvm_memory_pool_bytes_used",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Survivor Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 8388608
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "d854fbcf-968c-3eab-99ac-2579d0a07a6e",
+      "key": {
+        "name": "jvm_memory_pool_bytes_committed",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 2555904
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "6fee03a2-252d-3f18-988a-49ac1cac463e",
+      "key": {
+        "name": "jvm_memory_pool_bytes_max",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Old Gen"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 17179869184
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "621b0e6d-01cb-36a3-9591-0ee598813553",
+      "key": {
+        "name": "jvm_memory_pool_allocated_bytes_total",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Compressed Class Space"
+          }
+        ],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 5995232
+        }
+      },
+      "timestamp": 1667898792299
+    },
+    {
+      "id": "a780225e-7924-3223-b700-049443e835d2",
+      "key": {
+        "name": "jvm_memory_pool_bytes_used",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Compressed Class Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 5995232
+        }
+      },
+      "timestamp": 1667898447299
+    },
+    {
+      "id": "3a228bc8-cbce-3531-8e5e-09bef356d219",
+      "key": {
+        "name": "zio_fiber_successes",
+        "labels": [],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 1
+        }
+      },
+      "timestamp": 1667894807290
+    },
+    {
+      "id": "50133fe9-736e-3c71-9738-8ff9fe038cb1",
+      "key": {
+        "name": "jvm_classes_loaded_total",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 5708
+        }
+      },
+      "timestamp": 1667898447299
+    },
+    {
+      "id": "478bc349-a1b0-3e0a-a107-d3a0a820f4c8",
+      "key": {
+        "name": "mySummary",
+        "labels": [],
+        "metricType": "Summary",
+        "details": "{\"maxAge\":86400000,\"maxSize\":100,\"error\":0.03,\"quantiles\":[0.1,0.5,0.9]}"
+      },
+      "state": {
+        "Summary": {
+          "error": 0.03,
+          "quantiles": [
+            [
+              0.1,
+              130
+            ],
+            [
+              0.5,
+              282
+            ],
+            [
+              0.9,
+              461
+            ]
+          ],
+          "count": 91793,
+          "min": 100,
+          "max": 499,
+          "sum": 27472180
+        }
+      },
+      "timestamp": 1667911742303
+    },
+    {
+      "id": "93e31557-564e-33b3-88ae-ac9caf30815b",
+      "key": {
+        "name": "jvm_memory_pool_bytes_max",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Metaspace"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": -1
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "a90f86a2-a17c-31b4-a126-abb2b7e5e8b9",
+      "key": {
+        "name": "jvm_gc_collection_seconds_sum",
+        "labels": [
+          {
+            "key": "gc",
+            "value": "G1 Old Generation"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "637215d2-ee6e-39b1-8da1-f25f6be05875",
+      "key": {
+        "name": "gauge1",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 27.604149539756516
+        }
+      },
+      "timestamp": 1667911742303
+    },
+    {
+      "id": "052a0149-dc9f-3495-9aa5-91ca866f0b61",
+      "key": {
+        "name": "jvm_memory_pool_bytes_used",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Eden Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 549453824
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "e4697aca-cdca-301f-9a44-21c0f18f080e",
+      "key": {
+        "name": "zio_fiber_lifetimes",
+        "labels": [],
+        "metricType": "Histogram",
+        "details": "{\"boundaries\":{\"values\":[1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0,256.0,512.0,1024.0,2048.0,4096.0,8192.0,16384.0,32768.0,65536.0,131072.0,262144.0,524288.0,1048576.0,2097152.0,4194304.0,8388608.0,1.6777216E7,3.3554432E7,6.7108864E7,1.34217728E8,2.68435456E8,5.36870912E8,1.073741824E9,2.147483648E9,4.294967296E9,8.589934592E9,1.7179869184E10,3.4359738368E10,6.8719476736E10,1.37438953472E11,2.74877906944E11,5.49755813888E11,1.099511627776E12,2.199023255552E12,4.398046511104E12,8.796093022208E12,1.7592186044416E13,3.5184372088832E13,7.0368744177664E13,1.40737488355328E14,2.81474976710656E14,5.62949953421312E14,1.125899906842624E15,2.251799813685248E15,4.503599627370496E15,9.007199254740992E15,1.8014398509481984E16,3.602879701896397E16,7.205759403792794E16,1.4411518807585587E17,2.8823037615171174E17,5.764607523034235E17,1.152921504606847E18,2.305843009213694E18,4.611686018427388E18,9.223372036854776E18,1.8446744073709552E19,3.6893488147419103E19,7.378697629483821E19,1.4757395258967641E20,2.9514790517935283E20,5.902958103587057E20,1.1805916207174113E21,2.3611832414348226E21,4.722366482869645E21,9.44473296573929E21,1.888946593147858E22,3.777893186295716E22,7.555786372591432E22,1.5111572745182865E23,3.022314549036573E23,6.044629098073146E23,1.2089258196146292E24,2.4178516392292583E24,4.835703278458517E24,9.671406556917033E24,1.9342813113834067E25,3.8685626227668134E25,7.737125245533627E25,1.5474250491067253E26,3.094850098213451E26,6.189700196426902E26,1.2379400392853803E27,2.4758800785707605E27,4.951760157141521E27,9.903520314283042E27,1.9807040628566084E28,3.961408125713217E28,7.922816251426434E28,1.5845632502852868E29,3.1691265005705735E29,6.338253001141147E29,1.7976931348623157E308]}}"
+      },
+      "state": {
+        "Histogram": {
+          "buckets": [
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              8,
+              1
+            ],
+            [
+              16,
+              1
+            ],
+            [
+              32,
+              1
+            ],
+            [
+              64,
+              1
+            ],
+            [
+              128,
+              1
+            ],
+            [
+              256,
+              1
+            ],
+            [
+              512,
+              1
+            ],
+            [
+              1024,
+              1
+            ],
+            [
+              2048,
+              1
+            ],
+            [
+              4096,
+              1
+            ],
+            [
+              8192,
+              1
+            ],
+            [
+              16384,
+              1
+            ],
+            [
+              32768,
+              1
+            ],
+            [
+              65536,
+              1
+            ],
+            [
+              131072,
+              1
+            ],
+            [
+              262144,
+              1
+            ],
+            [
+              524288,
+              1
+            ],
+            [
+              1048576,
+              1
+            ],
+            [
+              2097152,
+              1
+            ],
+            [
+              4194304,
+              1
+            ],
+            [
+              8388608,
+              1
+            ],
+            [
+              16777216,
+              1
+            ],
+            [
+              33554432,
+              1
+            ],
+            [
+              67108864,
+              1
+            ],
+            [
+              134217728,
+              1
+            ],
+            [
+              268435456,
+              1
+            ],
+            [
+              536870912,
+              1
+            ],
+            [
+              1073741824,
+              1
+            ],
+            [
+              2147483648,
+              1
+            ],
+            [
+              4294967296,
+              1
+            ],
+            [
+              8589934592,
+              1
+            ],
+            [
+              17179869184,
+              1
+            ],
+            [
+              34359738368,
+              1
+            ],
+            [
+              68719476736,
+              1
+            ],
+            [
+              137438953472,
+              1
+            ],
+            [
+              274877906944,
+              1
+            ],
+            [
+              549755813888,
+              1
+            ],
+            [
+              1099511627776,
+              1
+            ],
+            [
+              2199023255552,
+              1
+            ],
+            [
+              4398046511104,
+              1
+            ],
+            [
+              8796093022208,
+              1
+            ],
+            [
+              17592186044416,
+              1
+            ],
+            [
+              35184372088832,
+              1
+            ],
+            [
+              70368744177664,
+              1
+            ],
+            [
+              140737488355328,
+              1
+            ],
+            [
+              281474976710656,
+              1
+            ],
+            [
+              562949953421312,
+              1
+            ],
+            [
+              1125899906842624,
+              1
+            ],
+            [
+              2251799813685248,
+              1
+            ],
+            [
+              4503599627370496,
+              1
+            ],
+            [
+              9007199254740992,
+              1
+            ],
+            [
+              18014398509481984,
+              1
+            ],
+            [
+              36028797018963970,
+              1
+            ],
+            [
+              72057594037927940,
+              1
+            ],
+            [
+              144115188075855870,
+              1
+            ],
+            [
+              288230376151711740,
+              1
+            ],
+            [
+              576460752303423500,
+              1
+            ],
+            [
+              1152921504606847000,
+              1
+            ],
+            [
+              2305843009213694000,
+              1
+            ],
+            [
+              4611686018427388000,
+              1
+            ],
+            [
+              9223372036854776000,
+              1
+            ],
+            [
+              18446744073709552000,
+              1
+            ],
+            [
+              36893488147419103000,
+              1
+            ],
+            [
+              73786976294838210000,
+              1
+            ],
+            [
+              147573952589676410000,
+              1
+            ],
+            [
+              295147905179352830000,
+              1
+            ],
+            [
+              590295810358705700000,
+              1
+            ],
+            [
+              1180591620717411300000,
+              1
+            ],
+            [
+              2361183241434822600000,
+              1
+            ],
+            [
+              4722366482869645000000,
+              1
+            ],
+            [
+              9444732965739290000000,
+              1
+            ],
+            [
+              18889465931478580000000,
+              1
+            ],
+            [
+              37778931862957160000000,
+              1
+            ],
+            [
+              75557863725914320000000,
+              1
+            ],
+            [
+              151115727451828650000000,
+              1
+            ],
+            [
+              302231454903657300000000,
+              1
+            ],
+            [
+              604462909807314600000000,
+              1
+            ],
+            [
+              1208925819614629200000000,
+              1
+            ],
+            [
+              2417851639229258300000000,
+              1
+            ],
+            [
+              4835703278458517000000000,
+              1
+            ],
+            [
+              9671406556917033000000000,
+              1
+            ],
+            [
+              19342813113834067000000000,
+              1
+            ],
+            [
+              38685626227668134000000000,
+              1
+            ],
+            [
+              77371252455336270000000000,
+              1
+            ],
+            [
+              154742504910672530000000000,
+              1
+            ],
+            [
+              309485009821345100000000000,
+              1
+            ],
+            [
+              618970019642690200000000000,
+              1
+            ],
+            [
+              1237940039285380300000000000,
+              1
+            ],
+            [
+              2475880078570760500000000000,
+              1
+            ],
+            [
+              4951760157141521000000000000,
+              1
+            ],
+            [
+              9903520314283042000000000000,
+              1
+            ],
+            [
+              19807040628566084000000000000,
+              1
+            ],
+            [
+              39614081257132170000000000000,
+              1
+            ],
+            [
+              79228162514264340000000000000,
+              1
+            ],
+            [
+              158456325028528680000000000000,
+              1
+            ],
+            [
+              316912650057057350000000000000,
+              1
+            ],
+            [
+              633825300114114700000000000000,
+              1
+            ],
+            [
+              1.7976931348623157e+308,
+              1
+            ]
+          ],
+          "count": 1,
+          "min": 0.049,
+          "max": 0.049,
+          "sum": 0.049
+        }
+      },
+      "timestamp": 1667894807289
+    },
+    {
+      "id": "9d6e8303-7f31-36f2-bb09-a1ed8ed3b48c",
+      "key": {
+        "name": "jvm_memory_pool_bytes_max",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'profiled nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 122896384
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "aa5b02c4-821c-336d-95f1-2be442331a58",
+      "key": {
+        "name": "jvm_threads_deadlocked_monitor",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "41c8d448-1fb3-3dea-a7f2-0f6bb65b893d",
+      "key": {
+        "name": "jvm_memory_bytes_max",
+        "labels": [
+          {
+            "key": "area",
+            "value": "heap"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 17179869184
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "a14b5825-f6e2-3a95-8f6a-b61da7fc9b1b",
+      "key": {
+        "name": "jvm_memory_pool_bytes_committed",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Old Gen"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 398458880
+        }
+      },
+      "timestamp": 1667897147297
+    },
+    {
+      "id": "95754bfd-b5ea-37a2-920e-df3567c16f5c",
+      "key": {
+        "name": "jvm_memory_pool_bytes_committed",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Compressed Class Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 7372800
+        }
+      },
+      "timestamp": 1667898247297
+    },
+    {
+      "id": "115db0a8-c351-3ea7-a599-fec288d61a73",
+      "key": {
+        "name": "jvm_threads_current",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 24
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "624d72c2-1743-3210-b169-b747943fa18d",
+      "key": {
+        "name": "countAll",
+        "labels": [],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 368518
+        }
+      },
+      "timestamp": 1667911742303
+    },
+    {
+      "id": "451fa21c-df3a-3d23-91ee-4160fed48fe0",
+      "key": {
+        "name": "jvm_buffer_pool_capacity_bytes",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "direct"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 22371842
+        }
+      },
+      "timestamp": 1667904227297
+    },
+    {
+      "id": "0e6c164c-5dee-3583-8a57-692d09841210",
+      "key": {
+        "name": "jvm_memory_pool_bytes_used",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'profiled nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 16697344
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "14e7073c-2e36-3df4-97df-91887a827061",
+      "key": {
+        "name": "jvm_memory_pool_bytes_init",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Metaspace"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "6add4b2c-cd70-3d90-9fb7-24d1ec82a7d0",
+      "key": {
+        "name": "jvm_memory_pool_bytes_max",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Eden Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": -1
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "412c4859-e977-395a-b1d4-ea759fbeec5c",
+      "key": {
+        "name": "jvm_memory_pool_bytes_init",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Eden Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 54525952
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "46b50906-5a6d-33d4-a7af-0e3262c55e86",
+      "key": {
+        "name": "jvm_memory_pool_bytes_init",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'profiled nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 2555904
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "fa42a677-70c5-3e95-a2f6-376e8627e0f0",
+      "key": {
+        "name": "jvm_gc_collection_seconds_count",
+        "labels": [
+          {
+            "key": "gc",
+            "value": "G1 Old Generation"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "0061e558-39bb-373b-989f-1edf6841257b",
+      "key": {
+        "name": "jvm_memory_pool_bytes_max",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Compressed Class Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 1073741824
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "349ae48b-7e17-31c3-bcc9-884b5d47811d",
+      "key": {
+        "name": "jvm_buffer_pool_used_bytes",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "mapped"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "83b898db-7160-3de7-bd9b-480d205812f7",
+      "key": {
+        "name": "process_max_fds",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 10240
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "a8109d65-b086-3f22-a131-7f3aa8a8089b",
+      "key": {
+        "name": "jvm_threads_state",
+        "labels": [
+          {
+            "key": "state",
+            "value": "RUNNABLE"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 8
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "ad95806f-39ae-3661-9b66-5b133ff19c35",
+      "key": {
+        "name": "jvm_gc_collection_seconds_count",
+        "labels": [
+          {
+            "key": "gc",
+            "value": "G1 Young Generation"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 13
+        }
+      },
+      "timestamp": 1667907607297
+    },
+    {
+      "id": "9a941282-9b37-3b0d-bccb-c7bade38b43a",
+      "key": {
+        "name": "jvm_memory_pool_bytes_committed",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'profiled nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 16711680
+        }
+      },
+      "timestamp": 1667911617293
+    },
+    {
+      "id": "8be7a584-578c-3522-98c6-b51db4301cca",
+      "key": {
+        "name": "jvm_memory_bytes_init",
+        "labels": [
+          {
+            "key": "area",
+            "value": "heap"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 1073741824
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "66db2a36-8df1-3d60-81ab-1278c8d8505c",
+      "key": {
+        "name": "jvm_memory_pool_allocated_bytes_total",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Survivor Space"
+          }
+        ],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 8388608
+        }
+      },
+      "timestamp": 1667894822307
+    },
+    {
+      "id": "8383339d-00c5-39f7-84b2-a5fa592bc1b0",
+      "key": {
+        "name": "jvm_memory_pool_bytes_used",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Old Gen"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 1692944
+        }
+      },
+      "timestamp": 1667907607297
+    },
+    {
+      "id": "d6a63a20-f7cb-38c1-8114-96790e9348e9",
+      "key": {
+        "name": "process_start_time_seconds",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 1667894806.67
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "82cb59ab-abdd-3d69-b177-0fa58aeec881",
+      "key": {
+        "name": "jvm_memory_pool_bytes_max",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Survivor Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": -1
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "9f10d25c-c5c4-32f3-a5f0-a9297acb2abf",
+      "key": {
+        "name": "jvm_gc_collection_seconds_sum",
+        "labels": [
+          {
+            "key": "gc",
+            "value": "G1 Young Generation"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0.201
+        }
+      },
+      "timestamp": 1667907607297
+    },
+    {
+      "id": "9e9da5cf-a639-344a-880d-ed918e765c40",
+      "key": {
+        "name": "jvm_threads_started_total",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 24
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "41c4faf7-3f21-3577-8046-25dd8c2fef47",
+      "key": {
+        "name": "jvm_memory_pool_bytes_committed",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Metaspace"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 47333376
+        }
+      },
+      "timestamp": 1667907177297
+    },
+    {
+      "id": "3b072014-a284-3d0b-96e3-c8c8259623ab",
+      "key": {
+        "name": "jvm_memory_pool_bytes_committed",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Eden Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 666894336
+        }
+      },
+      "timestamp": 1667897147297
+    },
+    {
+      "id": "5ac0cfc3-4100-3b43-a224-71d518750afb",
+      "key": {
+        "name": "jvm_memory_pool_bytes_init",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Survivor Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "75770b1d-6f81-3544-a662-15e3ffa30789",
+      "key": {
+        "name": "jvm_memory_pool_bytes_init",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Old Gen"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 1019215872
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "e66e1d7e-5de9-3c16-a0f7-68b43fad6ea3",
+      "key": {
+        "name": "jvm_memory_bytes_init",
+        "labels": [
+          {
+            "key": "area",
+            "value": "nonheap"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 7667712
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "2fcae71e-b70b-3806-9ad2-92281642e480",
+      "key": {
+        "name": "jvm_memory_pool_bytes_committed",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-profiled nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 6553600
+        }
+      },
+      "timestamp": 1667911737296
+    },
+    {
+      "id": "f0dddfb4-6d3b-38c2-9f0f-0b61379d5ac5",
+      "key": {
+        "name": "jvm_classes_loaded",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 5708
+        }
+      },
+      "timestamp": 1667898447299
+    },
+    {
+      "id": "1e703b17-628f-3e9a-8225-c8c5698d8e7a",
+      "key": {
+        "name": "jvm_threads_daemon",
+        "labels": [],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 18
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "88579e18-e75f-3c27-b0d9-1e234d3c802a",
+      "key": {
+        "name": "jvm_memory_pool_allocated_bytes_total",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'profiled nmethods'"
+          }
+        ],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 16560768
+        }
+      },
+      "timestamp": 1667907602305
+    },
+    {
+      "id": "b1c3acdb-5020-31d2-8aa5-1210f9016a0e",
+      "key": {
+        "name": "jvm_memory_pool_allocated_bytes_total",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "G1 Eden Space"
+          }
+        ],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 4731174912
+        }
+      },
+      "timestamp": 1667907602305
+    },
+    {
+      "id": "9970a18a-69a0-31e3-8c2a-1fe0d2a40060",
+      "key": {
+        "name": "jvm_memory_bytes_committed",
+        "labels": [
+          {
+            "key": "area",
+            "value": "heap"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 1073741824
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "0189a34d-159a-34ef-9546-c36f9228fda2",
+      "key": {
+        "name": "jvm_memory_pool_bytes_init",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "Compressed Class Space"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "8a936f21-6eef-3925-af40-2bce6a86b147",
+      "key": {
+        "name": "jvm_buffer_pool_used_bytes",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "direct"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 22371843
+        }
+      },
+      "timestamp": 1667904227297
+    },
+    {
+      "id": "21b4abfd-21e8-32f8-8c1e-2d40007c84f6",
+      "key": {
+        "name": "jvm_threads_state",
+        "labels": [
+          {
+            "key": "state",
+            "value": "TERMINATED"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817309
+    },
+    {
+      "id": "43ba0fb1-fff6-38a8-85ad-52e50e5ea3fe",
+      "key": {
+        "name": "jvm_buffer_pool_capacity_bytes",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "mapped"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 0
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "3f36ca4f-92b8-305b-9600-8cf89f796427",
+      "key": {
+        "name": "jvm_memory_pool_allocated_bytes_total",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-nmethods'"
+          }
+        ],
+        "metricType": "Counter",
+        "details": "{}"
+      },
+      "state": {
+        "Counter": {
+          "count": 1303936
+        }
+      },
+      "timestamp": 1667898792299
+    },
+    {
+      "id": "2c400537-2876-3ff0-811a-76d7da89bd77",
+      "key": {
+        "name": "jvm_memory_pool_bytes_init",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 2555904
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "08037a0e-6770-3ae3-95ce-e2f031edea24",
+      "key": {
+        "name": "jvm_memory_pool_bytes_max",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-profiled nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 122912768
+        }
+      },
+      "timestamp": 1667894817310
+    },
+    {
+      "id": "0bcff12c-d863-3473-bcd9-b306f9b8c647",
+      "key": {
+        "name": "jvm_memory_pool_bytes_used",
+        "labels": [
+          {
+            "key": "pool",
+            "value": "CodeHeap 'non-nmethods'"
+          }
+        ],
+        "metricType": "Gauge",
+        "details": "{}"
+      },
+      "state": {
+        "Gauge": {
+          "value": 1303936
+        }
+      },
+      "timestamp": 1667902817295
+    }
+  ]
+}

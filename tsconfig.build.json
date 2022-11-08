@@ -6,5 +6,5 @@
     "declarationDir": "build/dts",
     "tsBuildInfoFile": "build/tsbuildinfo/esm.tsbuildinfo",
   },
-  "include": ["src/**/*.ts*", "index.tsx"]
+  "include": ["src/data/*.json", "src/**/*.ts*", "index.tsx"]
 }

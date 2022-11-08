@@ -29,7 +29,7 @@ export interface MetricKey extends Z.TypeOf<typeof metricKeySchema> {}
 export const keyAsString = (mk: MetricKey) => 
   `${mk.key.metricType}:${mk.key.name}:${mk.key.labels.map(l => l.key + "=" + l.value).join(',')}`
 
-const AvailableMetrics = Z.object({
+const InsightMetricKeys = Z.object({
   keys: Z.array(metricKeySchema)
 })
 
@@ -38,9 +38,9 @@ export class InvalidMetricKeys {
   constructor(readonly reason: string) {}
 }
 
-export const fromInsight : (value: unknown) => T.Effect<never, InvalidMetricKeys, MetricKey[]> = (value : unknown) => 
+export const metricKeysFromInsight : (value: unknown) => T.Effect<never, InvalidMetricKeys, MetricKey[]> = (value : unknown) => 
   pipe(
-    T.sync(() => AvailableMetrics.safeParse(value)),
+    T.sync(() => InsightMetricKeys.safeParse(value)),
     T.flatMap((result) => 
       result.success 
         ? T.succeed(result.data.keys)
@@ -48,3 +48,27 @@ export const fromInsight : (value: unknown) => T.Effect<never, InvalidMetricKeys
     )
   )
 
+const metricStateSchema = Z.object({
+  id: Z.string()
+})
+
+const InsightMetricStates = Z.object({
+  states: Z.array(metricStateSchema) 
+})
+
+export interface MetricState extends Z.TypeOf<typeof metricStateSchema>{}
+
+export class InvalidMetricStates {
+  readonly _tag = "InvalidMetricStates"
+  constructor(readonly reason: string) {}
+}
+
+export const metricStatesFromInsight : (value: unknown) => T.Effect<never, InvalidMetricStates, MetricState[]> = (value: unknown) =>
+  pipe(
+    T.sync(() => InsightMetricStates.safeParse(value)),
+    T.flatMap((result) => 
+    result.success 
+      ? T.succeed(result.data.states)
+      : T.fail(new InvalidMetricStates(result.error.toString()))
+    )
+  ) 

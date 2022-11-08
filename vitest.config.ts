@@ -11,7 +11,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@test": path.resolve(__dirname, "/test"),
-      "@core": path.resolve(__dirname, "/src/core")
+      "@core": path.resolve(__dirname, "/src/core"),
+      "@data": path.resolve(__dirname, "/src/data")
     }
   }
 })
