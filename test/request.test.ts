@@ -25,7 +25,6 @@ describe("Request", () => {
       )
     )
 
-    console.log(JSON.stringify(res, null, 2))
     expect(res.length).toBeGreaterThan(0)
   })
 })

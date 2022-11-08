@@ -1,7 +1,7 @@
 import React from "react"
 import * as Ex from "@effect/core/io/Exit"
 import * as FiberId from "@effect/core/io/FiberId"
-import * as C from "@core/codecs"
+import * as C from "@core/metrics/model/MetricState"
 import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import { RuntimeContext } from "./App"

@@ -2,19 +2,20 @@ import * as T from '@effect/core/io/Effect'
 import * as L from '@effect/core/io/Layer'
 import { pipe } from "@tsplus/stdlib/data/Function";
 import * as Request from '@core/request'
-import * as Codec from '@core/codecs'
 import { Tag } from '@tsplus/stdlib/service/Tag';
 import * as Log from '@core/logger'
 import staticKeys from "@data/keys.json"
 import staticStates from "@data/state.json"
+import { InvalidMetricKeys, MetricKey, metricKeysFromInsight } from "@core/metrics/model/MetricKey"
+import { InvalidMetricStates, MetricState, metricStatesFromInsight } from "@core/metrics/model/MetricState"
 
-type ZIOApiError = Request.FetchError | Request.InvalidJsonResponse | Codec.InvalidMetricKeys | Codec.InvalidMetricStates
+type ZIOApiError = Request.FetchError | Request.InvalidJsonResponse | InvalidMetricKeys | InvalidMetricStates
 
 // As a best practice, do not require services in the individual methods of the interface
 // Rather, use Layer injection into the actual service 
 export interface ZIOMetrics {
-  getMetricKeys: T.Effect<never, ZIOApiError, Codec.MetricKey[]>
-  getMetricStates: (ids: string[]) => T.Effect<never,ZIOApiError, Codec.MetricState[]>
+  getMetricKeys: T.Effect<never, ZIOApiError, MetricKey[]>
+  getMetricStates: (ids: string[]) => T.Effect<never,ZIOApiError, MetricState[]>
 }
 
 const ZIOMetrics = Tag<ZIOMetrics>()
@@ -26,10 +27,10 @@ function makeLiveMetrics(logger: Log.LogService) : ZIOMetrics {
     getMetricKeys: pipe(
       Request.request("http://127.0.0.1:8080/insight/keys"),
       T.flatMap(Request.jsonFromResponse),
-      T.flatMap(Codec.metricKeysFromInsight),
+      T.flatMap(metricKeysFromInsight),
       T.tap(keys => logger.info(`Got ${keys.length} metric keys from server`))
     ),
-    getMetricStates: (_ : string[]) => T.succeed(<Codec.MetricState[]>[])
+    getMetricStates: (_ : string[]) => T.succeed(<MetricState[]>[])
   })
 }
 
@@ -47,11 +48,11 @@ export const ZIOMetricsStatic : L.Layer<never, never, ZIOMetrics> =
     T.succeed({
       getMetricKeys : pipe(
         T.succeed(staticKeys),
-        T.flatMap(Codec.metricKeysFromInsight)
+        T.flatMap(metricKeysFromInsight)
       ),
       getMetricStates: (keyIds : string[]) => pipe(
         T.succeed(staticStates),
-        T.flatMap(Codec.metricStatesFromInsight)
+        T.flatMap(metricStatesFromInsight)
       )
     })
   )
