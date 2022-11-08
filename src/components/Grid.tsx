@@ -24,7 +24,7 @@ export function MyGrid() {
       {elements.map((s: string) => (
         <div
           key={s}
-          className="w-full h-full bg-neutral-content p-2 rounded-md border-2 border-base-200">
+          className="w-full h-full bg-neutral p-2 text-neutral-content shadow">
           {s}
         </div>
       ))}

@@ -1,6 +1,6 @@
+import { Dummy } from "@components/Dummy"
 import * as React from "react"
 
 export function Home() {
-  return <h1>Home</h1>
-  //return <MyGrid />
+  return <Dummy title="Home" />
 }
