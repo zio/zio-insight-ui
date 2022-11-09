@@ -1,15 +1,15 @@
 import * as T from '@effect/core/io/Effect'
 import * as L from '@effect/core/io/Layer'
 import { pipe } from "@tsplus/stdlib/data/Function";
-import * as Request from '@core/request'
+import * as Req from '@core/Request'
 import { Tag } from '@tsplus/stdlib/service/Tag';
-import * as Log from '@core/logger'
+import * as Log from '@core/Logger'
 import staticKeys from "@data/keys.json"
 import staticStates from "@data/state.json"
 import { InvalidMetricKeys, InsightKey, metricKeysFromInsight } from "@core/metrics/model/MetricKey"
 import { InvalidMetricStates, MetricState, metricStatesFromInsight } from "@core/metrics/model/MetricState"
 
-type ZIOApiError = Request.FetchError | Request.InvalidJsonResponse | InvalidMetricKeys | InvalidMetricStates
+type ZIOApiError = Req.FetchError | Req.InvalidJsonResponse | InvalidMetricKeys | InvalidMetricStates
 
 // As a best practice, do not require services in the individual methods of the interface
 // Rather, use Layer injection into the actual service 
@@ -25,8 +25,8 @@ const ZIOMetrics = Tag<ZIOMetrics>()
 function makeLiveMetrics(logger: Log.LogService) : ZIOMetrics {
   return ({
     getMetricKeys: pipe(
-      Request.request("http://127.0.0.1:8080/insight/keys"),
-      T.flatMap(Request.jsonFromResponse),
+      Req.request("http://127.0.0.1:8080/insight/keys"),
+      T.flatMap(Req.jsonFromResponse),
       T.flatMap(metricKeysFromInsight),
       T.tap(keys => logger.info(`Got ${keys.length} metric keys from server`))
     ),
@@ -52,7 +52,8 @@ export const ZIOMetricsStatic : L.Layer<never, never, ZIOMetrics> =
       ),
       getMetricStates: (keyIds : string[]) => pipe(
         T.succeed(staticStates),
-        T.flatMap(metricStatesFromInsight)
+        T.flatMap(metricStatesFromInsight), 
+        T.map(states => states.filter(s => keyIds.findIndex(el => el === s.id) !== -1 ))
       )
     })
   )

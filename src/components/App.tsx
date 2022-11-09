@@ -1,5 +1,5 @@
 import * as React from "react"
-import * as AL from "@core/layer"
+import * as AL from "@core/AppLayer"
 import { AppRouter } from "./AppRouter"
 import { IconContext } from "react-icons/lib"
 

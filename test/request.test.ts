@@ -1,6 +1,6 @@
 import * as T from '@effect/core/io/Effect'
 import * as Api from '@core/api'
-import { appLayerStatic } from '@core/layer'
+import { appLayerStatic } from '@core/AppLayer'
 import { pipe } from '@tsplus/stdlib/data/Function'
 
 describe("Request", () => {
@@ -20,13 +20,13 @@ describe("Request", () => {
 
     const res = await T.unsafeRunPromise(
       pipe(
-        Api.getMetricStates(<string[]>[]),
+        Api.getMetricStates(<string[]>["14f12b03-adfd-305d-ba50-631fbdfdeb62"]),
         T.provideSomeLayer(appLayerStatic)
       )
     )
 
     console.log(JSON.stringify(res, null, 2))
 
-    expect(res.length).toBeGreaterThan(0)
+    expect(res.length).toEqual(1)
   })
 })
