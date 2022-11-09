@@ -6,7 +6,7 @@ import { Tag } from '@tsplus/stdlib/service/Tag';
 import * as Log from '@core/logger'
 import staticKeys from "@data/keys.json"
 import staticStates from "@data/state.json"
-import { InvalidMetricKeys, MetricKey, metricKeysFromInsight } from "@core/metrics/model/MetricKey"
+import { InvalidMetricKeys, InsightKey, metricKeysFromInsight } from "@core/metrics/model/MetricKey"
 import { InvalidMetricStates, MetricState, metricStatesFromInsight } from "@core/metrics/model/MetricState"
 
 type ZIOApiError = Request.FetchError | Request.InvalidJsonResponse | InvalidMetricKeys | InvalidMetricStates
@@ -14,7 +14,7 @@ type ZIOApiError = Request.FetchError | Request.InvalidJsonResponse | InvalidMet
 // As a best practice, do not require services in the individual methods of the interface
 // Rather, use Layer injection into the actual service 
 export interface ZIOMetrics {
-  getMetricKeys: T.Effect<never, ZIOApiError, MetricKey[]>
+  getMetricKeys: T.Effect<never, ZIOApiError, InsightKey[]>
   getMetricStates: (ids: string[]) => T.Effect<never,ZIOApiError, MetricState[]>
 }
 

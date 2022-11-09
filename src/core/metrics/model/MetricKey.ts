@@ -12,6 +12,8 @@ export const metricKeySchema = Z.object({
   metricType: metricTypeSchema
 })
 
+export interface MetricKey extends Z.TypeOf<typeof metricKeySchema> {}
+
 // The insight connectors adds a unique id that is used to query the state of the 
 // corresponding metricKey
 export const insightKeySchema = Z.object({
@@ -19,9 +21,9 @@ export const insightKeySchema = Z.object({
   key: metricKeySchema
 })
 
-export interface MetricKey extends Z.TypeOf<typeof insightKeySchema> {}
+export interface InsightKey extends Z.TypeOf<typeof insightKeySchema> {}
 
-export const keyAsString = (mk: MetricKey) => 
+export const keyAsString = (mk: InsightKey) => 
   `${mk.key.metricType}:${mk.key.name}:${mk.key.labels.map(l => l.key + "=" + l.value).join(',')}`
 
 export const InsightMetricKeys = Z.object({
@@ -33,7 +35,7 @@ export class InvalidMetricKeys {
   constructor(readonly reason: string) {}
 }
 
-export const metricKeysFromInsight : (value: unknown) => T.Effect<never, InvalidMetricKeys, MetricKey[]> = (value : unknown) => 
+export const metricKeysFromInsight : (value: unknown) => T.Effect<never, InvalidMetricKeys, InsightKey[]> = (value : unknown) => 
   pipe(
     T.sync(() => InsightMetricKeys.safeParse(value)),
     T.flatMap((result) => 

@@ -1,15 +1,15 @@
 import React from "react"
 import * as Ex from "@effect/core/io/Exit"
 import * as FiberId from "@effect/core/io/FiberId"
-import * as C from "@core/metrics/model/MetricState"
+import { InsightKey, keyAsString } from "@core/metrics/model/MetricKey"
 import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import { RuntimeContext } from "./App"
 import { getMetricKeys } from "@core/api"
 
 export const MetricKeySelector: React.FC<{}> = (props) => {
-  const selectionChanged = (sel: C.MetricKey[]) =>
-    console.log(`[${sel.map(C.keyAsString).join(",")}]`)
+  const selectionChanged = (sel: InsightKey[]) =>
+    console.log(`[${sel.map(keyAsString).join(",")}]`)
 
   return (
     <div className="w-full flex flex-shrink dark">
@@ -34,19 +34,19 @@ export const MetricKeySelector: React.FC<{}> = (props) => {
  */
 interface TableMetricKeysProps {
   // The initially selected keys
-  initialSelection: C.MetricKey[]
+  initialSelection: InsightKey[]
   // a Callback that can be used to change the selection state
-  onSelectionChanged: (key: C.MetricKey[]) => void
+  onSelectionChanged: (key: InsightKey[]) => void
 }
 
 export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
   const appRt = React.useContext(RuntimeContext)
 
-  const [selected, setSelected] = React.useState<HSet.HashSet<C.MetricKey>>(HSet.empty)
+  const [selected, setSelected] = React.useState<HSet.HashSet<InsightKey>>(HSet.empty)
   // The available metric keys
-  const [items, setItems] = React.useState<C.MetricKey[]>([])
+  const [items, setItems] = React.useState<InsightKey[]>([])
 
-  const isSelected = (k: C.MetricKey) => HSet.has<C.MetricKey>(k)(selected)
+  const isSelected = (k: InsightKey) => HSet.has<InsightKey>(k)(selected)
 
   // Get the available keys from the ZIO Application
   React.useEffect(() => {
@@ -61,7 +61,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
     return () => interrupt(FiberId.none)((_) => {})
   }, [])
 
-  const toggleKey = (k: C.MetricKey) => {
+  const toggleKey = (k: InsightKey) => {
     if (isSelected(k)) {
       return HSet.remove(k)(selected)
     } else {
@@ -69,7 +69,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
     }
   }
 
-  const toggled = (k: C.MetricKey) => {
+  const toggled = (k: InsightKey) => {
     const newSelection = toggleKey(k)
     props.onSelectionChanged(Coll.toArray(HSet.toCollection(newSelection)))
     setSelected(newSelection)
@@ -100,9 +100,9 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
 }
 
 interface RowMetricKeyProps {
-  metricKey: C.MetricKey
+  metricKey: InsightKey
   checked: boolean
-  toggled: (k: C.MetricKey) => void
+  toggled: (k: InsightKey) => void
 }
 
 const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
