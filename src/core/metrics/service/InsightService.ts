@@ -9,20 +9,20 @@ import staticStates from "@data/state.json"
 import { InvalidMetricKeys, InsightKey, metricKeysFromInsight } from "@core/metrics/model/MetricKey"
 import { InvalidMetricStates, MetricState, metricStatesFromInsight } from "@core/metrics/model/MetricState"
 
-type ZIOApiError = Req.FetchError | Req.InvalidJsonResponse | InvalidMetricKeys | InvalidMetricStates
+type InsightApiError = Req.FetchError | Req.InvalidJsonResponse | InvalidMetricKeys | InvalidMetricStates
 
 // As a best practice, do not require services in the individual methods of the interface
 // Rather, use Layer injection into the actual service 
-export interface ZIOMetrics {
-  getMetricKeys: T.Effect<never, ZIOApiError, InsightKey[]>
-  getMetricStates: (ids: string[]) => T.Effect<never,ZIOApiError, MetricState[]>
+export interface InsightMetrics {
+  getMetricKeys: T.Effect<never, InsightApiError, InsightKey[]>
+  getMetricStates: (ids: string[]) => T.Effect<never,InsightApiError, MetricState[]>
 }
 
-const ZIOMetrics = Tag<ZIOMetrics>()
+const InsightMetrics = Tag<InsightMetrics>()
 
 // helper function to construct a ZIOMetrics implementation on top of a Log Service 
 // instance
-function makeLiveMetrics(logger: Log.LogService) : ZIOMetrics {
+function makeLiveMetrics(logger: Log.LogService) : InsightMetrics {
   return ({
     getMetricKeys: pipe(
       Req.request("http://127.0.0.1:8080/insight/keys"),
@@ -35,16 +35,16 @@ function makeLiveMetrics(logger: Log.LogService) : ZIOMetrics {
 }
 
 // Define a Layer with Dependency on a Log Service
-export const ZIOMetricsLive : L.Layer<Log.LogService, never, ZIOMetrics> = 
-  L.fromEffect<ZIOMetrics>(ZIOMetrics)(
+export const InsightMetricsLive : L.Layer<Log.LogService, never, InsightMetrics> = 
+  L.fromEffect<InsightMetrics>(InsightMetrics)(
     pipe(
       T.service<Log.LogService>(Log.LogService),
       T.map(makeLiveMetrics)
     )
   )
 
-export const ZIOMetricsStatic : L.Layer<never, never, ZIOMetrics> = 
-  L.fromEffect<ZIOMetrics>(ZIOMetrics)(
+export const InsightMetricsStatic : L.Layer<never, never, InsightMetrics> = 
+  L.fromEffect<InsightMetrics>(InsightMetrics)(
     T.succeed({
       getMetricKeys : pipe(
         T.succeed(staticKeys),
@@ -58,6 +58,6 @@ export const ZIOMetricsStatic : L.Layer<never, never, ZIOMetrics> =
     })
   )
 
-export const getMetricKeys = T.serviceWithEffect(ZIOMetrics, api => api.getMetricKeys)
+export const getMetricKeys = T.serviceWithEffect(InsightMetrics, api => api.getMetricKeys)
 
-export const getMetricStates = (keyIds : string[]) => T.serviceWithEffect(ZIOMetrics, api => api.getMetricStates(keyIds))
+export const getMetricStates = (keyIds : string[]) => T.serviceWithEffect(InsightMetrics, api => api.getMetricStates(keyIds))

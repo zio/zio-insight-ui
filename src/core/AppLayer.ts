@@ -2,20 +2,20 @@ import * as T from "@effect/core/io/Effect"
 import * as L from "@effect/core/io/Layer"
 import * as S from "@effect/core/io/Scope"
 import * as E from "@effect/core/io/Exit"
-import { ZIOMetricsLive, ZIOMetrics, ZIOMetricsStatic } from "./api"
+import { InsightMetricsLive, InsightMetrics, InsightMetricsStatic } from "./metrics/service/InsightService"
 import { ConsoleService, LoggerLive, LogService } from "./Logger"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
-export type AppLayer = ConsoleService | LogService | ZIOMetrics
+export type AppLayer = ConsoleService | LogService | InsightMetrics
 
 export const appLayerLive : L.Layer<never, never, AppLayer> = pipe(
   LoggerLive,
-  L.provideToAndMerge(ZIOMetricsLive)
+  L.provideToAndMerge(InsightMetricsLive)
 )
 
 export const appLayerStatic : L.Layer<never, never, AppLayer> = pipe(
   LoggerLive,
-  L.merge(ZIOMetricsStatic)
+  L.merge(InsightMetricsStatic)
 )
   
 

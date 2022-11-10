@@ -5,7 +5,7 @@ import { InsightKey, keyAsString } from "@core/metrics/model/MetricKey"
 import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import { RuntimeContext } from "./App"
-import { getMetricKeys } from "@core/api"
+import { getMetricKeys } from "@core/metrics/service/InsightService"
 
 export const MetricKeySelector: React.FC<{}> = (props) => {
   const selectionChanged = (sel: InsightKey[]) =>
