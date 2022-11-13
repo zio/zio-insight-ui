@@ -23,6 +23,9 @@ export const ConsoleNull = L.fromEffect(ConsoleService)(
 
 export interface LogService {
   readonly info: (msg: string) => T.Effect<never, never, void>
+  readonly warn: (msg: string) => T.Effect<never, never, void>
+  readonly error: (msg: string) => T.Effect<never, never, void>
+  readonly debug: (msg: string) => T.Effect<never, never, void>
 }
 
 export const LogService =Tag<LogService>()
@@ -30,11 +33,23 @@ export const LogService =Tag<LogService>()
 export const info = 
   (msg: string) => T.serviceWithEffect(LogService, log => log.info(msg))
 
+export const warn = 
+  (msg: string) => T.serviceWithEffect(LogService, log => log.warn(msg))
+
+export const error = 
+  (msg: string) => T.serviceWithEffect(LogService, log => log.error(msg))
+
+export const debug = 
+  (msg: string) => T.serviceWithEffect(LogService, log => log.debug(msg))
+
 export const LoggerConsole = L.fromEffect(LogService)(
   T.gen(function*($){
     const { log } = yield* $(ConsoleService)
     return {
-      info: (msg: string) => log(`[INFO] -- ${msg}`)
+      info: (msg: string) => log(`[INFO ] -- ${msg}`),
+      warn: (msg: string) => log(`[WARN ] -- ${msg}`),
+      error: (msg: string) => log(`[ERROR] -- ${msg}`),
+      debug: (msg: string) => log(`[DEBUG] -- ${msg}`)
     }
   })
 )

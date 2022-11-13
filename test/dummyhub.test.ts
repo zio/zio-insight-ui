@@ -6,6 +6,12 @@ import * as Ref from "@effect/core/io/Ref"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import { Tag } from "@tsplus/stdlib/service/Tag"
 
+/**
+ * Just a dummy service doing some work and publish some data 
+ * to one or more subscribers, Something like this will be used 
+ * to poll the metric data from the server and push the metric 
+ * state downstream into the UI.
+ */
 interface Foo {
   count: () => T.Effect<never, never, void>
   stream: () => T.Effect<never, never, S.Stream<never, never, number>>
@@ -20,8 +26,7 @@ function makeFoo() : T.Effect<never, never, Foo> {
     T.map( ([hub, ref]) => <Foo>{
       count: () => pipe(
         ref.getAndUpdate(n => n + 1),
-        T.flatMap(n => hub.offer(n)),
-        T.flatMap(_ => T.sync(() => console.log("foo")))
+        T.flatMap(n => hub.offer(n))
       ),
       stream: () => T.sync(() => S.fromHub(hub))
     })
@@ -35,7 +40,7 @@ const run = (svc: Foo) =>
     svc.stream(),
     T.flatMap(s => 
       pipe(
-        S.take(10)(s),
+        S.take(11)(s),
         S.runForEach( (n: number) => T.succeed(console.log(`got ${n}`)))
       )
     )

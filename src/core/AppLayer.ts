@@ -3,7 +3,7 @@ import * as L from "@effect/core/io/Layer"
 import * as S from "@effect/core/io/Scope"
 import * as E from "@effect/core/io/Exit"
 import { InsightMetricsLive, InsightMetrics, InsightMetricsStatic } from "./metrics/service/InsightService"
-import { ConsoleService, LoggerLive, LogService } from "./Logger"
+import { ConsoleService, LoggerLive, LogService } from "./services/Logger"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
 export type AppLayer = ConsoleService | LogService | InsightMetrics

@@ -27,5 +27,5 @@ const makeMetricsManager = T.succeed(
 )
 
 export const MetricsManagerLive : L.Layer<never, never, MetricsManager> = 
-  L.fromEffect<MetricsManager>(MetricsManager)(makeMetricsManager)
+  L.fromEffect(MetricsManager)(makeMetricsManager)
 

@@ -46,7 +46,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
   // The available metric keys
   const [items, setItems] = React.useState<InsightKey[]>([])
 
-  const isSelected = (k: InsightKey) => HSet.has<InsightKey>(k)(selected)
+  const isSelected = (k: InsightKey) => HSet.has(k)(selected)
 
   // Get the available keys from the ZIO Application
   React.useEffect(() => {

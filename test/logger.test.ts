@@ -1,5 +1,5 @@
 import * as T from "@effect/core/io/Effect"
-import * as Log from "@core/Logger"
+import * as Log from "@core/services/Logger"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as Ex from "@effect/core/io/Exit"
 import { provideSomeLayer } from "@effect/core/io/Effect"

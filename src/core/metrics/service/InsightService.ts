@@ -1,9 +1,9 @@
 import * as T from '@effect/core/io/Effect'
 import * as L from '@effect/core/io/Layer'
 import { pipe } from "@tsplus/stdlib/data/Function";
-import * as Req from '@core/Request'
+import * as Req from '@core/services/Request'
 import { Tag } from '@tsplus/stdlib/service/Tag';
-import * as Log from '@core/Logger'
+import * as Log from '@core/services/Logger'
 import staticKeys from "@data/keys.json"
 import staticStates from "@data/state.json"
 import { InvalidMetricKeys, InsightKey, metricKeysFromInsight } from "@core/metrics/model/MetricKey"
@@ -36,15 +36,15 @@ function makeLiveMetrics(logger: Log.LogService) : InsightMetrics {
 
 // Define a Layer with Dependency on a Log Service
 export const InsightMetricsLive : L.Layer<Log.LogService, never, InsightMetrics> = 
-  L.fromEffect<InsightMetrics>(InsightMetrics)(
+  L.fromEffect(InsightMetrics)(
     pipe(
-      T.service<Log.LogService>(Log.LogService),
+      T.service(Log.LogService),
       T.map(makeLiveMetrics)
     )
   )
 
 export const InsightMetricsStatic : L.Layer<never, never, InsightMetrics> = 
-  L.fromEffect<InsightMetrics>(InsightMetrics)(
+  L.fromEffect(InsightMetrics)(
     T.succeed({
       getMetricKeys : pipe(
         T.succeed(staticKeys),
