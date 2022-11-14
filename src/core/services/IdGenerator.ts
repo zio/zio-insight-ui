@@ -16,7 +16,7 @@ export interface IdGenerator { 
   readonly nextId : (_ : string) => T.Effect<never, never, string>
 }
 
-const IdGenerator = Tag<IdGenerator>()
+export const IdGenerator = Tag<IdGenerator>()
 
 function make(
   log: Log.LogService,
