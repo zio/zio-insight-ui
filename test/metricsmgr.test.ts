@@ -15,6 +15,15 @@ const testRt = pipe(
   AL.unsafeMakeRuntime
 ).runtime
 
+const newKeys = C.make(<Model.InsightKey>{
+  id: "1234-5678",
+  key: <Model.MetricKey>{
+    name: "foo",
+    labels: [],
+    metricType: "Counter"      
+  }
+})
+
 describe("MetricsManager", () => {
 
   it("should start empty", async () => {
@@ -32,29 +41,48 @@ describe("MetricsManager", () => {
 
   it("should allow to register keys", async () => {
 
-    const newKeys = C.make(<Model.InsightKey>{
-      id: "1234-5678",
-      key: <Model.MetricKey>{
-        name: "foo",
-        labels: [],
-        metricType: "Counter"      
-      }
-    })
-
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
-        const idSvc = yield* $(T.service(IdSvc.IdGenerator))
         const mm = yield* $(T.service(MM.MetricsManager))
-        yield* $(
-          pipe(
-            idSvc.nextId("test"),
-            T.flatMap(id => mm.setSubscription(id, newKeys))
-          )
-        )
-        return yield* $(pipe(mm.registeredKeys(), T.map(C.size)))      
+        const id = yield* $(mm.createSubscription(newKeys))
+        const res = yield* $(mm.registeredKeys())
+        yield* $(mm.removeSubscription(id))
+        return res
       })
     )
 
-    expect(res).toBeGreaterThan(0)
+    const mbElem = C.find<Model.InsightKey>(e => e.id == "1234-5678")(res)
+    expect(res.length).toEqual(1)
+    expect(mbElem._tag).toEqual("Some")
+  })
+
+  it("should allow to remove a subscription", async () => {
+    const res = await testRt.unsafeRunPromise(
+      T.gen(function* ($) {
+        const mm = yield* $(T.service(MM.MetricsManager))
+        const id = yield* $(mm.createSubscription(newKeys))
+        yield* $(mm.removeSubscription(id))
+        const res = yield* $(mm.registeredKeys())
+        return res
+      })
+    )
+
+    expect(C.isEmpty(res)).toBe(true)
+  })
+
+  it("should only yield distinct keys", async () => {
+    const res = await testRt.unsafeRunPromise(
+      T.gen(function* ($) {
+        const mm = yield* $(T.service(MM.MetricsManager))
+        const id1 = yield* $(mm.createSubscription(newKeys))
+        const id2 = yield* $(mm.createSubscription(newKeys))
+        const res = yield* $(mm.registeredKeys())
+        yield* $(mm.removeSubscription(id1))
+        yield* $(mm.removeSubscription(id2))
+        return res
+      })
+    )
+
+    expect(C.size(res)).toBe(1)
   })
 })
