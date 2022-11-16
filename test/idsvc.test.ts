@@ -7,7 +7,8 @@ import * as Log from "@core/services/Logger"
 describe("IdSvc", () => {
 
   const layer = pipe(
-    Log.LoggerLive,
+    Log.ConsoleLive,
+    L.provideToAndMerge(Log.live(Log.All)),
     L.provideTo(IdSvc.live)
   )
 

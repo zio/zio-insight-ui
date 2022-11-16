@@ -1,8 +1,8 @@
 import * as T from '@effect/core/io/Effect'
 import * as L from '@effect/core/io/Layer'
-import { pipe } from "@tsplus/stdlib/data/Function";
+import { pipe } from "@tsplus/stdlib/data/Function"
 import * as Req from '@core/services/Request'
-import { Tag } from '@tsplus/stdlib/service/Tag';
+import { Tag } from '@tsplus/stdlib/service/Tag'
 import * as Log from '@core/services/Logger'
 import staticKeys from "@data/keys.json"
 import staticStates from "@data/state.json"
@@ -18,7 +18,7 @@ export interface InsightMetrics {
   getMetricStates: (ids: string[]) => T.Effect<never,InsightApiError, MetricState[]>
 }
 
-const InsightMetrics = Tag<InsightMetrics>()
+export const InsightMetrics = Tag<InsightMetrics>()
 
 // helper function to construct a ZIOMetrics implementation on top of a Log Service 
 // instance

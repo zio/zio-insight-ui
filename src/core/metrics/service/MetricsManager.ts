@@ -2,12 +2,14 @@ import * as T from "@effect/core/io/Effect"
 import * as S from "@effect/core/stream/Stream"
 import * as L from "@effect/core/io/Layer"
 import * as C from "@tsplus/stdlib/collections/Chunk"
+import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as Hub from "@effect/core/io/Hub"
 import * as Ref from "@effect/core/io/Ref"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Log from "@core/services/Logger"
 import * as IdSvc from "@core/services/IdGenerator"
 import * as Sch from "@effect/core/io/Schedule"
+import * as Insight from "./InsightService"
 import { Tag } from "@tsplus/stdlib/service/Tag"
 import { InsightKey } from "@core/metrics/model/MetricKey";
 import { MetricState } from "@core/metrics/model/MetricState";
@@ -35,6 +37,10 @@ export interface MetricsManager {
   readonly registeredKeys: () => T.Effect<never, never, C.Chunk<InsightKey>>
   // create a stream for incoming Metric State updates
   readonly updates: () => T.Effect<never, never, S.Stream<never, never, MetricState>>
+  // Set the interval for polling the metric states
+  readonly poll: () => T.Effect<never, never, void>
+  // Reset all subscriptions within the MetricsManager
+  readonly reset: () => T.Effect<never, never, void>
 }
 
 export const MetricsManager = Tag<MetricsManager>()
@@ -42,6 +48,7 @@ export const MetricsManager = Tag<MetricsManager>()
 function makeMetricsManager(
   log: Log.LogService,
   idSvc: IdSvc.IdGenerator,
+  insight: Insight.InsightMetrics,
   metricsHub: Hub.Hub<MetricState>,
   subscriptions: Ref.Ref<HMap.HashMap<string, C.Chunk<InsightKey>>>
 ) { 
@@ -91,28 +98,63 @@ function makeMetricsManager(
     )
 
     const updates = () => T.sync(() => S.fromHub(metricsHub))
-      
+
+    const reset = () => subscriptions.set(HMap.empty<string, C.Chunk<InsightKey>>())  
+
+    const getStates = (keys: string[]) => pipe(
+      insight.getMetricStates(keys),
+      T.catchAll(err => pipe(
+        log.warn(`Boom`),
+        T.flatMap(_ => T.sync(() => <MetricState[]>[]))
+      )),
+      T.tap(res => log.debug(`Got <${res.length}> metric states from Application`))
+    )
+
+    const pollMetrics = () => T.gen(function* ($) {
+      const keys = yield* $(registeredKeys())
+
+      if (keys.length > 0) {
+        // TODO: Most likely it is better to use Chunk in the API rather than arrays 
+        const keyArr = Coll.toArray(C.toCollection(keys)).map(ik => ik.id)
+        yield* $(log.info(`polling metrics for <${keyArr.length}> keys`))
+        const states = yield* $(getStates(keyArr))
+        yield* $(metricsHub.publishAll(states))
+
+        yield* $(pipe(
+          metricsHub.size,
+          T.flatMap(cnt => log.debug(`Current metric state hub has <${cnt}> elements`))
+        ))
+      }
+    })
+          
   return pipe(
     T.forkDaemon(
-      T.schedule(Sch.linear(D.millis(500)))(log.info("Hello"))
+       T.schedule(Sch.fixed(D.seconds(5)))(pollMetrics())
     ),
-    T.map(_ => <MetricsManager>{
+    T.map(() => <MetricsManager>{
       createSubscription: createSubscription,
       removeSubscription: removeSubscription,
       modifySubscription: modifySubscription,
       registeredKeys: registeredKeys,
-      updates : updates
+      updates : updates,
+      reset: reset,
+      poll: pollMetrics
     })
-)}
+  )
+}
 
 export const live = 
   L.fromEffect(MetricsManager)(
-    T.gen(function* ($) { 
-      const hub = yield* $(Hub.sliding<MetricState>(512))
-      const log = yield* $(T.service(Log.LogService))
-      const ref = yield* $(Ref.makeRef(() => HMap.empty<string, C.Chunk<InsightKey>>()))
+    T.gen(function* ($) {
+      // TODO: Review the Hub configuration 
+      const hub = yield* $(Hub.unbounded<MetricState>())
+      const insight = yield* $(T.service(Insight.InsightMetrics))
       const idSvc= yield* $(T.service(IdSvc.IdGenerator))
-      return yield* $(makeMetricsManager(log, idSvc, hub, ref))
+      const log = yield* $(T.service(Log.LogService))
+      const subscriptions = yield* $(Ref.makeRef(() => HMap.empty<string, C.Chunk<InsightKey>>()))
+
+      const mm = yield* $(makeMetricsManager(log, idSvc, insight, hub, subscriptions))
+      return mm
     })
   )
 

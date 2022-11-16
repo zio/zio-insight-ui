@@ -1,18 +1,15 @@
 import * as T from "@effect/core/io/Effect"
-import * as L from "@effect/core/io/Layer"
+import * as S from "@effect/core/stream/Stream"
+import * as F from "@effect/core/io/Fiber"
 import * as MM from "@core/metrics/service/MetricsManager"
+import * as Insight from "@core/metrics/service/InsightService"
 import * as C from "@tsplus/stdlib/collections/Chunk"
-import { pipe } from "@tsplus/stdlib/data/Function"
 import * as AL from "@core/AppLayer"
-import * as Log from "@core/services/Logger"
 import * as Model from "@core/metrics/model/MetricKey"
-import * as IdSvc from "@core/services/IdGenerator"
+import { pipe } from "@tsplus/stdlib/data/Function"
 
-const testRt = pipe(
-  Log.LoggerLive,
-  L.provideToAndMerge(IdSvc.live),
-  L.provideToAndMerge(MM.live),
-  AL.unsafeMakeRuntime
+const testRt = AL.unsafeMakeRuntime(
+  AL.appLayerStatic
 ).runtime
 
 const newKeys = C.make(<Model.InsightKey>{
@@ -26,14 +23,16 @@ const newKeys = C.make(<Model.InsightKey>{
 
 describe("MetricsManager", () => {
 
-  it("should start empty", async () => {
+  it("can be reset", async () => {
 
     const res = await testRt.unsafeRunPromise(
-      pipe(
-        T.service(MM.MetricsManager),
-        T.flatMap(mm => mm.registeredKeys()),
-        T.map(C.isEmpty)
-      )      
+      T.gen(function* ($) {
+        const mm = yield* $(T.service(MM.MetricsManager))
+        yield* $(mm.reset())
+        const keys = yield* $(mm.registeredKeys())
+
+        return C.isEmpty(keys)
+      })
     )
 
     expect(res).toBe(true)
@@ -84,5 +83,48 @@ describe("MetricsManager", () => {
     )
 
     expect(C.size(res)).toBe(1)
+  })
+
+  it("should publish metric state updates", async () => {
+
+    const res = await testRt.unsafeRunPromise(
+      T.gen(function* ($) {
+        const insight = yield* $(T.service(Insight.InsightMetrics))
+        const mm = yield* $(T.service(MM.MetricsManager))
+
+        const keys = yield* $(
+          pipe(
+            insight.getMetricKeys,
+            T.catchAll(_ => 
+              T.sync(() => <Model.InsightKey[]>[])
+            )
+          )          
+        )
+
+        const sub = yield* $(mm.createSubscription(C.from(keys)))
+        const states = yield* $(mm.updates())
+
+        // Make sure we are already consuming from the stream before we manually kick off 
+        // the polling 
+        const f = yield* $(
+          pipe(
+            S.take(10)(states),
+            S.runCollect,
+            T.fork
+          )
+        )
+
+        yield* $(mm.poll())
+
+        // Now the fiber should be done and have the first 10 elements from the state 
+        // updates
+        const res = yield* $(F.join(f))
+        yield* $(mm.removeSubscription(sub))
+
+        return res
+      })
+    )
+
+    expect(res.length).toEqual(10)
   })
 })
