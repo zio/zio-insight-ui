@@ -3,6 +3,9 @@ import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as AL from "@core/AppLayer"
 import * as TS from "@core/metrics/model/insight/TimeSeries"
+import {MetricState, CounterState, GaugeState} from "@core/metrics/model/zio/MetricState"
+import {MetricKey} from "@core/metrics/model/zio/MetricKey"
+import {MetricLabel} from "@core/metrics/model/zio/MetricLabel"
 
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
@@ -78,5 +81,46 @@ describe("TimeSeries", () => {
     expect(e1.when.getTime()).toEqual(now.getTime() - 1000)
     expect(e2.when.getTime()).toEqual(now.getTime())
     expect(C.size(res)).toEqual(2)
+  })
+})
+
+describe("TimeSeriesConvert", () => {
+
+  it("should convert Counters", () => { 
+    const c = <MetricState>{
+      id: "test",
+      key: <MetricKey>{
+        name: "counter",
+        labels: <MetricLabel[]>[],
+        metricType: "Counter"
+      },
+      state: <CounterState>{
+        count: 10
+      },
+      timestamp: new Date().getTime()
+    }
+
+    const res = TS.timeEntriesFromState(c)
+
+    expect(C.size(res)).toEqual(1)
+  })
+
+  it("should convert Gauges", () => { 
+    const c = <MetricState>{
+      id: "test",
+      key: <MetricKey>{
+        name: "gauge",
+        labels: <MetricLabel[]>[],
+        metricType: "Gauge"
+      },
+      state: <GaugeState>{
+        value: 10
+      },
+      timestamp: new Date().getTime()
+    }
+
+    const res = TS.timeEntriesFromState(c)
+
+    expect(C.size(res)).toEqual(1)
   })
 })

@@ -3,6 +3,8 @@ import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as Ref from "@effect/core/io/Ref"
 import { Ord } from "@tsplus/stdlib/prelude/Ord"
 import * as MayBe from "@tsplus/stdlib/data/Maybe"
+import { formatDate } from "@core/utils" 
+import * as State from "@core/metrics/model/zio/MetricState"
 
 // A time series key uniquely defines a single measured piece of data over a 
 // period of time
@@ -15,10 +17,20 @@ export interface TimeSeriesConfig {
   color: string
 }
 
-export interface TimeSeriesEntry {
-  id: TimeSeriesKey
-  when: Date
-  value: number
+export class TimeSeriesEntry {
+  readonly id: TimeSeriesKey
+  readonly when: Date
+  readonly value: number
+
+  constructor(id: TimeSeriesKey, when: Date, value: number) {
+    this.id = id
+    this.when = when
+    this.value = value
+  }
+
+  asString() : string {
+    return `TimeSeriesEntry(${this.id}, ${formatDate(this.when)}, ${this.value})`
+  }
 }
 
 const OrdTimeSeriesEntry = <Ord<TimeSeriesEntry>> { 
@@ -68,3 +80,30 @@ export const makeTimeSeries = (id: String, maxEntries: number) => {
     })
   )
 }
+
+export const timeEntriesFromState = (s: State.MetricState) => {
+
+  switch(s.key.metricType){
+    case "Counter":
+      const c = <State.CounterState>s.state
+      return C.make(new TimeSeriesEntry(
+        s.id,
+        new Date(s.timestamp),
+        c.count
+      ))
+    case "Gauge":
+      const g = <State.GaugeState>s.state
+      return C.make(new TimeSeriesEntry(
+        s.id,
+        new Date(s.timestamp),
+        g.value
+      ))
+    case "Histogram":
+      return C.empty<TimeSeriesEntry>()
+    case "Summary":
+      return C.empty<TimeSeriesEntry>()
+    case "Frequency":
+      return C.empty<TimeSeriesEntry>()
+  }
+}
+
