@@ -2,10 +2,8 @@ name: ZIO Insight UI
 
 on:
   push:
-    branches: 
-      - **
   pull_request:
-    branches: 
+    branches:
       - main
 
 jobs:
