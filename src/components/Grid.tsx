@@ -6,13 +6,12 @@ import embed from "vega-embed"
 import { TopLevelSpec } from "vega-lite"
 
 export function MyGrid() {
-  const layout: Layout[] = [
-    { i: "a", x: 0, y: 0, w: 1, h: 2 },
-    { i: "b", x: 1, y: 0, w: 2, h: 2 },
-    { i: "c", x: 0, y: 1, w: 1, h: 2 }
-  ]
-
-  const elements: string[] = ["a", "b", "c"]
+  const [layout, _] = React.useState<Layout[]>([
+    { i: "a", x: 0, y: 0, w: 3, h: 3 },
+    { i: "b", x: 0, y: 0, w: 3, h: 3 },
+    { i: "c", x: 0, y: 0, w: 3, h: 3 },
+    { i: "d", x: 0, y: 0, w: 3, h: 3 }
+  ])
 
   const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -27,12 +26,12 @@ export function MyGrid() {
       onResize={handleResize}
       onResizeStop={() => setTimeout(handleResize, 200)}
       rowHeight={50}>
-      {elements.map((s: string) => (
+      {layout.map((l: Layout) => (
         <div
-          key={s}
+          key={l.i}
           className="w-full h-full bg-neutral p-2 text-neutral-content shadow">
           <div className="w-full h-full">
-            <GridContent title={s} />
+            <GridContent title={l.i} />
           </div>
         </div>
       ))}
@@ -67,7 +66,7 @@ export const GridContent: React.FC<{ title: string }> = (props) => {
     height: "container"
   }
 
-  const init = React.useEffect(() => {
+  React.useEffect(() => {
     embed(myRef.current!, vegaLiteSpec, { actions: false, renderer: "svg" })
   }, [])
 

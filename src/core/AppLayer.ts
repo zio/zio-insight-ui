@@ -3,19 +3,27 @@ import * as L from "@effect/core/io/Layer"
 import * as S from "@effect/core/io/Scope"
 import * as E from "@effect/core/io/Exit"
 import { InsightMetricsLive, InsightMetrics, InsightMetricsStatic } from "./metrics/service/InsightService"
-import { ConsoleService, LoggerLive, LogService } from "./services/Logger"
+import * as Log from "./services/Logger"
+import * as MM from "@core/metrics/service/MetricsManager"
+import * as IdSvc from "@core/services/IdGenerator"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
-export type AppLayer = ConsoleService | LogService | InsightMetrics
+export type AppLayer = Log.ConsoleService | Log.LogService | InsightMetrics | MM.MetricsManager
 
 export const appLayerLive : L.Layer<never, never, AppLayer> = pipe(
-  LoggerLive,
-  L.provideToAndMerge(InsightMetricsLive)
+  Log.ConsoleLive,
+  L.provideToAndMerge(Log.live(Log.All)),
+  L.provideToAndMerge(IdSvc.live),
+  L.provideToAndMerge(InsightMetricsLive),
+  L.provideToAndMerge(MM.live)
 )
 
 export const appLayerStatic : L.Layer<never, never, AppLayer> = pipe(
-  LoggerLive,
-  L.merge(InsightMetricsStatic)
+  Log.ConsoleLive,
+  L.provideToAndMerge(Log.live(Log.All)),
+  L.provideToAndMerge(IdSvc.live),
+  L.provideToAndMerge(InsightMetricsStatic),
+  L.provideToAndMerge(MM.live)
 )
   
 

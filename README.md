@@ -1,1 +1,1 @@
-# zio-insight-ui
+# ZIO Insight UI

@@ -1,5 +1,6 @@
 import * as T from "@effect/core/io/Effect"
 import { pipe } from "@tsplus/stdlib/data/Function"
+import { Ord } from "@tsplus/stdlib/prelude/Ord"
 import * as Z from "zod"
 
 import { metricLabelSchema } from "./MetricLabel"
@@ -22,6 +23,14 @@ export const insightKeySchema = Z.object({
 })
 
 export interface InsightKey extends Z.TypeOf<typeof insightKeySchema> {}
+
+export const OrdInsightKey = <Ord<InsightKey>>{
+  compare: (x: InsightKey, y: InsightKey) => {
+    if (x.id < y.id) return -1
+    else if (x.id > y.id) return 1
+    else return 0
+  }
+}
 
 export const keyAsString = (mk: InsightKey) => 
   `${mk.key.metricType}:${mk.key.name}:${mk.key.labels.map(l => l.key + "=" + l.value).join(',')}`
