@@ -4,6 +4,7 @@ import * as Ref from "@effect/core/io/Ref"
 import * as C from "@effect/core/io/Clock"
 import { pipe } from "@tsplus/stdlib/data/Function/pipe"
 import { Tag } from "@tsplus/stdlib/service/Tag"
+import { formatDate } from "@core/utils"
 
 export interface LogLevel {
   name: string, 
@@ -72,8 +73,6 @@ function makeLogger(l: LogLevel) {
           T.map(now => new Date(now))
         )
 
-      const pad = (n: number, l: number) => `${n}`.padStart(l, "0")
-
       const doLog = (logLvl: LogLevel, msg: string) => 
         T.ifEffect(
           pipe(
@@ -83,9 +82,7 @@ function makeLogger(l: LogLevel) {
           pipe(
             now,
             T.flatMap( d => {
-              const tsDay = `${pad(d.getFullYear(),4)}-${pad(d.getMonth(),2)}-${pad(d.getDate(),2)}`
-              const tsMoment = `${pad(d.getHours(), 2)}:${pad(d.getMinutes(), 2)}:${pad(d.getSeconds(), 2)}.${pad(d.getMilliseconds(), 3)}`
-              return c.log(`[${logLvl.name.padEnd(5)}] -- [${tsDay}-${tsMoment}] -- ${msg}`)
+              return c.log(`[${logLvl.name.padEnd(5)}] -- [${formatDate(d)}] -- ${msg}`)
             }),
           ),
           T.sync(() => {})

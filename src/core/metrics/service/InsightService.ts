@@ -6,8 +6,8 @@ import { Tag } from '@tsplus/stdlib/service/Tag'
 import * as Log from '@core/services/Logger'
 import staticKeys from "@data/keys.json"
 import staticStates from "@data/state.json"
-import { InvalidMetricKeys, InsightKey, metricKeysFromInsight } from "@core/metrics/model/MetricKey"
-import { InvalidMetricStates, MetricState, metricStatesFromInsight } from "@core/metrics/model/MetricState"
+import { InvalidMetricKeys, InsightKey, metricKeysFromInsight } from "@core/metrics/model/zio/MetricKey"
+import { InvalidMetricStates, MetricState, metricStatesFromInsight } from "@core/metrics/model/zio/MetricState"
 
 type InsightApiError = Req.FetchError | Req.InvalidJsonResponse | InvalidMetricKeys | InvalidMetricStates
 

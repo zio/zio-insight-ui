@@ -5,7 +5,7 @@ import * as MM from "@core/metrics/service/MetricsManager"
 import * as Insight from "@core/metrics/service/InsightService"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as AL from "@core/AppLayer"
-import * as Model from "@core/metrics/model/MetricKey"
+import * as Model from "@core/metrics/model/zio/MetricKey"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
 const testRt = AL.unsafeMakeRuntime(

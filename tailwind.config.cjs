@@ -15,7 +15,21 @@ module.exports = {
 
   daisyui: {
     styled: true,
-    themes: ["light", "dark", "lemonade", "corporate"],
+    themes: [
+      {
+        insight: { 
+          "primary": "#B10101",
+          "secondary": "#262830",
+          "accent": "#e74100",
+          "neutral": "#404350",
+          "neutral-content": "#ffffff",
+          "base-100": "#262830",
+          "base-200": "#343042",
+          "base-300": "#404350",
+          "base-400": "#505266"
+        }
+      }
+    ],
     base: true,
     utils: true,
     logs: true,

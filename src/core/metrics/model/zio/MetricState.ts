@@ -2,6 +2,7 @@ import * as T from '@effect/core/io/Effect'
 import { pipe } from '@tsplus/stdlib/data/Function'
 import * as Z from 'zod'
 import * as Coll from "@tsplus/stdlib/collections/Collection"
+import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Chunk from "@tsplus/stdlib/collections/Chunk"
 
 import { MetricKey, metricKeySchema } from './MetricKey'
@@ -22,7 +23,14 @@ const freqStateSchema = Z.object({
   occurrences: Z.unknown()
 })
 
-export interface FrequencyState extends Z.TypeOf<typeof freqStateSchema> {}
+// From the API we get the occurences as an "unknown", but we now it is actually 
+// a map <string, number>, so we do the conversion here before we pass it onwards to any 
+// downstream component
+interface RawFrequencyState extends Z.TypeOf<typeof freqStateSchema> {}
+
+export interface FrequencyState {
+  occurrences: HMap.HashMap<string, number>
+}
 
 const summaryStateSchema = Z.object({
   error: Z.number(),
@@ -81,11 +89,26 @@ export class InvalidMetricStates {
   constructor(readonly reason: string) {}
 }
 
+const parseFrequency = (state: RawFrequencyState) => {
+  const res = <[string, number][]>[]
+
+  Object.keys(state).forEach(k => {
+    const v = state[k]
+    if (typeof v === "number") { 
+      res.push([k, v])
+    }
+  })
+
+  return <FrequencyState>{
+    occurrences: HMap.from(res)
+  }
+}
+
 // A helper function to unwrap the combined state we get from the Insight connector
 const parseCurrentState : (_: CombinedState) => T.Effect<never, InvalidMetricStates, MetricStateValue> =  (comb: CombinedState) => {
   if (comb.Gauge !== undefined) { return T.succeed(comb.Gauge!) }
   else if (comb.Counter !== undefined) { return T.succeed(comb.Counter!) }
-  else if (comb.Frequency !== undefined) { return T.succeed(comb.Frequency!) }
+  else if (comb.Frequency !== undefined) { return T.succeed(parseFrequency(comb.Frequency!.occurrences!)) }
   else if (comb.Histogram !== undefined) { return T.succeed(comb.Histogram!) }
   else if (comb.Summary !== undefined) { return T.succeed(comb.Summary!) }
   else { return T.fail( new InvalidMetricStates(`Invalid metric state value <${JSON.stringify(comb)}>`)) } 

@@ -11,8 +11,8 @@ import * as IdSvc from "@core/services/IdGenerator"
 import * as Sch from "@effect/core/io/Schedule"
 import * as Insight from "./InsightService"
 import { Tag } from "@tsplus/stdlib/service/Tag"
-import { InsightKey } from "@core/metrics/model/MetricKey";
-import { MetricState } from "@core/metrics/model/MetricState";
+import { InsightKey } from "@core/metrics/model/zio/MetricKey";
+import { MetricState } from "@core/metrics/model/zio/MetricState";
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as D from "@tsplus/stdlib/data/Duration"
 
@@ -153,8 +153,7 @@ export const live =
       const log = yield* $(T.service(Log.LogService))
       const subscriptions = yield* $(Ref.makeRef(() => HMap.empty<string, C.Chunk<InsightKey>>()))
 
-      const mm = yield* $(makeMetricsManager(log, idSvc, insight, hub, subscriptions))
-      return mm
+      return yield* $(makeMetricsManager(log, idSvc, insight, hub, subscriptions))
     })
   )
 
