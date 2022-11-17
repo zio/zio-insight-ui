@@ -27,9 +27,7 @@ export function MyGrid() {
       onResizeStop={() => setTimeout(handleResize, 200)}
       rowHeight={50}>
       {layout.map((l: Layout) => (
-        <div
-          key={l.i}
-          className="w-full h-full bg-neutral p-2 text-neutral-content shadow">
+        <div key={l.i} className="w-full h-full pl-4 bg-neutral text-neutral-content">
           <div className="w-full h-full">
             <GridContent title={l.i} />
           </div>
@@ -57,13 +55,23 @@ export const GridContent: React.FC<{ title: string }> = (props) => {
         { a: "I", b: 52 }
       ]
     },
-    mark: "bar",
+    mark: {
+      type: "line",
+      color: "#e74100"
+    },
     encoding: {
       x: { field: "a", type: "nominal", axis: { labelAngle: 0 } },
       y: { field: "b", type: "quantitative" }
     },
     width: "container",
-    height: "container"
+    height: "container",
+    config: {
+      axis: {
+        titleColor: "#fff",
+        labelColor: "#fff"
+      },
+      background: "#505266"
+    }
   }
 
   React.useEffect(() => {
