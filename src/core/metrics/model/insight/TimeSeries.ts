@@ -1,5 +1,6 @@
 import * as T from "@effect/core/io/Effect"
 import * as C from "@tsplus/stdlib/collections/Chunk"
+import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Ref from "@effect/core/io/Ref"
 import { Ord } from "@tsplus/stdlib/prelude/Ord"
 import * as MayBe from "@tsplus/stdlib/data/Maybe"
@@ -83,27 +84,58 @@ export const makeTimeSeries = (id: String, maxEntries: number) => {
 
 export const timeEntriesFromState = (s: State.MetricState) => {
 
+  const ts = new Date(s.timestamp)
+  const res = <TimeSeriesEntry[]>[]
+
   switch(s.key.metricType){
     case "Counter":
-      const c = <State.CounterState>s.state
-      return C.make(new TimeSeriesEntry(
+      const counter = <State.CounterState>s.state
+      res.push(new TimeSeriesEntry(
         s.id,
-        new Date(s.timestamp),
-        c.count
+        ts,
+        counter.count
       ))
+      break
     case "Gauge":
-      const g = <State.GaugeState>s.state
-      return C.make(new TimeSeriesEntry(
-        s.id,
-        new Date(s.timestamp),
-        g.value
+      const gauge = <State.GaugeState>s.state
+      res.push(new TimeSeriesEntry(
+        s.id, ts, gauge.value
       ))
+      break
     case "Histogram":
-      return C.empty<TimeSeriesEntry>()
+      const hist = <State.HistogramState>s.state
+      hist.buckets.forEach( ([k, v]) => res.push(
+        new TimeSeriesEntry(`${s.id}-${k}`, ts, v)
+      ))
+      if (hist.count > 0) {
+        res.push(
+          new TimeSeriesEntry(`${s.id}-avg`, ts, hist.sum / hist.count)
+        )
+      }
+      break
     case "Summary":
-      return C.empty<TimeSeriesEntry>()
+      const summ = <State.SummaryState>s.state
+      summ.quantiles.forEach( ([q,v]) => res.push(new TimeSeriesEntry(
+        `${s.id}-${q}`, ts, v
+      )))
+
+      if (summ.count > 0) {
+        res.push(new TimeSeriesEntry(
+          `${s.id}-avg`, ts, summ.sum / summ.count
+        ))
+      }
+
+      break
     case "Frequency":
-      return C.empty<TimeSeriesEntry>()
+      const freq = <State.FrequencyState>s.state
+      HMap.forEachWithIndex<string, number>( (k, v) => 
+        res.push(new TimeSeriesEntry(
+          `${s.id}-${k}`, ts, v
+        ))
+      )(freq.occurrences)
+      break
   }
+
+  return C.from(res)
 }
 
