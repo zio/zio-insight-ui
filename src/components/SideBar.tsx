@@ -65,7 +65,7 @@ export const SideBar: React.FC<{}> = (props) => {
   return (
     <div
       className={`${
-        shown ? "w-48" : "w-12"
+        shown ? "w-48" : "w-14"
       } flex flex-col bg-neutral text-neutral-content border-r`}>
       <div className="h-[70px] border-b-2 relative">{collapseBtn}</div>
       <div className="h-full flex flex-col">
