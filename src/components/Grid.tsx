@@ -27,7 +27,7 @@ export function MyGrid() {
       onResizeStop={() => setTimeout(handleResize, 200)}
       rowHeight={50}>
       {layout.map((l: Layout) => (
-        <div key={l.i} className="w-full h-full pl-4 bg-neutral text-neutral-content">
+        <div key={l.i} className="w-full h-full bg-neutral text-neutral-content">
           <GridFrame key={l.i}>
             <VegaPanel />
           </GridFrame>

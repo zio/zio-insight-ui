@@ -10,8 +10,8 @@ const createTS = (id: string) =>
     (i) =>
       ({
         id: id,
-        when: new Date(now - (10 + i) * 30000),
-        value: Math.floor(Math.random() * 10) * 10
+        when: new Date(now - i * 30000),
+        value: Math.floor(Math.random() * 1000)
       } as TS.TimeSeriesEntry)
   )
 
@@ -25,6 +25,11 @@ export const VegaPanel: React.FC<{}> = () => {
   const vegaLiteSpec: TopLevelSpec = {
     $schema: "https://vega.github.io/schema/vega-lite/v5.json",
     padding: 5,
+    autosize: {
+      type: "fit",
+      resize: true,
+      contains: "padding"
+    },
     params: [
       {
         name: "labels",
@@ -78,7 +83,7 @@ export const VegaPanel: React.FC<{}> = () => {
   }
 
   React.useEffect(() => {
-    embed(myRef.current!, vegaLiteSpec, { actions: true, renderer: "svg" })
+    embed(myRef.current!, vegaLiteSpec, { actions: false, renderer: "canvas" })
   }, [])
 
   return <div ref={myRef} className="w-full h-full"></div>
