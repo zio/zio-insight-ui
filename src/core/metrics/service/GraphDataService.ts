@@ -140,7 +140,11 @@ function makeGraphDataService(
   const metrics = () => observed.get
 
   const setMaxEntries = (newMax : number) => 
-    currMaxEntries.set(newMax)
+    T.gen(function* ($) {
+      const series = yield* $(timeseries.get)
+      yield* $(T.forEach(HMap.values(series), ts => ts.updateMaxEntries(newMax)))
+      yield* $(currMaxEntries.set(newMax))
+    })
 
   const maxEntries = () => currMaxEntries.get
 
