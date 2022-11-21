@@ -37,7 +37,8 @@ export interface MetricsManager {
   readonly registeredKeys: () => T.Effect<never, never, C.Chunk<InsightKey>>
   // create a stream for incoming Metric State updates
   readonly updates: () => T.Effect<never, never, S.Stream<never, never, MetricState>>
-  // Set the interval for polling the metric states
+  // Manually trigger a poll, the poll will cause an update to all connected 
+  // subscribers for metric data
   readonly poll: () => T.Effect<never, never, void>
   // Reset all subscriptions within the MetricsManager
   readonly reset: () => T.Effect<never, never, void>
@@ -72,8 +73,13 @@ function makeMetricsManager(
 
     const modifySubscription = (id: string,  f: (_:C.Chunk<InsightKey>) => C.Chunk<InsightKey>) => pipe(
       log.debug(`Modifying subscription <${id}> in MetricsManager`),
-      T.flatMap(_ => subscriptions.update(HMap.update(id, f)))
+      T.flatMap(_ => subscriptions.updateAndGet(HMap.update(id, f))),
+      T.tap(subs => 
+        log.debug(
+          `Subscription <${id}> has now <${C.size(HMap.unsafeGet<string, C.Chunk<InsightKey>>(id)(subs))}> keys`)
+      )
     )
+    
 
     const registeredKeys = () => pipe(
       subscriptions.get,
@@ -104,7 +110,7 @@ function makeMetricsManager(
     const getStates = (keys: string[]) => pipe(
       insight.getMetricStates(keys),
       T.catchAll(err => pipe(
-        log.warn(`Boom`),
+        log.warn(`Error getting metric states from server: <${JSON.stringify(err)}>`),
         T.flatMap(_ => T.sync(() => <MetricState[]>[]))
       )),
       T.tap(res => log.debug(`Got <${res.length}> metric states from Application`))
