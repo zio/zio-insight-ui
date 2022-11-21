@@ -2,10 +2,11 @@ import * as T from "@effect/core/io/Effect"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Ref from "@effect/core/io/Ref"
+import * as Log from "@core/services/Logger"
 import { Ord } from "@tsplus/stdlib/prelude/Ord"
-import * as MayBe from "@tsplus/stdlib/data/Maybe"
 import { formatDate } from "@core/utils" 
 import * as State from "@core/metrics/model/zio/MetricState"
+import { pipe } from "@tsplus/stdlib/data/Function"
 
 // A time series key uniquely defines a single measured piece of data over a 
 // period of time
@@ -52,28 +53,43 @@ export interface TimeSeries {
   readonly entries: () => T.Effect<never, never, C.Chunk<TimeSeriesEntry>>
 }
 
-export const makeTimeSeries = (id: String, maxEntries: number) => {
+export const makeTimeSeries = (id: String, maxEntries: number) => (log: Log.LogService) => {
   return (
     T.gen(function* ($){
       const maxRef = yield* $(Ref.makeRef(() => maxEntries))
       const entriesRef = yield* $(Ref.makeRef(() => C.empty<TimeSeriesEntry>()))
 
+      const logPrefix = `TS <${id}> --`
+
+      const restrictEntries = (entries: C.Chunk<TimeSeriesEntry>, max: number) => {
+        if (max > 0) {
+          if (C.size(entries) <= max) {
+            return entries
+          } else { 
+            return C.sort(OrdTimeSeriesEntry)(C.takeRight(max)(entries))
+          }
+        } else { 
+          return C.empty<TimeSeriesEntry>()
+        }
+      }
+
       return <TimeSeries>{
         id: id,
         maxEntries: () => maxRef.get,
-        updateMaxEntries: (newMax: number) => maxRef.set(newMax),
+        updateMaxEntries: (newMax: number) => pipe(
+          maxRef.set(newMax),
+          T.flatMap(_ => entriesRef.updateAndGet(curr => restrictEntries(curr, newMax))),
+          T.flatMap(entries => log.debug(`${logPrefix} has now <${C.size(entries)}> entries`))
+        ),
         record: (e: TimeSeriesEntry) => T.gen(function* ($){
           if (e.id == id) {
             const max = yield* $(maxRef.get)
             const curr = yield* $(entriesRef.get)
-            const newEntries = () => {
-              if (C.size(curr) == max) {
-                return C.sort(OrdTimeSeriesEntry)(C.append(e)(MayBe.getOrElse(() => C.empty())(C.tail(curr))))
-              } else {
-                return C.sort(OrdTimeSeriesEntry)(C.append(e)(curr))
-              }
-            }
-            yield* $(entriesRef.set(newEntries()))
+            const newEntries = () => restrictEntries(C.append(e)(curr), max) 
+            yield* $(pipe(
+              entriesRef.updateAndGet(_ => newEntries()),
+              T.flatMap(entries => log.debug(`${logPrefix} has now <${C.size(entries)}> entries`))
+            ))
           }
         }),
         entries: () => entriesRef.get
