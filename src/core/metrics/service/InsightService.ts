@@ -9,6 +9,8 @@ import staticStates from "@data/state.json"
 import { InvalidMetricKeys, InsightKey, metricKeysFromInsight } from "@core/metrics/model/zio/MetricKey"
 import { InvalidMetricStates, MetricState, metricStatesFromInsight } from "@core/metrics/model/zio/MetricState"
 
+const baseUrl = "http://127.0.0.1:8080"
+
 type InsightApiError = Req.FetchError | Req.InvalidJsonResponse | InvalidMetricKeys | InvalidMetricStates
 
 // As a best practice, do not require services in the individual methods of the interface
@@ -20,17 +22,29 @@ export interface InsightMetrics {
 
 export const InsightMetrics = Tag<InsightMetrics>()
 
+interface StateRequest { 
+  selection: string[]
+}
+
 // helper function to construct a ZIOMetrics implementation on top of a Log Service 
 // instance
 function makeLiveMetrics(logger: Log.LogService) : InsightMetrics {
   return ({
     getMetricKeys: pipe(
-      Req.request("http://127.0.0.1:8080/insight/keys"),
+      Req.request(`${baseUrl}/insight/keys`),
       T.flatMap(Req.jsonFromResponse),
       T.flatMap(metricKeysFromInsight),
       T.tap(keys => logger.info(`Got ${keys.length} metric keys from server`))
     ),
-    getMetricStates: (_ : string[]) => T.succeed(<MetricState[]>[])
+    getMetricStates: (keys : string[]) => 
+      T.gen(function* ($) {
+        const req = <StateRequest>{selection: keys}
+        yield* $(logger.debug(`${JSON.stringify(req)}`))
+
+        const raw = yield* $(Req.request(`${baseUrl}/insight/metrics`, { method: "POST", body: JSON.stringify(req)}))
+        
+        return yield* $(metricStatesFromInsight(raw))
+      })
   })
 }
 
