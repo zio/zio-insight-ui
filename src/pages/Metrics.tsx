@@ -1,4 +1,4 @@
-import { MyGrid } from "@components/Grid"
+import { InsightGridLayout } from "@components/Grid"
 import * as React from "react"
 import * as BiIcons from "react-icons/bi"
 import * as MdIcons from "react-icons/md"
@@ -21,7 +21,7 @@ export function Metrics() {
         </div>
       </div>
       <div className="w-full h-full flex flex-grow">
-        <MyGrid />
+        <InsightGridLayout />
       </div>
     </div>
   )

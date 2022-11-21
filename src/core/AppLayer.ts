@@ -8,7 +8,8 @@ import * as MM from "@core/metrics/service/MetricsManager"
 import * as IdSvc from "@core/services/IdGenerator"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
-export type AppLayer = Log.ConsoleService | Log.LogService | InsightMetrics | MM.MetricsManager
+export type AppLayer = 
+  Log.ConsoleService | Log.LogService | InsightMetrics | MM.MetricsManager
 
 export const appLayerLive : L.Layer<never, never, AppLayer> = pipe(
   Log.ConsoleLive,

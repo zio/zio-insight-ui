@@ -5,7 +5,7 @@ import "@styles/grid.css"
 import { VegaPanel } from "./panel/VegaPanel"
 import { GridFrame } from "./panel/GridFrame"
 
-export function MyGrid() {
+export function InsightGridLayout() {
   const [layout, _] = React.useState<Layout[]>([
     { i: "a", x: 0, y: 0, w: 3, h: 3 },
     { i: "b", x: 0, y: 0, w: 3, h: 3 },
@@ -15,6 +15,8 @@ export function MyGrid() {
 
   const ResponsiveGridLayout = WidthProvider(Responsive)
 
+  // This is required to push resize events, so that embedded Vega Lite charts
+  // trigger their own resizing as well
   const handleResize = () => window.dispatchEvent(new Event("resize"))
 
   return (

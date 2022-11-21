@@ -6,11 +6,11 @@ import * as TS from "@core/metrics/model/insight/TimeSeries"
 const now = new Date().getTime()
 
 const createTS = (id: string) =>
-  [...Array(10).keys()].map(
+  [...Array(5).keys()].map(
     (i) =>
       ({
         id: id,
-        when: new Date(now - i * 30000),
+        when: new Date(now - i * 120000),
         value: Math.floor(Math.random() * 1000)
       } as TS.TimeSeriesEntry)
   )
@@ -18,6 +18,7 @@ const createTS = (id: string) =>
 const data = createTS("ref1")
 data.push(...createTS("ref2"))
 data.push(...createTS("ref3"))
+data.push(...createTS("ref4"))
 
 export const VegaPanel: React.FC<{}> = () => {
   const myRef = React.createRef<HTMLDivElement>()
@@ -36,7 +37,8 @@ export const VegaPanel: React.FC<{}> = () => {
         value: {
           ref1: "Gauge 1",
           ref2: "Gauge 2",
-          ref3: "Gauge 3"
+          ref3: "Gauge 3",
+          ref4: "Gauge 4"
         }
       }
     ],
@@ -62,10 +64,12 @@ export const VegaPanel: React.FC<{}> = () => {
         field: "id",
         type: "nominal",
         scale: {
-          range: ["gray", "orange", "blue"]
+          range: ["gray", "orange", "blue", "green"]
         },
         legend: {
           title: "Test",
+          titleColor: "#fff",
+          labelColor: "#fff",
           labelExpr: "labels[datum.value]"
         }
       }
