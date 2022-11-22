@@ -130,7 +130,7 @@ export const metricStatesFromInsight : (value: unknown) => T.Effect<never, Inval
         id : s.id,
         key: s.key,
         state: cs, 
-        timestamp: new Date().getTime()
+        timestamp: s.timestamp
       })
     ))),
     T.map(res => Coll.toArray(Chunk.toCollection(res)))

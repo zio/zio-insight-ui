@@ -122,8 +122,8 @@ describe("TimeSeriesConvert", () => {
 
     expect(C.size(res)).toEqual(1)
     const entry = C.unsafeHead(res)
-    expect(entry.value).toEqual(13)
-    expect(entry.when.getTime()).toEqual(1667911737296)
+    expect(entry.value).toEqual(-39.47982534263892)
+    expect(entry.when.getTime()).toEqual(1667911742303)
   })
 
   it("should convert Summaries", async () => { 
