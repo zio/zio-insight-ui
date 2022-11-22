@@ -2,7 +2,7 @@ import * as React from "react"
 import { Layout, Responsive, WidthProvider } from "react-grid-layout"
 
 import "@styles/grid.css"
-import { ChartPanel } from "./panel/ChartPanel"
+import { ChartContainer } from "./panel/ChartPanel"
 import { GridFrame } from "./panel/GridFrame"
 
 export function InsightGridLayout() {
@@ -31,7 +31,7 @@ export function InsightGridLayout() {
       {layout.map((l: Layout) => (
         <div key={l.i} className="w-full h-full bg-neutral text-neutral-content">
           <GridFrame key={l.i}>
-            <ChartPanel />
+            <ChartContainer />
           </GridFrame>
         </div>
       ))}

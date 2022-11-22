@@ -23,15 +23,17 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
           <Feather.FiEdit className={`${btnStyle} btn-primary`} />
           <AiIcons.AiOutlineClose className={`${btnStyle} btn-ghost`} />
         </div>
-        <div className="p-2 h-[calc(100%-24px)] flex flex-grow bg-base-400 text-neutral-content">
+        <div className="pr-2 w-full h-[calc(100%-40px)] flex bg-base-400 text-neutral-content">
           <div className="w-full h-full">{props.children}</div>
         </div>
-        <ResizeHandle />
+        <div className="h-4 flex flex-none">
+          <ResizeHandle />
+        </div>
       </div>
     </div>
   )
 }
 
 const ResizeHandle: React.FC<{}> = () => {
-  return <BsIcons.BsTextareaResize className="absolute right-0 bottom-0 text-xs" />
+  return <BsIcons.BsTextareaResize className="mx-0 absolute right-0 bottom-0 text-xs" />
 }

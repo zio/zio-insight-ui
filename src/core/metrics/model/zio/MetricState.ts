@@ -1,4 +1,5 @@
 import * as T from '@effect/core/io/Effect'
+import * as Clk from "@effect/core/io/Clock"
 import { pipe } from '@tsplus/stdlib/data/Function'
 import * as Z from 'zod'
 import * as Coll from "@tsplus/stdlib/collections/Collection"
@@ -121,7 +122,7 @@ export const metricStatesFromInsight : (value: unknown) => T.Effect<never, Inval
     T.flatMap((result) => 
     result.success 
       ? T.succeed(result.data.states)
-      : T.fail(new InvalidMetricStates(result.error.toString()))
+      : T.fail(new InvalidMetricStates(`${result.error.toString()}\n${JSON.stringify(value, null, 2)}`))
     ),
     T.flatMap( res => T.forEach(res, s => pipe(
       parseCurrentState(s.state),
@@ -129,7 +130,7 @@ export const metricStatesFromInsight : (value: unknown) => T.Effect<never, Inval
         id : s.id,
         key: s.key,
         state: cs, 
-        timestamp: s.timestamp
+        timestamp: new Date().getTime()
       })
     ))),
     T.map(res => Coll.toArray(Chunk.toCollection(res)))
