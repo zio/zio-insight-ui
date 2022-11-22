@@ -6,7 +6,7 @@ import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as GDS from "@core/metrics/service/GraphDataService"
 import * as MM from "@core/metrics/service/MetricsManager"
-import * as TK from  "../testkeys"
+import * as TK from  "../../../../src/data/testkeys"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
 const testRt = AL.unsafeMakeRuntime(

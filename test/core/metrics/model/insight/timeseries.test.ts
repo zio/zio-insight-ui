@@ -9,7 +9,7 @@ import states from "@data/state.json"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import { 
   counterId, gaugeId, summaryId, histId, frequencyId
-} from "../../testkeys"
+} from "../../../../../src/data/testkeys"
 
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
