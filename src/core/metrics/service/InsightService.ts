@@ -39,11 +39,10 @@ function makeLiveMetrics(logger: Log.LogService) : InsightMetrics {
     getMetricStates: (keys : string[]) => 
       T.gen(function* ($) {
         const req = <StateRequest>{selection: keys}
-        yield* $(logger.debug(`${JSON.stringify(req)}`))
-
         const raw = yield* $(Req.request(`${baseUrl}/insight/metrics`, { method: "POST", body: JSON.stringify(req)}))
+        const json = yield* $(Req.jsonFromResponse(raw))
         
-        return yield* $(metricStatesFromInsight(raw))
+        return yield* $(metricStatesFromInsight(json))
       })
   })
 }

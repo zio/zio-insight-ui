@@ -24,7 +24,7 @@ export const counterKey = pipe(
 )
 
 // A known gauge id from state.json
-export const gaugeId = "d385f6bd-2903-3c2e-8cf0-d2c20b70d57b"
+export const gaugeId = "7f29b1a9-cc39-3361-88ff-9cfad25b28cd"
 export const gaugeKey = pipe(
   staticKeys,
   T.map(keyById(gaugeId)),

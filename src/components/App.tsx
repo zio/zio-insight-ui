@@ -3,7 +3,7 @@ import * as AL from "@core/AppLayer"
 import { AppRouter } from "./AppRouter"
 import { IconContext } from "react-icons/lib"
 
-const runtime = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
+const runtime = AL.unsafeMakeRuntime(AL.appLayerLive).runtime
 export const RuntimeContext = React.createContext(runtime)
 
 export function App() {
