@@ -1,12 +1,11 @@
 import * as T from '@effect/core/io/Effect'
-import * as Clk from "@effect/core/io/Clock"
 import { pipe } from '@tsplus/stdlib/data/Function'
 import * as Z from 'zod'
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Chunk from "@tsplus/stdlib/collections/Chunk"
 
-import { MetricKey, metricKeySchema } from './MetricKey'
+import { InsightKey, MetricKey, metricKeySchema } from './MetricKey'
 
 const gaugeStateSchema = Z.object({
   value: Z.number()
@@ -79,12 +78,32 @@ const insightMetricStatesSchema = Z.object({
   states: Z.array(rawMetricStateSchema) 
 })
 
-export interface MetricState {
-  id: string,
-  key: MetricKey,
-  state: MetricStateValue,
-  timestamp: number
+export class MetricState {
+  readonly id: string
+  readonly key: MetricKey
+  readonly state: MetricStateValue
+  readonly timestamp: number
+
+  constructor (
+    id: string, 
+    key: MetricKey,
+    state: MetricStateValue,
+    timestamp: number
+  ) {
+    this.id = id
+    this.key = key
+    this.state = state
+    this.timestamp = timestamp
+  }
+
+  insightKey() {
+    return <InsightKey>{
+      id: this.id, 
+      key: this.key
+    }
+  }
 }
+
 export class InvalidMetricStates {
   readonly _tag = "InvalidMetricStates"
   constructor(readonly reason: string) {}
@@ -126,12 +145,12 @@ export const metricStatesFromInsight : (value: unknown) => T.Effect<never, Inval
     ),
     T.flatMap( res => T.forEach(res, s => pipe(
       parseCurrentState(s.state),
-      T.map(cs => <MetricState>{
-        id : s.id,
-        key: s.key,
-        state: cs, 
-        timestamp: s.timestamp
-      })
+      T.map(cs => { return new MetricState(
+        s.id,
+        s.key,
+        cs, 
+        s.timestamp
+      )})
     ))),
     T.map(res => Coll.toArray(Chunk.toCollection(res)))
   )

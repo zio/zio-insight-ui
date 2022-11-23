@@ -4,45 +4,53 @@ import * as F from "@effect/core/io/Fiber"
 import * as React from "react"
 import * as TS from "@core/metrics/model/insight/TimeSeries"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
+import * as MB from "@tsplus/stdlib/data/Maybe"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import { RuntimeContext } from "@components/App"
 import * as GDS from "@core/metrics/service/GraphDataService"
-import * as TK from "@data/testkeys"
 import { Chart } from "chart.js/auto"
+import { pipe } from "@tsplus/stdlib/data/Function"
+import { InsightKey, keyAsString } from "@core/metrics/model/zio/MetricKey"
 
 // required import for time based axis
 import "chartjs-adapter-date-fns"
-import { pipe } from "@tsplus/stdlib/data/Function"
 
 interface ChartData {
-  label: string
+  tsConfig: TS.TimeSeriesConfig
   data: { x: Date; y: number }[]
-  tension: number
 }
 
-export const ChartContainer: React.FC<{}> = () => {
-  const [graphData, setGraphData] = React.useState<ChartData[]>([])
+export const ChartContainer: React.FC<{ metricKey: InsightKey }> = (props) => {
+  const [graphData, setGraphData] = React.useState<
+    HMap.HashMap<TS.TimeSeriesKey, ChartData>
+  >(HMap.empty())
+
   const appRt = React.useContext(RuntimeContext)
 
-  const toData = (d: GDS.GraphData) =>
-    Coll.toArray(
-      HMap.values(
-        HMap.mapWithIndex((k: TS.TimeSeriesKey, v: C.Chunk<TS.TimeSeriesEntry>) => {
+  const label = (tsKey: TS.TimeSeriesKey) => {
+    const mbSub = MB.map((s) => `-${s}`)(tsKey.subKey)
+    return `${keyAsString(tsKey.key.key)}${MB.getOrElse(() => "")(mbSub)}`
+  }
+
+  const updateState = (newData: GDS.GraphData) => {
+    setGraphData((current) => {
+      return HMap.mapWithIndex(
+        (k: TS.TimeSeriesKey, v: C.Chunk<TS.TimeSeriesEntry>) => {
+          const mbConfig = MB.map<ChartData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
+            HMap.get<TS.TimeSeriesKey, ChartData>(k)(current)
+          )
+
+          const cfg = MB.getOrElse(() => new TS.TimeSeriesConfig(k, label(k)))(mbConfig)
+
           return {
-            label: k,
+            tsConfig: cfg,
             data: Coll.toArray(v).map((e) => {
               return { x: e.when, y: e.value }
-            }),
-            tension: 0.3
+            })
           } as ChartData
-        })(d)
-      )
-    )
-
-  const updateState = (newData: ChartData[]) => {
-    setGraphData((_) => {
-      return newData
+        }
+      )(newData)
     })
   }
 
@@ -50,9 +58,8 @@ export const ChartContainer: React.FC<{}> = () => {
     const [gds, updater] = appRt.unsafeRunSync(
       T.gen(function* ($) {
         const gds = yield* $(GDS.createGraphDataService())
-        const k = yield* $(TK.gaugeKey)
-        yield* $(gds.setMetrics(k))
-        yield* $(gds.setMaxEntries(20))
+        yield* $(gds.setMetrics(props.metricKey))
+        yield* $(gds.setMaxEntries(15))
 
         const updates = yield* $(gds.data())
 
@@ -60,7 +67,7 @@ export const ChartContainer: React.FC<{}> = () => {
           pipe(
             S.runForEach((e: GDS.GraphData) =>
               T.sync(() => {
-                updateState(toData(e))
+                updateState(e)
               })
             )(updates),
             T.forkDaemon
@@ -85,7 +92,7 @@ export const ChartContainer: React.FC<{}> = () => {
 
   return (
     <div className="w-full h-full">
-      <ChartPanel initialData={graphData} />
+      <ChartPanel initialData={Coll.toArray(HMap.values(graphData))} />
     </div>
   )
 }
@@ -95,11 +102,11 @@ const ChartPanel: React.FC<{ initialData: ChartData[] }> = (props) => {
 
   React.useEffect(() => {
     if (chartRef) {
-      console.log(`${JSON.stringify(props.initialData, null, 2)}`)
       const ref = chartRef.current!.getContext("2d")!
       const chart = new Chart(ref, {
         type: "line",
         options: {
+          animation: false,
           scales: {
             x: {
               type: "time",
@@ -111,7 +118,15 @@ const ChartPanel: React.FC<{ initialData: ChartData[] }> = (props) => {
           maintainAspectRatio: false
         },
         data: {
-          datasets: props.initialData
+          datasets: props.initialData.map((cd) => {
+            return {
+              label: cd.tsConfig.title,
+              data: cd.data,
+              tension: cd.tsConfig.tension,
+              backgroundColor: cd.tsConfig.pointColor.toRgb(),
+              borderColor: cd.tsConfig.lineColor.toRgba()
+            }
+          })
         }
       })
 

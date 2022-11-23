@@ -1,22 +1,38 @@
 import * as T from "@effect/core/io/Effect"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
+import * as MB from "@tsplus/stdlib/data/Maybe"
 import * as Ref from "@effect/core/io/Ref"
 import * as Log from "@core/services/Logger"
+import * as Color from "@core/Color"
 import { Ord } from "@tsplus/stdlib/prelude/Ord"
 import { formatDate } from "@core/utils" 
 import * as State from "@core/metrics/model/zio/MetricState"
 import { pipe } from "@tsplus/stdlib/data/Function"
+import * as MK  from "@core/metrics/model/zio/MetricKey"
 
 // A time series key uniquely defines a single measured piece of data over a 
 // period of time
-export type TimeSeriesKey = string
+export interface TimeSeriesKey {
+  key: MK.InsightKey,
+  subKey: MB.Maybe<string>
+}
 
 // The basic rendering config for a TimeSeries 
-export interface TimeSeriesConfig {
-  id: TimeSeriesKey
-  title: string
-  color: string
+export class TimeSeriesConfig {
+  readonly id: TimeSeriesKey
+  readonly title: string
+  readonly tension: number
+  readonly lineColor: Color.Color
+  readonly pointColor: Color.Color
+
+  constructor(id: TimeSeriesKey, title: string) {
+    this.id = id
+    this.title = title
+    this.tension = Math.floor((Math.random() * 3 + 1)) / 10
+    this.lineColor = Color.fromRandom()
+    this.pointColor = Color.fromRandom()
+  }
 }
 
 export class TimeSeriesEntry {
@@ -53,13 +69,13 @@ export interface TimeSeries {
   readonly entries: () => T.Effect<never, never, C.Chunk<TimeSeriesEntry>>
 }
 
-export const makeTimeSeries = (id: String, maxEntries: number) => (log: Log.LogService) => {
+export const makeTimeSeries = (id: TimeSeriesKey, maxEntries: number) => (log: Log.LogService) => {
   return (
     T.gen(function* ($){
       const maxRef = yield* $(Ref.makeRef(() => maxEntries))
       const entriesRef = yield* $(Ref.makeRef(() => C.empty<TimeSeriesEntry>()))
 
-      const logPrefix = `TS <${id}> --`
+      const logPrefix = `TS <${id.key.id}-${MB.getOrElse(() => "")(id.subKey)}> --`
 
       const restrictEntries = (entries: C.Chunk<TimeSeriesEntry>, max: number) => {
         if (max > 0) {
@@ -82,7 +98,7 @@ export const makeTimeSeries = (id: String, maxEntries: number) => (log: Log.LogS
           T.flatMap(entries => log.debug(`${logPrefix} has now <${C.size(entries)}> entries`))
         ),
         record: (e: TimeSeriesEntry) => T.gen(function* ($){
-          if (e.id == id) {
+          if (JSON.stringify(id) === JSON.stringify(e.id)) {
             const max = yield* $(maxRef.get)
             const curr = yield* $(entriesRef.get)
             const newEntries = () => restrictEntries(C.append(e)(curr), max) 
@@ -98,7 +114,7 @@ export const makeTimeSeries = (id: String, maxEntries: number) => (log: Log.LogS
   )
 }
 
-export const timeEntriesFromState = (s: State.MetricState) => {
+export const tsEntriesFromState = (s: State.MetricState) => {
 
   const ts = new Date(s.timestamp)
   const res = <TimeSeriesEntry[]>[]
@@ -107,37 +123,35 @@ export const timeEntriesFromState = (s: State.MetricState) => {
     case "Counter":
       const counter = <State.CounterState>s.state
       res.push(new TimeSeriesEntry(
-        s.id,
-        ts,
-        counter.count
+        { key: s.insightKey(), subKey: MB.none }, ts, counter.count
       ))
       break
     case "Gauge":
       const gauge = <State.GaugeState>s.state
       res.push(new TimeSeriesEntry(
-        s.id, ts, gauge.value
+        { key: s.insightKey(), subKey: MB.none }, ts, gauge.value
       ))
       break
     case "Histogram":
       const hist = <State.HistogramState>s.state
       hist.buckets.forEach( ([k, v]) => res.push(
-        new TimeSeriesEntry(`${s.id}-${k}`, ts, v)
+        new TimeSeriesEntry({ key: s.insightKey(), subKey: MB.some(`${k}`)}, ts, v)
       ))
       if (hist.count > 0) {
         res.push(
-          new TimeSeriesEntry(`${s.id}-avg`, ts, hist.sum / hist.count)
+          new TimeSeriesEntry({ key: s.insightKey(), subKey: MB.some("avg")}, ts, hist.sum / hist.count)
         )
       }
       break
     case "Summary":
       const summ = <State.SummaryState>s.state
       summ.quantiles.forEach( ([q,v]) => res.push(new TimeSeriesEntry(
-        `${s.id}-${q}`, ts, v
+        { key: s.insightKey(), subKey: MB.some(`${q}`)}, ts, v
       )))
 
       if (summ.count > 0) {
         res.push(new TimeSeriesEntry(
-          `${s.id}-avg`, ts, summ.sum / summ.count
+          { key: s.insightKey(), subKey: MB.some("avg")}, ts, summ.sum / summ.count
         ))
       }
 
@@ -146,7 +160,7 @@ export const timeEntriesFromState = (s: State.MetricState) => {
       const freq = <State.FrequencyState>s.state
       HMap.forEachWithIndex<string, number>( (k, v) => 
         res.push(new TimeSeriesEntry(
-          `${s.id}-${k}`, ts, v
+          { key: s.insightKey(), subKey: MB.some(`${k}`)}, ts, v
         ))
       )(freq.occurrences)
       break

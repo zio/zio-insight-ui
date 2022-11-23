@@ -59,6 +59,7 @@ function makeGraphDataService(
   const createTS = (id: TS.TimeSeriesKey) => 
     T.gen(function* ($) {
       const max = yield* $(currMaxEntries.get)
+      yield* $(log.debug(`creating new Timeseries`))
       return yield* $(TS.makeTimeSeries(id, max)(log))
     })
 
@@ -105,20 +106,31 @@ function makeGraphDataService(
 
     // Handle a single metric state update 
     const handleMetricState = (ms : MetricState) => 
-
       T.gen(function* ($) {
         yield* $(log.debug(`GDS <${subscriptionId}> - received state update ${JSON.stringify(ms)}`))
-        const tsEntries = TS.timeEntriesFromState(ms)
-        yield* $(T.forEach(tsEntries, e => pipe(
-          getOrCreateTS(e.id),
-          T.flatMap(ts => ts.record(e))
-        )))
-        yield* $(
+
+        const contains = yield* $(
           pipe(
-            current(),
-            T.flatMap(d => dataHub.offer(d))
-            )
+            observed.get,
+            T.map(HSet.filter(k => k.id == ms.id)),
+            T.map(HSet.size),
+            T.map(s => s > 0)
+          )
         )
+
+        if (contains) { 
+          const tsEntries = TS.tsEntriesFromState(ms)
+          yield* $(T.forEach(tsEntries, e => pipe(
+            getOrCreateTS(e.id),
+            T.flatMap(ts => ts.record(e)),
+          )))
+          yield* $(
+            pipe(
+              current(),
+              T.flatMap(d => dataHub.offer(d))
+              )
+          )
+        }
       })
 
     const runner = pipe(
