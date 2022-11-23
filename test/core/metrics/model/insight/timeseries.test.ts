@@ -1,6 +1,7 @@
 import * as T from "@effect/core/io/Effect"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
+import * as MB from "@tsplus/stdlib/data/Maybe"
 import * as AL from "@core/AppLayer"
 import * as TS from "@core/metrics/model/insight/TimeSeries"
 import * as Insight from "@core/metrics/model/zio/MetricState"
@@ -10,15 +11,29 @@ import { pipe } from "@tsplus/stdlib/data/Function"
 import { 
   counterId, gaugeId, summaryId, histId, frequencyId
 } from "../../../../../src/data/testkeys"
+import * as MT from "@core/metrics/model/zio/MetricType"
 
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
+
+const makeKey = (name: string, metricType: MT.MetricType) => 
+  <TS.TimeSeriesKey>{
+    key: {
+    id: name,
+    key: {
+      name: "foo",
+      labels: [],
+      metricType: metricType
+    },
+    },
+    subKey: MB.none
+  }
 
 // just a helper to get time series entries from a state id 
 const entries = (id : string) => 
   pipe(
     Insight.metricStatesFromInsight(states),
     T.map(states => (states.find(s => s.id == id))!),
-    T.map(entry => TS.timeEntriesFromState(entry))
+    T.map(entry => TS.tsEntriesFromState(entry))
   )
 
 describe("TimeSeries", () => {
@@ -28,7 +43,7 @@ describe("TimeSeries", () => {
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const log = yield* $(T.service(Log.LogService))
-        const ts = yield* $(TS.makeTimeSeries("foo", 2)(log))
+        const ts = yield* $(TS.makeTimeSeries(makeKey("foo", "Counter"), 2)(log))
         return yield* $(ts.entries())
       })
     )
@@ -40,9 +55,10 @@ describe("TimeSeries", () => {
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const log = yield* $(T.service(Log.LogService))
-        const ts = yield* $(TS.makeTimeSeries("foo", 2)(log))
+        const key = makeKey("foo", "Counter")
+        const ts = yield* $(TS.makeTimeSeries(key, 2)(log))
         const e = <TS.TimeSeriesEntry>{
-          id: "foo", 
+          id: key, 
           when: new Date(),
           value: 100
         }
@@ -58,9 +74,9 @@ describe("TimeSeries", () => {
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const log = yield* $(T.service(Log.LogService))
-        const ts = yield* $(TS.makeTimeSeries("foo", 2)(log))
+        const ts = yield* $(TS.makeTimeSeries(makeKey("foo", "Counter"), 2)(log))
         const e = <TS.TimeSeriesEntry>{
-          id: "bar", 
+          id: makeKey("bar", "Counter"), 
           when: new Date(),
           value: 100
         }
@@ -75,9 +91,10 @@ describe("TimeSeries", () => {
   it("should drop the oldest entry when the max number of entries is exceeded", async () => {
 
     const now = new Date()
+    const key = makeKey("foo", "Counter")
     const entries = [...Array(5).keys()].map(n => 
       <TS.TimeSeriesEntry>{
-        id: "foo",
+        id: key,
         when: new Date(now.getTime() - n * 1000),
         value: n
       }
@@ -86,7 +103,7 @@ describe("TimeSeries", () => {
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const log = yield* $(T.service(Log.LogService))
-        const ts = yield* $(TS.makeTimeSeries("foo", 2)(log))
+        const ts = yield* $(TS.makeTimeSeries(key, 2)(log))
         yield* $(T.forEach(entries, e => ts.record(e)))
         return yield* $(ts.entries())
       })
@@ -134,7 +151,6 @@ describe("TimeSeriesConvert", () => {
 
     expect(C.size(res)).toEqual(4)
     expect(C.forAll<TS.TimeSeriesEntry>(ts => ts.when.getTime() == 1667911742303)(res)).toBe(true)
-    expect(C.forAll<TS.TimeSeriesEntry>(ts => ts.id.startsWith(summaryId))(res)).toBe(true)
   })
 
   it("should convert Frequencies", async () => { 
@@ -145,7 +161,6 @@ describe("TimeSeriesConvert", () => {
 
     expect(C.size(res)).toEqual(10)
     expect(C.forAll<TS.TimeSeriesEntry>(ts => ts.when.getTime() == 1667911742303)(res)).toBe(true)
-    expect(C.forAll<TS.TimeSeriesEntry>(ts => ts.id.startsWith(frequencyId))(res)).toBe(true)
   })
 
   it("should convert Histograms", async () => { 
@@ -156,7 +171,6 @@ describe("TimeSeriesConvert", () => {
 
     expect(C.size(res)).toEqual(102)
     expect(C.forAll<TS.TimeSeriesEntry>(ts => ts.when.getTime() == 1667894807289)(res)).toBe(true)
-    expect(C.forAll<TS.TimeSeriesEntry>(ts => ts.id.startsWith(histId))(res)).toBe(true)
   })
 
 })

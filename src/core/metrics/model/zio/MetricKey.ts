@@ -32,8 +32,8 @@ export const OrdInsightKey = <Ord<InsightKey>>{
   }
 }
 
-export const keyAsString = (mk: InsightKey) => 
-  `${mk.key.metricType}:${mk.key.name}:${mk.key.labels.map(l => l.key + "=" + l.value).join(',')}`
+export const keyAsString = (mk: MetricKey) => 
+  `${mk.metricType}:${mk.name}:${mk.labels.map(l => l.key + "=" + l.value).join(',')}`
 
 export const InsightMetricKeys = Z.object({
   keys: Z.array(insightKeySchema)
