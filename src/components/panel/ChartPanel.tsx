@@ -10,16 +10,22 @@ import { RuntimeContext } from "@components/App"
 import * as GDS from "@core/metrics/service/GraphDataService"
 import * as TK from "@data/testkeys"
 import { Chart } from "chart.js/auto"
+import { pipe } from "@tsplus/stdlib/data/Function"
+import * as Color from "@core/Color"
 
 // required import for time based axis
 import "chartjs-adapter-date-fns"
-import { pipe } from "@tsplus/stdlib/data/Function"
 
 interface ChartData {
   label: string
   data: { x: Date; y: number }[]
   tension: number
+  lineColor: Color.Color
+  pointColor: Color.Color
 }
+
+const lineColor = Color.fromRandom()
+const pointColor = Color.fromRandom()
 
 export const ChartContainer: React.FC<{}> = () => {
   const [graphData, setGraphData] = React.useState<ChartData[]>([])
@@ -34,7 +40,9 @@ export const ChartContainer: React.FC<{}> = () => {
             data: Coll.toArray(v).map((e) => {
               return { x: e.when, y: e.value }
             }),
-            tension: 0.3
+            tension: 0.5,
+            lineColor: lineColor,
+            pointColor: pointColor
           } as ChartData
         })(d)
       )
@@ -95,7 +103,6 @@ const ChartPanel: React.FC<{ initialData: ChartData[] }> = (props) => {
 
   React.useEffect(() => {
     if (chartRef) {
-      console.log(`${JSON.stringify(props.initialData, null, 2)}`)
       const ref = chartRef.current!.getContext("2d")!
       const chart = new Chart(ref, {
         type: "line",
@@ -111,7 +118,15 @@ const ChartPanel: React.FC<{ initialData: ChartData[] }> = (props) => {
           maintainAspectRatio: false
         },
         data: {
-          datasets: props.initialData
+          datasets: props.initialData.map((cd) => {
+            return {
+              label: cd.label,
+              data: cd.data,
+              tension: cd.tension,
+              backgroundColor: cd.pointColor.toRgb(),
+              borderColor: cd.lineColor.toRgba()
+            }
+          })
         }
       })
 

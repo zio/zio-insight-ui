@@ -6,12 +6,7 @@ import { ChartContainer } from "./panel/ChartPanel"
 import { GridFrame } from "./panel/GridFrame"
 
 export function InsightGridLayout() {
-  const [layout, _] = React.useState<Layout[]>([
-    { i: "a", x: 0, y: 0, w: 3, h: 3 },
-    { i: "b", x: 0, y: 0, w: 3, h: 3 },
-    { i: "c", x: 0, y: 0, w: 3, h: 3 },
-    { i: "d", x: 0, y: 0, w: 3, h: 3 }
-  ])
+  const [layout, _] = React.useState<Layout[]>([{ i: "a", x: 0, y: 0, w: 12, h: 15 }])
 
   const ResponsiveGridLayout = WidthProvider(Responsive)
 
