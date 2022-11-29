@@ -1,9 +1,9 @@
 import * as React from "react"
-import * as BsIcons from "react-icons/bs"
 import * as AiIcons from "react-icons/ai"
 import * as Feather from "react-icons/fi"
 import * as Tabler from "react-icons/tb"
 import * as BoxIcons from "react-icons/bi"
+import * as RxIcons from "@radix-ui/react-icons"
 
 interface GridFrameProps {
   children?: React.ReactNode
@@ -35,5 +35,7 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
 }
 
 const ResizeHandle: React.FC<{}> = () => {
-  return <BsIcons.BsTextareaResize className="mx-0 absolute right-0 bottom-0 text-xs" />
+  return (
+    <RxIcons.CornerBottomRightIcon className="mx-0 absolute right-0 bottom-0 text-xs" />
+  )
 }
