@@ -116,7 +116,7 @@ export const makeTimeSeries = (id: TimeSeriesKey, maxEntries: number) => (log: L
 
 export const tsEntriesFromState = (s: State.MetricState) => {
 
-  const ts = new Date(s.timestamp)
+  const ts = new Date(s.retrieved)
   const res = <TimeSeriesEntry[]>[]
 
   switch(s.key.metricType){

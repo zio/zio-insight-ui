@@ -4,6 +4,7 @@ import * as Z from 'zod'
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Chunk from "@tsplus/stdlib/collections/Chunk"
+import * as Clk from "@effect/core/io/Clock"
 
 import { InsightKey, MetricKey, metricKeySchema } from './MetricKey'
 
@@ -82,18 +83,21 @@ export class MetricState {
   readonly id: string
   readonly key: MetricKey
   readonly state: MetricStateValue
-  readonly timestamp: number
+  readonly lastChange: Date
+  readonly retrieved: Date
 
   constructor (
     id: string, 
     key: MetricKey,
     state: MetricStateValue,
-    timestamp: number
+    lastChange: Date,
+    retrieved: Date
   ) {
     this.id = id
     this.key = key
     this.state = state
-    this.timestamp = timestamp
+    this.lastChange = lastChange
+    this.retrieved = retrieved
   }
 
   insightKey() {
@@ -136,21 +140,23 @@ const parseCurrentState : (_: CombinedState) => T.Effect<never, InvalidMetricSta
 
 
 export const metricStatesFromInsight : (value: unknown) => T.Effect<never, InvalidMetricStates, MetricState[]> = (value: unknown) =>
-  pipe(
-    T.sync(() => insightMetricStatesSchema.safeParse(value)),
-    T.flatMap((result) => 
-    result.success 
-      ? T.succeed(result.data.states)
-      : T.fail(new InvalidMetricStates(`${result.error.toString()}\n${JSON.stringify(value, null, 2)}`))
-    ),
-    T.flatMap( res => T.forEach(res, s => pipe(
+  T.gen(function* ($) { 
+    const parsed = insightMetricStatesSchema.safeParse(value), 
+    states = 
+    parsed.success 
+    ? parsed.data.states
+    : yield* $(T.fail(new InvalidMetricStates(`${parsed.error.toString()}\n${JSON.stringify(value, null, 2)}`)))
+    const now = yield* $(pipe(Clk.currentTime, T.map(t => new Date(t))))
+    const res = yield* $(T.forEach(states, s => pipe(
       parseCurrentState(s.state),
       T.map(cs => { return new MetricState(
         s.id,
         s.key,
         cs, 
-        s.timestamp
+        new Date(s.timestamp),
+        now        
       )})
-    ))),
-    T.map(res => Coll.toArray(Chunk.toCollection(res)))
-  )
+    )))
+    
+    return Coll.toArray(Chunk.toCollection(res))
+  })

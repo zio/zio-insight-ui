@@ -2,7 +2,7 @@ import * as React from "react"
 import { Routes, Route } from "react-router-dom"
 import { Fibers } from "@pages/Fibers"
 import { Help } from "@pages/Help"
-import { Home } from "@pages/Home"
+import { Dashboard } from "@pages/Dashboard"
 import { Metrics } from "@pages/Metrics"
 import { NotFound } from "@pages/NotFound"
 import { Profiling } from "@pages/Profiling"
@@ -14,7 +14,7 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<AppLayout />}>
-        <Route index element={<Home />} />
+        <Route index element={<Dashboard />} />
         <Route path="/metrics" element={<Metrics />} />
         <Route path="/services" element={<Services />} />
         <Route path="/profiling" element={<Profiling />} />

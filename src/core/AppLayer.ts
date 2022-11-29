@@ -9,7 +9,7 @@ import * as IdSvc from "@core/services/IdGenerator"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
 export type AppLayer = 
-  Log.ConsoleService | Log.LogService | InsightMetrics | MM.MetricsManager
+  Log.ConsoleService | Log.LogService | InsightMetrics | MM.MetricsManager | IdSvc.IdGenerator
 
 export const appLayerLive : L.Layer<never, never, AppLayer> = pipe(
   Log.ConsoleLive,

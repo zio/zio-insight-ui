@@ -6,6 +6,7 @@ import * as BoxIcons from "react-icons/bi"
 import * as RxIcons from "@radix-ui/react-icons"
 
 interface GridFrameProps {
+  title: string
   children?: React.ReactNode
 }
 
@@ -18,10 +19,13 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
         <BoxIcons.BiGridVertical className="w-full mx-auto cursor-move" />
       </div>
       <div className="flex flex-grow flex-col w-[calc(100%-24px)] h-full relative">
-        <div className="h-6 m-1 flex flex-row flex-none justify-end">
-          <Tabler.TbArrowsMaximize className={`${btnStyle} btn-primary`} />
-          <Feather.FiEdit className={`${btnStyle} btn-primary`} />
-          <AiIcons.AiOutlineClose className={`${btnStyle} btn-ghost`} />
+        <div className="h-6 m-1 flex flex-row flex-none justify-between">
+          <span>{props.title}</span>
+          <div className="flex flex-row">
+            <Tabler.TbArrowsMaximize className={`${btnStyle} btn-primary`} />
+            <Feather.FiEdit className={`${btnStyle} btn-primary`} />
+            <AiIcons.AiOutlineClose className={`${btnStyle} btn-ghost`} />
+          </div>
         </div>
         <div className="pr-2 w-full h-[calc(100%-40px)] flex bg-base-400 text-neutral-content">
           <div className="w-full h-full">{props.children}</div>
