@@ -29,7 +29,7 @@ export class TimeSeriesConfig {
   constructor(id: TimeSeriesKey, title: string) {
     this.id = id
     this.title = title
-    this.tension = Math.floor((Math.random() * 3 + 1)) / 10
+    this.tension = Math.floor((Math.random() * 3 + 3)) / 10
     this.lineColor = Color.fromRandom()
     this.pointColor = Color.fromRandom()
   }

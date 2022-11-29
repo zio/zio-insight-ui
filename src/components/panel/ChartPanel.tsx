@@ -59,7 +59,7 @@ export const ChartContainer: React.FC<{ metricKey: InsightKey }> = (props) => {
       T.gen(function* ($) {
         const gds = yield* $(GDS.createGraphDataService())
         yield* $(gds.setMetrics(props.metricKey))
-        yield* $(gds.setMaxEntries(15))
+        yield* $(gds.setMaxEntries(Math.floor(Math.random() * 10 + 15)))
 
         const updates = yield* $(gds.data())
 
