@@ -13,15 +13,34 @@ import * as IdSvc from "@core/services/IdGenerator"
 import * as MdIcons from "react-icons/md"
 import * as BiIcons from "react-icons/bi"
 
+// An Insight Dashboard uses react-grid-layout under the covers to allow the users to create and arrange their
+// panels as they see fit. In that sense a dashboard is a collection of views, each of which is an instance of
+// a React Element. This element is embedded in a Grid Frame which is the interface between the Dashboard and
+// the content view. Logically, the dashboard only knows about layouts and arrangements while the content views
+// themselves are not aware of being rendered in the dashboard.
+
+// A GridFrame will provide a standard set of operations like "edit", "maximize" and "close".
+
+// A dashboard configuration shall be (de)serializable to/from the local storage, so that users can easily
+// navigate between different dashboards
+
 interface DashboardState {
+  // the name of the current breakpoint, such as "lg", "md" etc
   breakpoint: string
+  // The panel layouts for each breakpoint. Basically it is an object whit the breakpoint
+  // names as keys and each key will point to an array of panel layouts
+  // The layout arrays will be managed via the panel operations. Each panel will have its own
+  // id set in the "i" field of the layout. The id is used to match the actual content for the
+  // panel from the content field below.
   layouts: Layouts
   content: HMap.HashMap<string, React.ReactElement>
 }
 
 export function InsightGridLayout() {
+  // We need to tap into the runtime to have access to the services
   const appRt = React.useContext(App.RuntimeContext)
 
+  // The initial state for the dashboard with predefined breakpoints and empty layout/content.
   const [dbState, setState] = React.useState<DashboardState>({
     breakpoint: "md",
     layouts: {
@@ -31,6 +50,8 @@ export function InsightGridLayout() {
     content: HMap.empty()
   } as DashboardState)
 
+  // TODO: This must be replaced with a proper config page. For now we are randomly choosing
+  // an existing metric to actually see some graph being rendered
   const randomKey = T.gen(function* ($) {
     const app = yield* $(T.service(InsightSvc.InsightMetrics))
     const idSvc = yield* $(T.service(IdSvc.IdGenerator))
@@ -45,6 +66,7 @@ export function InsightGridLayout() {
     }
   })
 
+  // A callback to keep track of the current breakpoint
   const updateBreakPoint = (bp: string) =>
     setState((curr) => {
       return {
@@ -54,6 +76,7 @@ export function InsightGridLayout() {
       } as DashboardState
     })
 
+  // A callback to keep track of the current layouts
   const updateLayouts = (layouts: Layouts) =>
     setState((curr) => {
       return {
@@ -63,6 +86,8 @@ export function InsightGridLayout() {
       } as DashboardState
     })
 
+  // A callback to remove a panel from the dashboard by removing it
+  // from all layouts and also from the content map
   const removePanel = (panelId: string) => {
     const removeFromLayout = (id: string, l: Layout[]) => {
       return l.slice().filter((c) => c.i != id)
@@ -83,6 +108,9 @@ export function InsightGridLayout() {
     })
   }
 
+  // A callback to create a panel
+  // TODO: Most like this should create a TSConfig and stick that into the underlying
+  // panel as an init paramter. That would make the entire dashboard serializable
   const addPanel = () => {
     appRt.unsafeRunAsyncWith(randomKey, (res) => {
       switch (res._tag) {
@@ -118,10 +146,6 @@ export function InsightGridLayout() {
 
   const ResponsiveGridLayout = WidthProvider(Responsive)
 
-  // This is required to push resize events, so that embedded Vega Lite charts
-  // trigger their own resizing as well
-  const handleResize = () => window.dispatchEvent(new Event("resize"))
-
   return (
     <div className="w-full h-full flex flex-col p-2">
       <div className="flex flex-row justify-between">
@@ -144,10 +168,7 @@ export function InsightGridLayout() {
         compactType="horizontal"
         layouts={dbState.layouts}
         cols={{ md: 8, lg: 12 }}
-        onResize={handleResize}
         onBreakpointChange={(bp: string, _: number) => updateBreakPoint(bp)}
-        onLayoutChange={(_: Layout[], all: Layouts) => updateLayouts(all)}
-        onResizeStop={() => setTimeout(handleResize, 200)}
         rowHeight={50}>
         {Coll.toArray(dbState.content).map((el) => {
           return (
