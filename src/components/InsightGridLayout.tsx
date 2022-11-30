@@ -12,7 +12,6 @@ import * as InsightSvc from "@core/metrics/service/InsightService"
 import * as IdSvc from "@core/services/IdGenerator"
 import * as MdIcons from "react-icons/md"
 import * as BiIcons from "react-icons/bi"
-import { InsightKey } from "@core/metrics/model/zio/MetricKey"
 
 interface DashboardState {
   breakpoint: string
@@ -40,8 +39,10 @@ export function InsightGridLayout() {
     const idx = Math.floor(Math.random() * keys.length)
     const res = keys.at(idx) || (yield* $(TK.gaugeKey))
 
-    console.log(res.id)
-    return [panelId, res] as [string, InsightKey]
+    return {
+      id: panelId,
+      key: res
+    }
   })
 
   const updateBreakPoint = (bp: string) =>
@@ -62,6 +63,26 @@ export function InsightGridLayout() {
       } as DashboardState
     })
 
+  const removePanel = (panelId: string) => {
+    const removeFromLayout = (id: string, l: Layout[]) => {
+      return l.slice().filter((c) => c.i != id)
+    }
+
+    setState((curr) => {
+      const layouts = curr.layouts
+
+      for (const k in layouts) {
+        layouts[k] = removeFromLayout(panelId, layouts[k] || [])
+      }
+
+      return {
+        breakpoint: curr.breakpoint,
+        layouts: layouts,
+        content: HMap.remove(panelId)(curr.content)
+      } as DashboardState
+    })
+  }
+
   const addPanel = () => {
     appRt.unsafeRunAsyncWith(randomKey, (res) => {
       switch (res._tag) {
@@ -70,12 +91,16 @@ export function InsightGridLayout() {
         case "Success":
           setState((curr) => {
             const newPanel = (
-              <GridFrame key={res.value[0]} title={res.value[0]}>
-                <ChartContainer metricKey={res.value[1]} />
+              <GridFrame
+                key={res.value.id}
+                title={res.value.id}
+                id={res.value.id}
+                closePanel={removePanel}>
+                <ChartContainer metricKey={res.value.key} />
               </GridFrame>
             )
 
-            const newLayout: Layout = { i: res.value[0], x: 0, y: 0, w: 3, h: 3 }
+            const newLayout: Layout = { i: res.value.id, x: 0, y: 0, w: 3, h: 6 }
             const layouts = curr.layouts
             for (const k in layouts) {
               layouts[k].push(newLayout)
@@ -84,7 +109,7 @@ export function InsightGridLayout() {
             return {
               breakpoint: curr.breakpoint,
               layouts: layouts,
-              content: HMap.set(res.value[0], newPanel)(curr.content)
+              content: HMap.set(res.value.id, newPanel)(curr.content)
             } as DashboardState
           })
       }

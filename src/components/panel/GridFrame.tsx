@@ -6,13 +6,21 @@ import * as BoxIcons from "react-icons/bi"
 import * as RxIcons from "@radix-ui/react-icons"
 
 interface GridFrameProps {
+  // The id to identify the panel within the layout
+  id: string
+  // The title to be rendered on the panels title bar
   title: string
+  // the callback method to remove the panel from the layout
+  closePanel: (id: string) => void
+  // The actual panel content
   children?: React.ReactNode
 }
 
 const btnStyle = "ml-1 p-1 text-2xl rounded-full"
 
 export const GridFrame: React.FC<GridFrameProps> = (props) => {
+  const closeHandler = () => props.closePanel(props.id)
+
   return (
     <div className="w-full h-full flex flex-row">
       <div className="flex flex-col flex-none w-6 bg-base-200 h-full justify-center">
@@ -24,7 +32,10 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
           <div className="flex flex-row">
             <Tabler.TbArrowsMaximize className={`${btnStyle} btn-primary`} />
             <Feather.FiEdit className={`${btnStyle} btn-primary`} />
-            <AiIcons.AiOutlineClose className={`${btnStyle} btn-ghost`} />
+            <AiIcons.AiOutlineClose
+              className={`${btnStyle} btn-ghost`}
+              onClick={closeHandler}
+            />
           </div>
         </div>
         <div className="pr-2 w-full h-[calc(100%-40px)] flex bg-base-400 text-neutral-content">

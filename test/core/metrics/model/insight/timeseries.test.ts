@@ -128,7 +128,6 @@ describe("TimeSeriesConvert", () => {
     expect(C.size(res)).toEqual(1)
     const entry = C.unsafeHead(res)
     expect(entry.value).toEqual(6410368)
-    expect(entry.when.getTime()).toEqual(1667907602305)
   })
 
   it("should convert Gauges", async () => { 
@@ -140,7 +139,6 @@ describe("TimeSeriesConvert", () => {
     expect(C.size(res)).toEqual(1)
     const entry = C.unsafeHead(res)
     expect(entry.value).toEqual(-39.47982534263892)
-    expect(entry.when.getTime()).toEqual(1667911742303)
   })
 
   it("should convert Summaries", async () => { 
@@ -150,7 +148,6 @@ describe("TimeSeriesConvert", () => {
     )
 
     expect(C.size(res)).toEqual(4)
-    expect(C.forAll<TS.TimeSeriesEntry>(ts => ts.when.getTime() == 1667911742303)(res)).toBe(true)
   })
 
   it("should convert Frequencies", async () => { 
@@ -160,7 +157,6 @@ describe("TimeSeriesConvert", () => {
     )
 
     expect(C.size(res)).toEqual(10)
-    expect(C.forAll<TS.TimeSeriesEntry>(ts => ts.when.getTime() == 1667911742303)(res)).toBe(true)
   })
 
   it("should convert Histograms", async () => { 
@@ -170,7 +166,6 @@ describe("TimeSeriesConvert", () => {
     )
 
     expect(C.size(res)).toEqual(102)
-    expect(C.forAll<TS.TimeSeriesEntry>(ts => ts.when.getTime() == 1667894807289)(res)).toBe(true)
   })
 
 })
