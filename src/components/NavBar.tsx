@@ -22,7 +22,6 @@ export const NavBar: React.FC<{}> = () => {
     <div className="navbar bg-neutral w-full text-neutral-content text-2xl border-b-2">
       {logo}
       <span className="flex flex-grow" />
-      {/* <div className="flex-none">{themeMenu}</div> */}
       {ghButton}
     </div>
   )

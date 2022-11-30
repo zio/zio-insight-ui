@@ -10,8 +10,12 @@ interface GridFrameProps {
   id: string
   // The title to be rendered on the panels title bar
   title: string
+  // whether the panel is currently maximized
+  maximized: boolean
   // the callback method to remove the panel from the layout
   closePanel: (id: string) => void
+  // The callback to maximize the panel
+  maximize: (id: string) => void
   // The actual panel content
   children?: React.ReactNode
 }
@@ -20,6 +24,23 @@ const btnStyle = "ml-1 p-1 text-2xl rounded-full"
 
 export const GridFrame: React.FC<GridFrameProps> = (props) => {
   const closeHandler = () => props.closePanel(props.id)
+  const maxHandler = () => props.maximize(props.id)
+
+  const controls = () => {
+    return (
+      <div className="flex flex-row">
+        <Tabler.TbArrowsMaximize
+          className={`${btnStyle} btn-primary`}
+          onClick={maxHandler}
+        />
+        <Feather.FiEdit className={`${btnStyle} btn-primary`} />
+        <AiIcons.AiOutlineClose
+          className={`${btnStyle} btn-ghost`}
+          onClick={closeHandler}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="w-full h-full flex flex-row">
@@ -29,14 +50,7 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
       <div className="flex flex-grow flex-col w-[calc(100%-24px)] h-full relative">
         <div className="h-6 m-1 flex flex-row flex-none justify-between">
           <span>{props.title}</span>
-          <div className="flex flex-row">
-            <Tabler.TbArrowsMaximize className={`${btnStyle} btn-primary`} />
-            <Feather.FiEdit className={`${btnStyle} btn-primary`} />
-            <AiIcons.AiOutlineClose
-              className={`${btnStyle} btn-ghost`}
-              onClick={closeHandler}
-            />
-          </div>
+          {controls()}
         </div>
         <div className="pr-2 w-full h-[calc(100%-40px)] flex bg-base-400 text-neutral-content">
           <div className="w-full h-full">{props.children}</div>

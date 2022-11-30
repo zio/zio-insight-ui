@@ -8,6 +8,7 @@ import { GridFrame } from "./panel/GridFrame"
 import * as TK from "@data/testkeys"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
+import * as MB from "@tsplus/stdlib/data/Maybe"
 import * as InsightSvc from "@core/metrics/service/InsightService"
 import * as IdSvc from "@core/services/IdGenerator"
 import * as MdIcons from "react-icons/md"
@@ -18,6 +19,9 @@ import * as BiIcons from "react-icons/bi"
 // a React Element. This element is embedded in a Grid Frame which is the interface between the Dashboard and
 // the content view. Logically, the dashboard only knows about layouts and arrangements while the content views
 // themselves are not aware of being rendered in the dashboard.
+
+// As an overall guideline think of a dashboard that contains a set of metric viewer panels, a service dependency
+// graph and a fiber trace viewer
 
 // A GridFrame will provide a standard set of operations like "edit", "maximize" and "close".
 
@@ -34,6 +38,10 @@ interface DashboardState {
   // panel from the content field below.
   layouts: Layouts
   content: HMap.HashMap<string, React.ReactElement>
+  // If set, maximized will contain the id of a panel that shall be shown maximized,
+  // In that case the corresponding panel will take all space of the dashboard view
+  // including the control buttons at the top of the Dashboard
+  maximized: MB.Maybe<string>
 }
 
 export function InsightGridLayout() {
@@ -47,7 +55,8 @@ export function InsightGridLayout() {
       md: [],
       lg: []
     },
-    content: HMap.empty()
+    content: HMap.empty(),
+    maximized: MB.none
   } as DashboardState)
 
   // TODO: This must be replaced with a proper config page. For now we are randomly choosing
@@ -72,7 +81,8 @@ export function InsightGridLayout() {
       return {
         breakpoint: bp,
         layouts: curr.layouts,
-        content: curr.content
+        content: curr.content,
+        maximized: curr.maximized
       } as DashboardState
     })
 
@@ -82,7 +92,8 @@ export function InsightGridLayout() {
       return {
         breakpoint: curr.breakpoint,
         layouts: layouts,
-        content: curr.content
+        content: curr.content,
+        maximized: curr.maximized
       } as DashboardState
     })
 
@@ -103,7 +114,51 @@ export function InsightGridLayout() {
       return {
         breakpoint: curr.breakpoint,
         layouts: layouts,
-        content: HMap.remove(panelId)(curr.content)
+        content: HMap.remove(panelId)(curr.content),
+        // If we close the currently maximized panel we need to clear the
+        // maximized flag as well
+        maximized: (() => {
+          switch (curr.maximized._tag) {
+            case "None":
+              return MB.none
+            case "Some":
+              if (curr.maximized.value == panelId) {
+                return MB.none
+              } else {
+                return curr.maximized
+              }
+          }
+        })()
+      } as DashboardState
+    })
+  }
+
+  // A callback to toggle the maximized state for a panel with a given id.
+  // If a panel is currently maximized, this method needs to be called with
+  // the id of the currently maximized panel to restore the normal state.
+  const maximizePanel = (panelId: string) => {
+    setState((curr) => {
+      const maximized = () => {
+        switch (curr.maximized._tag) {
+          case "None":
+            return MB.some(panelId)
+          case "Some":
+            if (curr.maximized.value == panelId) {
+              return MB.none
+            } else {
+              return curr.maximized
+            }
+        }
+      }
+
+      const newMaximized = maximized()
+      console.log(`Maximized : ${newMaximized._tag}`)
+
+      return {
+        breakpoint: curr.breakpoint,
+        layouts: curr.layouts,
+        content: curr.content,
+        maximized: newMaximized
       } as DashboardState
     })
   }
@@ -118,15 +173,7 @@ export function InsightGridLayout() {
           break
         case "Success":
           setState((curr) => {
-            const newPanel = (
-              <GridFrame
-                key={res.value.id}
-                title={res.value.id}
-                id={res.value.id}
-                closePanel={removePanel}>
-                <ChartContainer metricKey={res.value.key} />
-              </GridFrame>
-            )
+            const newPanel = <ChartContainer metricKey={res.value.key} />
 
             const newLayout: Layout = { i: res.value.id, x: 0, y: 0, w: 3, h: 6 }
             const layouts = curr.layouts
@@ -137,7 +184,8 @@ export function InsightGridLayout() {
             return {
               breakpoint: curr.breakpoint,
               layouts: layouts,
-              content: HMap.set(res.value.id, newPanel)(curr.content)
+              content: HMap.set(res.value.id, newPanel)(curr.content),
+              maximized: curr.maximized
             } as DashboardState
           })
       }
@@ -146,38 +194,78 @@ export function InsightGridLayout() {
 
   const ResponsiveGridLayout = WidthProvider(Responsive)
 
-  return (
-    <div className="w-full h-full flex flex-col p-2">
-      <div className="flex flex-row justify-between">
-        <span className="btn btn-primary" onClick={() => addPanel()}>
-          <MdIcons.MdAddChart />
-          Create Panel
-        </span>
-        <span />
-        <div className="flex flex-row">
-          <span className="btn btn-neutral">
-            <BiIcons.BiSave />
-            Save this view
+  const renderDashboard = () => {
+    return (
+      <div className="w-full h-full flex flex-col p-2">
+        <div className="flex flex-row justify-between">
+          <span className="btn btn-primary" onClick={() => addPanel()}>
+            <MdIcons.MdAddChart />
+            Create Panel
           </span>
-          <span className="ml-2 btn btn-neutral btn-disabled">Select View</span>
+          <span />
+          <div className="flex flex-row">
+            <span className="btn btn-neutral">
+              <BiIcons.BiSave />
+              Save this view
+            </span>
+            <span className="ml-2 btn btn-neutral btn-disabled">Select View</span>
+          </div>
         </div>
-      </div>
 
-      <ResponsiveGridLayout
-        className="layout w-full h-full"
-        compactType="horizontal"
-        layouts={dbState.layouts}
-        cols={{ md: 8, lg: 12 }}
-        onBreakpointChange={(bp: string, _: number) => updateBreakPoint(bp)}
-        rowHeight={50}>
-        {Coll.toArray(dbState.content).map((el) => {
-          return (
-            <div key={el[0]} className="w-full h-full bg-neutral text-neutral-content">
-              {el[1]}
-            </div>
-          )
-        })}
-      </ResponsiveGridLayout>
-    </div>
-  )
+        <ResponsiveGridLayout
+          className="layout w-full h-full"
+          compactType="horizontal"
+          layouts={dbState.layouts}
+          cols={{ md: 8, lg: 12 }}
+          onLayoutChange={(_: Layout[], all: Layouts) => updateLayouts(all)}
+          onBreakpointChange={(bp: string, _: number) => updateBreakPoint(bp)}
+          rowHeight={50}>
+          {Coll.toArray(dbState.content).map((el) => {
+            const id = el[0]
+            return (
+              <div key={id} className="w-full h-full bg-neutral text-neutral-content">
+                <GridFrame
+                  key={id}
+                  title={id}
+                  maximized={false}
+                  id={id}
+                  closePanel={removePanel}
+                  maximize={maximizePanel}>
+                  {el[1]}
+                </GridFrame>
+              </div>
+            )
+          })}
+        </ResponsiveGridLayout>
+      </div>
+    )
+  }
+
+  const renderMaximized = (id: string) => {
+    const mbMax = HMap.get(id)(dbState.content)
+
+    switch (mbMax._tag) {
+      case "None":
+        return renderDashboard()
+      case "Some":
+        return (
+          <GridFrame
+            key={id}
+            title={id}
+            maximized={true}
+            id={id}
+            closePanel={removePanel}
+            maximize={maximizePanel}>
+            {mbMax.value as React.ReactElement}
+          </GridFrame>
+        )
+    }
+  }
+
+  switch (dbState.maximized._tag) {
+    case "None":
+      return renderDashboard()
+    case "Some":
+      return renderMaximized(dbState.maximized.value)
+  }
 }
