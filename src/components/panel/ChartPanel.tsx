@@ -68,6 +68,8 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
       T.gen(function* ($) {
         const gdm = yield* $(T.service(GDM.GraphDataManager))
         const gds = yield* $(gdm.lookup(props.id))
+        const data = yield* $(gds.current())
+        updateState(data)
 
         const updates = yield* $(gds.data())
 
