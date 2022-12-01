@@ -3,13 +3,14 @@ import * as React from "react"
 import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout"
 import * as App from "@components/App"
 import "@styles/grid.css"
-import { ChartContainer } from "./panel/ChartPanel"
+import { ChartPanel } from "./panel/ChartPanel"
 import { GridFrame } from "./panel/GridFrame"
 import * as TK from "@data/testkeys"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as MB from "@tsplus/stdlib/data/Maybe"
 import * as InsightSvc from "@core/metrics/service/InsightService"
+import * as GDM from "@core/metrics/service/GraphDataManager"
 import * as IdSvc from "@core/services/IdGenerator"
 import * as MdIcons from "react-icons/md"
 import * as BiIcons from "react-icons/bi"
@@ -62,17 +63,17 @@ export function InsightGridLayout() {
   // TODO: This must be replaced with a proper config page. For now we are randomly choosing
   // an existing metric to actually see some graph being rendered
   const randomKey = T.gen(function* ($) {
+    const gdm = yield* $(T.service(GDM.GraphDataManager))
     const app = yield* $(T.service(InsightSvc.InsightMetrics))
     const idSvc = yield* $(T.service(IdSvc.IdGenerator))
     const panelId = yield* $(idSvc.nextId("panel"))
     const keys = yield* $(app.getMetricKeys)
     const idx = Math.floor(Math.random() * keys.length)
     const res = keys.at(idx) || (yield* $(TK.gaugeKey))
+    const gds = yield* $(gdm.register(panelId))
+    yield* $(gds.setMetrics(res))
 
-    return {
-      id: panelId,
-      key: res
-    }
+    return panelId
   })
 
   // A callback to keep track of the current breakpoint
@@ -104,33 +105,42 @@ export function InsightGridLayout() {
       return l.slice().filter((c) => c.i != id)
     }
 
-    setState((curr) => {
-      const layouts = curr.layouts
+    appRt
+      .unsafeRunPromise(
+        T.gen(function* ($) {
+          const gdm = yield* $(T.service(GDM.GraphDataManager))
+          yield* $(gdm.deregister(panelId))
+        })
+      )
+      .then(() =>
+        setState((curr) => {
+          const layouts = curr.layouts
 
-      for (const k in layouts) {
-        layouts[k] = removeFromLayout(panelId, layouts[k] || [])
-      }
-
-      return {
-        breakpoint: curr.breakpoint,
-        layouts: layouts,
-        content: HMap.remove(panelId)(curr.content),
-        // If we close the currently maximized panel we need to clear the
-        // maximized flag as well
-        maximized: (() => {
-          switch (curr.maximized._tag) {
-            case "None":
-              return MB.none
-            case "Some":
-              if (curr.maximized.value == panelId) {
-                return MB.none
-              } else {
-                return curr.maximized
-              }
+          for (const k in layouts) {
+            layouts[k] = removeFromLayout(panelId, layouts[k] || [])
           }
-        })()
-      } as DashboardState
-    })
+
+          return {
+            breakpoint: curr.breakpoint,
+            layouts: layouts,
+            content: HMap.remove(panelId)(curr.content),
+            // If we close the currently maximized panel we need to clear the
+            // maximized flag as well
+            maximized: (() => {
+              switch (curr.maximized._tag) {
+                case "None":
+                  return MB.none
+                case "Some":
+                  if (curr.maximized.value == panelId) {
+                    return MB.none
+                  } else {
+                    return curr.maximized
+                  }
+              }
+            })()
+          } as DashboardState
+        })
+      )
   }
 
   // A callback to toggle the maximized state for a panel with a given id.
@@ -165,7 +175,7 @@ export function InsightGridLayout() {
 
   // A callback to create a panel
   // TODO: Most like this should create a TSConfig and stick that into the underlying
-  // panel as an init paramter. That would make the entire dashboard serializable
+  // panel as an init parameter. That would make the entire dashboard serializable
   const addPanel = () => {
     appRt.unsafeRunAsyncWith(randomKey, (res) => {
       switch (res._tag) {
@@ -173,9 +183,9 @@ export function InsightGridLayout() {
           break
         case "Success":
           setState((curr) => {
-            const newPanel = <ChartContainer metricKey={res.value.key} />
+            const newPanel = <ChartPanel id={res.value} />
 
-            const newLayout: Layout = { i: res.value.id, x: 0, y: 0, w: 3, h: 6 }
+            const newLayout: Layout = { i: res.value, x: 0, y: 0, w: 3, h: 6 }
             const layouts = curr.layouts
             for (const k in layouts) {
               layouts[k].push(newLayout)
@@ -184,7 +194,7 @@ export function InsightGridLayout() {
             return {
               breakpoint: curr.breakpoint,
               layouts: layouts,
-              content: HMap.set(res.value.id, newPanel)(curr.content),
+              content: HMap.set(res.value, newPanel)(curr.content),
               maximized: curr.maximized
             } as DashboardState
           })

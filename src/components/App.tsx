@@ -5,7 +5,7 @@ import { IconContext } from "react-icons/lib"
 
 // To connect to a real ZIO application we need to use
 // AL.appLayerLive
-const runtime = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
+const runtime = AL.unsafeMakeRuntime(AL.appLayerLive).runtime
 export const RuntimeContext = React.createContext(runtime)
 
 export function App() {
