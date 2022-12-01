@@ -40,27 +40,27 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
 
   // The callback that will handle incoming updates to the graph data
   const updateState = (newData: GDS.GraphData) => {
-    const newState = HMap.reduceWithIndex(
-      HMap.empty(),
-      (s: TSData, k: TS.TimeSeriesKey, v: C.Chunk<TS.TimeSeriesEntry>) => {
-        const mbConfig = MB.map<ChartData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
-          HMap.get<TS.TimeSeriesKey, ChartData>(k)(chartData)
-        )
+    setChartData((current) => {
+      return HMap.reduceWithIndex(
+        HMap.empty(),
+        (s: TSData, k: TS.TimeSeriesKey, v: C.Chunk<TS.TimeSeriesEntry>) => {
+          const mbConfig = MB.map<ChartData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
+            HMap.get<TS.TimeSeriesKey, ChartData>(k)(current)
+          )
 
-        const cfg = MB.getOrElse(() => new TS.TimeSeriesConfig(k, label(k)))(mbConfig)
+          const cfg = MB.getOrElse(() => new TS.TimeSeriesConfig(k, label(k)))(mbConfig)
 
-        const cData = {
-          tsConfig: cfg,
-          data: Coll.toArray(v).map((e) => {
-            return { x: e.when, y: e.value }
-          })
-        } as ChartData
+          const cData = {
+            tsConfig: cfg,
+            data: Coll.toArray(v).map((e) => {
+              return { x: e.when, y: e.value }
+            })
+          } as ChartData
 
-        return HMap.set(k, cData)(s)
-      }
-    )(newData)
-
-    setChartData(newState)
+          return HMap.set(k, cData)(s)
+        }
+      )(newData)
+    })
   }
 
   React.useEffect(() => {
