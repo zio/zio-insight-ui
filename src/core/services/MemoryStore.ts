@@ -1,31 +1,38 @@
 import * as T from "@effect/core/io/Effect"
 import * as Ref from "@effect/core/io/Ref"
-import * as Log from "@core/services/Logger"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Sem from "@effect/core/stm/TSemaphore"
 import { pipe } from "@tsplus/stdlib/data/Function"
-import { E } from "vitest/dist/global-732f9b14"
 
 // A Memory Store provides a convenient to create a HashMap<K,V>
 // as a Layer within the application. 
 
-export class KeyDoesExist<K>{
+export interface KeyDoesNotExist<K>{
+  readonly _tag: "KeyDoesNotExist"
   readonly key: K
+}
 
-  constructor(k:K) { 
-    this.key = k
-  }
+export interface KeyAlreadyExists<K> {
+  readonly _tag: "KeyAlreadyExists"
+  readonly key: K
 }
 
 export interface MemoryStore<K, V>{
-  get: (k: K) => T.Effect<never, KeyDoesExist<K>, V>
-  set: (k: K, v: T.Effect<never, E, V>) => T.Effect<never, E, V>
+  // Return the item for the given key from the underlying store or return an error 
+  // if the key does not exist 
+  get: (k: K) => T.Effect<never, KeyDoesNotExist<K>, V>
+  // Effectfully create an item and place it in the underlying store, potentially replacing 
+  // the existing item in the store 
+  set: <E>(k: K, v: T.Effect<never, E, V>) => T.Effect<never, E, V>
+  // Remove an element from the store
   remove: (k: K, cleanUp: (v:V) => T.Effect<never, never, void>) => T.Effect<never, never, void>
+  
+  update: (f: (_ : HMap.HashMap<K,V>) => HMap.HashMap<K,V> ) => T.Effect<never, never, HMap.HashMap<K,V>>
+  getAll: T.Effect<never, never, HMap.HashMap<K,V>>
 }
 
-export function makeMemoryStore<K,V>(
+function makeMemoryStore<K,V>(
   sem: Sem.TSemaphore,
-  log: Log.LogService,
   elements: Ref.Ref<HMap.HashMap<K, V>>
 ) {
 
@@ -41,14 +48,14 @@ export function makeMemoryStore<K,V>(
         const mbSvc = yield* $(itemByKey(k))
         switch(mbSvc._tag) { 
           case "None":
-            return yield* $(T.fail(<KeyDoesExist<K>>{key: k}))
+            return yield* $(T.fail(<KeyDoesNotExist<K>>{key: k}))
           case "Some":
             return mbSvc.value
         }
       })
     )
 
-  const set = (k: K, v: T.Effect<never, E, V>) => 
+  const set = <E>(k: K, v: T.Effect<never, E, V>) => 
     Sem.withPermit(sem)(
       T.gen(function* ($) {
         const elem = yield* $(v)
@@ -73,9 +80,29 @@ export function makeMemoryStore<K,V>(
       })
     )
 
-  return T.sync(() => <MemoryStore<K,V>>{
+  const update = (f: (_: HMap.HashMap<K,V>) => HMap.HashMap<K,V>) => 
+    Sem.withPermit(sem)(
+      T.gen(function* ($){
+        return yield* $(elements.updateAndGet(f))
+      })
+    )
+
+  return <MemoryStore<K,V>>{
     get: get,
     set: set,
-    remove: remove
+    remove: remove,
+    update: update,
+    getAll: pipe(elements.get)
+  }
+}
+
+export function createMemoryStore<K, V>() {
+  return T.gen(function* ($) {
+    const sem = yield* $(Sem.make(1))
+    const elems = yield* $(
+      Ref.makeRef(() => <HMap.HashMap<K,V>>HMap.empty())
+    )
+
+    return makeMemoryStore<K,V>(sem, elems)
   })
 }

@@ -102,7 +102,7 @@ export function InsightGridLayout() {
   // from all layouts and also from the content map
   const removePanel = (panelId: string) => {
     const removeFromLayout = (id: string, l: Layout[]) => {
-      return l.slice().filter((c) => c.i != id)
+      return l.filter((c) => c.i != id)
     }
 
     appRt
