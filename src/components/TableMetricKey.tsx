@@ -9,7 +9,7 @@ import { getMetricKeys } from "@core/metrics/service/InsightService"
 
 export const MetricKeySelector: React.FC<{}> = (props) => {
   const selectionChanged = (sel: InsightKey[]) =>
-    console.log(`[${sel.map(keyAsString).join(",")}]`)
+    console.log(`[${sel.map((ik) => keyAsString(ik.key)).join(",")}]`)
 
   return (
     <div className="w-full flex flex-shrink dark">

@@ -1,5 +1,4 @@
 import * as React from "react"
-import { Link } from "react-router-dom"
 import * as FaIcons from "react-icons/fa"
 import Logo from "@static/ZIO.png"
 
@@ -14,7 +13,7 @@ export const NavBar: React.FC<{}> = () => {
     <>
       <img src={Logo} alt="" />
       <li className="flex flex-none">
-        <Link to="/">Insight</Link>
+        <span>Insight</span>
       </li>
     </>
   )
@@ -23,7 +22,6 @@ export const NavBar: React.FC<{}> = () => {
     <div className="navbar bg-neutral w-full text-neutral-content text-2xl border-b-2">
       {logo}
       <span className="flex flex-grow" />
-      {/* <div className="flex-none">{themeMenu}</div> */}
       {ghButton}
     </div>
   )

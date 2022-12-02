@@ -8,9 +8,9 @@ export function AppLayout() {
     <div className="w-screen h-screen flex flex-col" data-theme="insight">
       <div className="flex flex-row h-full">
         <SideBar />
-        <div className="w-full f-full">
+        <div className="flex flex-col w-full h-full">
           <NavBar />
-          <div className="w-full h-full flex bg-base-100">
+          <div className="w-full flex h-full bg-base-100">
             <Outlet />
           </div>
         </div>

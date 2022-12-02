@@ -15,6 +15,11 @@ interface NavEntry {
 
 const entries: NavEntry[] = [
   {
+    title: "Dashboard",
+    path: "/",
+    icon: <VscIcons.VscGraphLine />
+  },
+  {
     title: "Metrics",
     path: "/metrics",
     icon: <VscIcons.VscGraphLine />
