@@ -4,6 +4,7 @@ import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout"
 import * as App from "@components/App"
 import "@styles/grid.css"
 import { ChartPanel } from "./panel/ChartPanel"
+import { ChartConfig } from "./panel/ChartConfig"
 import { GridFrame } from "./panel/GridFrame"
 import * as TK from "@data/testkeys"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
@@ -24,10 +25,17 @@ import * as BiIcons from "react-icons/bi"
 // As an overall guideline think of a dashboard that contains a set of metric viewer panels, a service dependency
 // graph and a fiber trace viewer
 
-// A GridFrame will provide a standard set of operations like "edit", "maximize" and "close".
+// A GridFrame will provide a standard set of operations like "maximize" and "close".
+// A GridFrame might also be configurable, in this case the frame controls will also have an "edit" button
+// to invoke a panel specific configuration dialog
 
 // A dashboard configuration shall be (de)serializable to/from the local storage, so that users can easily
 // navigate between different dashboards
+
+export interface ConfigurableContent {
+  content: React.ReactElement
+  config?: React.ReactElement
+}
 
 interface DashboardState {
   // the name of the current breakpoint, such as "lg", "md" etc
@@ -38,11 +46,23 @@ interface DashboardState {
   // id set in the "i" field of the layout. The id is used to match the actual content for the
   // panel from the content field below.
   layouts: Layouts
-  content: HMap.HashMap<string, React.ReactElement>
+  // The actual panel contents, each individual entry will hold a React Element representing
+  // the panel content and an optional React Element to configure the content panel. If the config
+  // is defined the GridFrame will show a corresponding "edit" button to switch to the config
+  // panel, a config panel will always be shown maximized. If another content panel is currently
+  // maximized, the config panel will take precedence.
+  content: HMap.HashMap<string, ConfigurableContent>
   // If set, maximized will contain the id of a panel that shall be shown maximized,
   // In that case the corresponding panel will take all space of the dashboard view
   // including the control buttons at the top of the Dashboard
   maximized: MB.Maybe<string>
+  // If set, configure will call the configure function to create a configuration panel
+  // for the configuration of the panel with the given id.
+  // If both maximized AND configure are set, the configure panel takes precedence
+  // Typically a config dialog would modify the state in some Memory Store service
+  // within the app runtime so that any interested panel can consume the modified
+  // configuration.
+  configure: MB.Maybe<string>
 }
 
 export function InsightGridLayout() {
@@ -57,7 +77,8 @@ export function InsightGridLayout() {
       lg: []
     },
     content: HMap.empty(),
-    maximized: MB.none
+    maximized: MB.none,
+    configure: MB.none
   } as DashboardState)
 
   // TODO: This must be replaced with a proper config page. For now we are randomly choosing
@@ -83,7 +104,8 @@ export function InsightGridLayout() {
         breakpoint: bp,
         layouts: curr.layouts,
         content: curr.content,
-        maximized: curr.maximized
+        maximized: curr.maximized,
+        configure: curr.configure
       } as DashboardState
     })
 
@@ -94,7 +116,8 @@ export function InsightGridLayout() {
         breakpoint: curr.breakpoint,
         layouts: layouts,
         content: curr.content,
-        maximized: curr.maximized
+        maximized: curr.maximized,
+        configure: curr.configure
       } as DashboardState
     })
 
@@ -137,10 +160,35 @@ export function InsightGridLayout() {
                     return curr.maximized
                   }
               }
+            })(),
+            configure: (() => {
+              switch (curr.configure._tag) {
+                case "None":
+                  return MB.none
+                case "Some":
+                  if (curr.configure.value == panelId) {
+                    return MB.none
+                  } else {
+                    return curr.configure
+                  }
+              }
             })()
           } as DashboardState
         })
       )
+  }
+
+  const toggle = (panelId: string, curr: MB.Maybe<string>) => {
+    switch (curr._tag) {
+      case "None":
+        return MB.some(panelId)
+      case "Some":
+        if (curr.value === panelId) {
+          return MB.none
+        } else {
+          return curr
+        }
+    }
   }
 
   // A callback to toggle the maximized state for a panel with a given id.
@@ -148,27 +196,25 @@ export function InsightGridLayout() {
   // the id of the currently maximized panel to restore the normal state.
   const maximizePanel = (panelId: string) => {
     setState((curr) => {
-      const maximized = () => {
-        switch (curr.maximized._tag) {
-          case "None":
-            return MB.some(panelId)
-          case "Some":
-            if (curr.maximized.value == panelId) {
-              return MB.none
-            } else {
-              return curr.maximized
-            }
-        }
-      }
-
-      const newMaximized = maximized()
-      console.log(`Maximized : ${newMaximized._tag}`)
-
       return {
         breakpoint: curr.breakpoint,
         layouts: curr.layouts,
         content: curr.content,
-        maximized: newMaximized
+        maximized: toggle(panelId, curr.maximized),
+        configure: curr.configure
+      } as DashboardState
+    })
+  }
+
+  // A callback to toggle the config mode for a panel with a given id.
+  const configurePanel = (panelId: string) => {
+    setState((curr) => {
+      return {
+        breakpoint: curr.breakpoint,
+        layouts: curr.layouts,
+        content: curr.content,
+        maximized: curr.maximized,
+        configure: toggle(panelId, curr.configure)
       } as DashboardState
     })
   }
@@ -184,6 +230,7 @@ export function InsightGridLayout() {
         case "Success":
           setState((curr) => {
             const newPanel = <ChartPanel id={res.value} />
+            const cfgPanel = <ChartConfig id={res.value} />
 
             const newLayout: Layout = { i: res.value, x: 0, y: 0, w: 3, h: 6 }
             const layouts = curr.layouts
@@ -194,12 +241,20 @@ export function InsightGridLayout() {
             return {
               breakpoint: curr.breakpoint,
               layouts: layouts,
-              content: HMap.set(res.value, newPanel)(curr.content),
-              maximized: curr.maximized
+              content: HMap.set(res.value, {
+                content: newPanel,
+                config: cfgPanel
+              } as ConfigurableContent)(curr.content),
+              maximized: curr.maximized,
+              configure: curr.configure
             } as DashboardState
           })
       }
     })
+  }
+
+  const configMode = (panelId: string) => {
+    return MB.getOrElse(() => false)(MB.map((v) => v === panelId)(dbState.configure))
   }
 
   const ResponsiveGridLayout = WidthProvider(Responsive)
@@ -238,11 +293,13 @@ export function InsightGridLayout() {
                   key={id}
                   title={id}
                   maximized={false}
+                  configMode={false}
                   id={id}
                   closePanel={removePanel}
-                  maximize={maximizePanel}>
-                  {el[1]}
-                </GridFrame>
+                  configure={configurePanel}
+                  maximize={maximizePanel}
+                  content={el[1].content}
+                  config={el[1].config}></GridFrame>
               </div>
             )
           })}
@@ -252,7 +309,7 @@ export function InsightGridLayout() {
   }
 
   const renderMaximized = (id: string) => {
-    const mbMax = HMap.get(id)(dbState.content)
+    const mbMax = HMap.get<string, ConfigurableContent>(id)(dbState.content)
 
     switch (mbMax._tag) {
       case "None":
@@ -262,20 +319,27 @@ export function InsightGridLayout() {
           <GridFrame
             key={id}
             title={id}
+            configMode={configMode(id)}
             maximized={true}
             id={id}
             closePanel={removePanel}
-            maximize={maximizePanel}>
-            {mbMax.value as React.ReactElement}
-          </GridFrame>
+            configure={configurePanel}
+            maximize={maximizePanel}
+            content={mbMax.value.content as React.ReactElement}
+            config={mbMax.value.config}></GridFrame>
         )
     }
   }
 
-  switch (dbState.maximized._tag) {
+  switch (dbState.configure._tag) {
     case "None":
-      return renderDashboard()
+      switch (dbState.maximized._tag) {
+        case "None":
+          return renderDashboard()
+        case "Some":
+          return renderMaximized(dbState.maximized.value)
+      }
     case "Some":
-      return renderMaximized(dbState.maximized.value)
+      return renderMaximized(dbState.configure.value)
   }
 }
