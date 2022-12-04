@@ -1,33 +1,11 @@
 import React from "react"
 import * as Ex from "@effect/core/io/Exit"
 import * as FiberId from "@effect/core/io/FiberId"
-import { InsightKey, keyAsString } from "@core/metrics/model/zio/MetricKey"
+import { InsightKey } from "@core/metrics/model/zio/MetricKey"
 import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import { RuntimeContext } from "./App"
 import { getMetricKeys } from "@core/metrics/service/InsightService"
-
-export const MetricKeySelector: React.FC<{}> = (props) => {
-  const selectionChanged = (sel: InsightKey[]) =>
-    console.log(`[${sel.map((ik) => keyAsString(ik.key)).join(",")}]`)
-
-  return (
-    <div className="w-full flex flex-shrink dark">
-      <label htmlFor="exampleModal" className="btn btn-primary">
-        Select Metrics
-      </label>
-      <input type="checkbox" id="exampleModal" className="modal-toggle" />
-      <label htmlFor="exampleModal" className="modal cursor-pointer">
-        <div className="max-h-96 overflow-y-auto rounded p-2">
-          <TableMetricKeys
-            initialSelection={[]}
-            onSelectionChanged={selectionChanged}
-          />
-        </div>
-      </label>
-    </div>
-  )
-}
 
 /**
  * A component for rendering available metric keys in a table. Effectively this

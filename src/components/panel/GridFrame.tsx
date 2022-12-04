@@ -4,6 +4,7 @@ import * as Feather from "react-icons/fi"
 import * as Tabler from "react-icons/tb"
 import * as BoxIcons from "react-icons/bi"
 import * as RxIcons from "@radix-ui/react-icons"
+import * as BsIcons from "react-icons/bs"
 
 interface GridFrameProps {
   // The id to identify the panel within the layout
@@ -40,7 +41,10 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
     if (cfgEnabled) {
       return (
         <div className="flex flex-row">
-          <span onClick={cfgHandler}>Back</span>
+          <span className="btn btn-ghost" onClick={cfgHandler}>
+            <BsIcons.BsArrowLeft />
+            Back
+          </span>
         </div>
       )
     } else {
@@ -70,32 +74,37 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
   }
 
   return (
-    <div className="w-full h-full flex flex-row">
+    <div className="grow h-full flex flex-row justify-items-stretch">
       {props.maximized || cfgEnabled ? (
         <></>
       ) : (
-        <div className="flex flex-col flex-none w-6 bg-base-200 h-full justify-center">
+        <div className="flex flex-col flex-none bg-base-200 h-full justify-center">
           <BoxIcons.BiGridVertical className="w-full mx-auto cursor-move" />
         </div>
       )}
-      <div className="flex flex-grow flex-col w-[calc(100%-24px)] h-full relative">
-        <div className="h-6 m-1 flex flex-row flex-none justify-between">
-          <span>
-            {`${cfgEnabled}`} -- {props.title}
-          </span>
+      <div className="grow h-full flex flex-col">
+        <div className="m-1 flex flex-row flex-none justify-between place-items-center">
+          <span>{props.title}</span>
           {controls()}
         </div>
-        <div className="pr-2 w-full h-[calc(100%-40px)] flex bg-base-400 text-neutral-content">
-          {(() => {
-            if (cfgEnabled) return props.config!
-            else return props.content
-          })()}
+
+        <div className="grow grid grid-col-1 m-2 overflow-auto place-items-stretch">
+          <div
+            className={`grid grid-col-1 place-items-stretch ${
+              props.maximized || cfgEnabled ? "" : "p-2 border"
+            }`}>
+            {(() => {
+              if (cfgEnabled) return props.config!
+              else return props.content
+            })()}
+          </div>
         </div>
+
         {(() => {
           if (cfgEnabled || props.maximized) return <></>
           else
             return (
-              <div className="h-4 flex flex-none">
+              <div className="flex flex-none">
                 <ResizeHandle />
               </div>
             )

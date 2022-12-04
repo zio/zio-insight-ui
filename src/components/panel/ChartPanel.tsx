@@ -100,6 +100,8 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
       type: "line",
       options: {
         animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
           x: {
             type: "time",
@@ -107,8 +109,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
               unit: "minute"
             }
           }
-        },
-        maintainAspectRatio: false
+        }
       },
       data: {
         datasets: Coll.toArray(HMap.values(chartData)).map((cd) => {
@@ -135,7 +136,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
   }, [chartData])
 
   return (
-    <div className="w-full h-full">
+    <div className="grow flex relative">
       <canvas className="bg-neutral-content" ref={chartRef} />
     </div>
   )

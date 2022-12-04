@@ -19,7 +19,7 @@ export const NavBar: React.FC<{}> = () => {
   )
 
   return (
-    <div className="navbar bg-neutral w-full text-neutral-content text-2xl border-b-2">
+    <div className="flex flex-none navbar bg-neutral w-full text-neutral-content text-2xl border-b-2">
       {logo}
       <span className="flex flex-grow" />
       {ghButton}
