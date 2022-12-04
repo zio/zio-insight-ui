@@ -81,6 +81,24 @@ export function InsightGridLayout() {
     configure: MB.none
   } as DashboardState)
 
+  const updateState = (p: {
+    newBreakpoint?: string
+    newLayouts?: Layouts
+    newContent?: HMap.HashMap<string, ConfigurableContent>
+    newMaximized?: MB.Maybe<string>
+    newConfigure?: MB.Maybe<string>
+  }) => {
+    setState((curr) => {
+      return {
+        breakpoint: p.newBreakpoint || curr.breakpoint,
+        layouts: p.newLayouts || curr.layouts,
+        content: p.newContent || curr.content,
+        maximized: p.newMaximized || curr.maximized,
+        configure: p.newConfigure || curr.configure
+      } as DashboardState
+    })
+  }
+
   // TODO: This must be replaced with a proper config page. For now we are randomly choosing
   // an existing metric to actually see some graph being rendered
   const randomKey = T.gen(function* ($) {
@@ -96,30 +114,6 @@ export function InsightGridLayout() {
 
     return panelId
   })
-
-  // A callback to keep track of the current breakpoint
-  const updateBreakPoint = (bp: string) =>
-    setState((curr) => {
-      return {
-        breakpoint: bp,
-        layouts: curr.layouts,
-        content: curr.content,
-        maximized: curr.maximized,
-        configure: curr.configure
-      } as DashboardState
-    })
-
-  // A callback to keep track of the current layouts
-  const updateLayouts = (layouts: Layouts) =>
-    setState((curr) => {
-      return {
-        breakpoint: curr.breakpoint,
-        layouts: layouts,
-        content: curr.content,
-        maximized: curr.maximized,
-        configure: curr.configure
-      } as DashboardState
-    })
 
   // A callback to remove a panel from the dashboard by removing it
   // from all layouts and also from the content map
@@ -194,30 +188,12 @@ export function InsightGridLayout() {
   // A callback to toggle the maximized state for a panel with a given id.
   // If a panel is currently maximized, this method needs to be called with
   // the id of the currently maximized panel to restore the normal state.
-  const maximizePanel = (panelId: string) => {
-    setState((curr) => {
-      return {
-        breakpoint: curr.breakpoint,
-        layouts: curr.layouts,
-        content: curr.content,
-        maximized: toggle(panelId, curr.maximized),
-        configure: curr.configure
-      } as DashboardState
-    })
-  }
+  const maximizePanel = (panelId: string) =>
+    updateState({ newMaximized: toggle(panelId, dbState.maximized) })
 
   // A callback to toggle the config mode for a panel with a given id.
-  const configurePanel = (panelId: string) => {
-    setState((curr) => {
-      return {
-        breakpoint: curr.breakpoint,
-        layouts: curr.layouts,
-        content: curr.content,
-        maximized: curr.maximized,
-        configure: toggle(panelId, curr.configure)
-      } as DashboardState
-    })
-  }
+  const configurePanel = (panelId: string) =>
+    updateState({ newConfigure: toggle(panelId, dbState.configure) })
 
   // A callback to create a panel
   // TODO: Most like this should create a TSConfig and stick that into the underlying
@@ -228,26 +204,21 @@ export function InsightGridLayout() {
         case "Failure":
           break
         case "Success":
-          setState((curr) => {
-            const newPanel = <ChartPanel id={res.value} />
-            const cfgPanel = <ChartConfig id={res.value} />
+          const newPanel = <ChartPanel id={res.value} />
+          const cfgPanel = <ChartConfig id={res.value} />
 
-            const newLayout: Layout = { i: res.value, x: 0, y: 0, w: 3, h: 6 }
-            const layouts = curr.layouts
-            for (const k in layouts) {
-              layouts[k].push(newLayout)
-            }
+          const newLayout: Layout = { i: res.value, x: 0, y: 0, w: 3, h: 6 }
+          const layouts = dbState.layouts
+          for (const k in layouts) {
+            layouts[k].push(newLayout)
+          }
 
-            return {
-              breakpoint: curr.breakpoint,
-              layouts: layouts,
-              content: HMap.set(res.value, {
-                content: newPanel,
-                config: cfgPanel
-              } as ConfigurableContent)(curr.content),
-              maximized: curr.maximized,
-              configure: curr.configure
-            } as DashboardState
+          updateState({
+            newLayouts: layouts,
+            newContent: HMap.set(res.value, {
+              content: newPanel,
+              config: cfgPanel
+            } as ConfigurableContent)(dbState.content)
           })
       }
     })
@@ -282,8 +253,12 @@ export function InsightGridLayout() {
           compactType="horizontal"
           layouts={dbState.layouts}
           cols={{ md: 8, lg: 12 }}
-          onLayoutChange={(_: Layout[], all: Layouts) => updateLayouts(all)}
-          onBreakpointChange={(bp: string, _: number) => updateBreakPoint(bp)}
+          onLayoutChange={(_: Layout[], all: Layouts) =>
+            updateState({ newLayouts: all })
+          }
+          onBreakpointChange={(bp: string, _: number) =>
+            updateState({ newBreakpoint: bp })
+          }
           rowHeight={50}>
           {Coll.toArray(dbState.content).map((el) => {
             const id = el[0]
