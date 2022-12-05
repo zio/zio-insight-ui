@@ -84,7 +84,12 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
       )}
       <div className="grow h-full flex flex-col">
         <div className="m-1 flex flex-row flex-none justify-between place-items-center">
-          <span>{props.title}</span>
+          <span
+            className={`${
+              props.maximized || cfgEnabled ? "ml-2 underline text-2xl" : ""
+            }`}>
+            {props.title}
+          </span>
           {controls()}
         </div>
 
