@@ -33,6 +33,7 @@ import * as BiIcons from "react-icons/bi"
 // navigate between different dashboards
 
 export interface ConfigurableContent {
+  title: string
   content: React.ReactElement
   config?: React.ReactElement
 }
@@ -216,6 +217,7 @@ export function InsightGridLayout() {
           updateState({
             newLayouts: layouts,
             newContent: HMap.set(res.value, {
+              title: `${res.value}`,
               content: newPanel,
               config: cfgPanel
             } as ConfigurableContent)(dbState.content)
@@ -266,7 +268,7 @@ export function InsightGridLayout() {
               <div key={id} className="w-full h-full bg-neutral text-neutral-content">
                 <GridFrame
                   key={id}
-                  title={id}
+                  title={el[1].title}
                   maximized={false}
                   configMode={false}
                   id={id}
