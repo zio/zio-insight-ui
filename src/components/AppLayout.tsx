@@ -10,7 +10,7 @@ export function AppLayout() {
         <SideBar />
         <div className="flex flex-col justify-items stretch w-full h-full">
           <NavBar />
-          <div className="overflow-auto grow w-full flex bg-base-100">
+          <div className="grow bg-base-100">
             <Outlet />
           </div>
         </div>

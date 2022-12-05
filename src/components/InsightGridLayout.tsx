@@ -302,7 +302,7 @@ export function InsightGridLayout() {
             closePanel={removePanel}
             configure={configurePanel}
             maximize={maximizePanel}
-            content={mbMax.value.content as React.ReactElement}
+            content={mbMax.value.content}
             config={mbMax.value.config}></GridFrame>
         )
     }

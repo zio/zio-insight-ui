@@ -54,7 +54,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
   }
 
   return (
-    <table className="table table-zebra table-compact">
+    <table className="table table-zebra table-compact w-full">
       <thead>
         <tr>
           <th></th>

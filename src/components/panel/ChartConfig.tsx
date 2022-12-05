@@ -3,11 +3,13 @@ import { TableMetricKeys } from "@components/TableMetricKey"
 
 export const ChartConfig: React.FC<{ id: string }> = (props) => {
   return (
-    <div className="flex flex-col">
-      <div className="flex-none flex flex-row">xx</div>
-      <div className="grow grid grid-col-1 place-items-stretch">
-        <div className="h-max-full w-full overflow-hidden">
-          <TableMetricKeys initialSelection={[]} onSelectionChanged={() => {}} />
+    <div className="w-full h-full flex flex-col justify-items-stretch">
+      <div className="grow w-full place-items-stretch relative">
+        <div className="absolute top-0 left-0 w-full h-full overflow-y-auto">
+          <span>Bla</span>
+          <TableMetricKeys
+            initialSelection={[]}
+            onSelectionChanged={() => {}}></TableMetricKeys>
         </div>
       </div>
       <div className="m-2 flex-none flex flex-row justify-end">

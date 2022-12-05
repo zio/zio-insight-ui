@@ -90,7 +90,7 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
 
         <div className="grow grid grid-col-1 m-2 place-items-stretch">
           <div
-            className={`grid grid-col-1 place-items-stretch ${
+            className={`overflow-auto grid grid-col-1 place-items-stretch ${
               props.maximized || cfgEnabled ? "" : "p-2 border"
             }`}>
             {(() => {
