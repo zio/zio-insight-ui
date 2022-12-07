@@ -173,28 +173,58 @@ export function InsightGridLayout() {
       )
   }
 
-  const toggle = (panelId: string, curr: MB.Maybe<string>) => {
-    switch (curr._tag) {
-      case "None":
-        return MB.some(panelId)
-      case "Some":
-        if (curr.value === panelId) {
-          return MB.none
-        } else {
-          return curr
+  const toggle = (panelId: string, view: "Max" | "Cfg") => {
+    setState((state) => {
+      const curr = (() => {
+        switch (view) {
+          case "Max":
+            return state.maximized
+          case "Cfg":
+            return state.configure
         }
-    }
+      })()
+
+      const newVal = (() => {
+        switch (curr._tag) {
+          case "None":
+            return MB.some(panelId)
+          case "Some":
+            if (curr.value === panelId) {
+              return MB.none
+            } else {
+              return curr
+            }
+        }
+      })()
+
+      switch (view) {
+        case "Max":
+          return {
+            breakpoint: state.breakpoint,
+            layouts: state.layouts,
+            content: state.content,
+            maximized: newVal,
+            configure: state.configure
+          }
+        case "Cfg":
+          return {
+            breakpoint: state.breakpoint,
+            layouts: state.layouts,
+            content: state.content,
+            maximized: state.maximized,
+            configure: newVal
+          }
+      }
+    })
   }
 
   // A callback to toggle the maximized state for a panel with a given id.
   // If a panel is currently maximized, this method needs to be called with
   // the id of the currently maximized panel to restore the normal state.
-  const maximizePanel = (panelId: string) =>
-    updateState({ newMaximized: toggle(panelId, dbState.maximized) })
+  const maximizePanel = (panelId: string) => toggle(panelId, "Max")
 
   // A callback to toggle the config mode for a panel with a given id.
-  const configurePanel = (panelId: string) =>
-    updateState({ newConfigure: toggle(panelId, dbState.configure) })
+  const configurePanel = (panelId: string) => toggle(panelId, "Cfg")
 
   // A callback to create a panel
   // TODO: Most like this should create a TSConfig and stick that into the underlying
@@ -206,7 +236,9 @@ export function InsightGridLayout() {
           break
         case "Success":
           const newPanel = <ChartPanel id={res.value} />
-          const cfgPanel = <ChartConfig id={res.value} />
+          const cfgPanel = (
+            <ChartConfig id={res.value} onDone={(k: string) => configurePanel(k)} />
+          )
 
           const newLayout: Layout = { i: res.value, x: 0, y: 0, w: 3, h: 6 }
           const layouts = dbState.layouts

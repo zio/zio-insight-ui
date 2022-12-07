@@ -19,7 +19,7 @@ export type AppLayer =
 
 export const appLayerLive : L.Layer<never, never, AppLayer> = pipe(
   Log.ConsoleLive,
-  L.provideToAndMerge(Log.live(Log.All)),
+  L.provideToAndMerge(Log.live(Log.Off)),
   L.provideToAndMerge(IdSvc.live),
   L.provideToAndMerge(InsightMetricsLive),
   L.provideToAndMerge(MM.live),
