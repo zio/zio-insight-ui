@@ -143,8 +143,22 @@ function makeGraphDataService(
   
   const setMetrics = (...keys: InsightKey[]) => 
     T.gen(function * ($) {
-      const newSet = HSet.from(keys)
+      const ids = keys.map(k => k.id)
+      const newSet = HSet.from(keys)      
       yield *$(mm.modifySubscription(subscriptionId, _ => C.from(keys)))
+
+      yield* $(timeseries.update(curr => 
+        HMap.reduceWithIndex(HMap.empty<TS.TimeSeriesKey, TS.TimeSeries>(),
+          (s: HMap.HashMap<TS.TimeSeriesKey, TS.TimeSeries>, k: TS.TimeSeriesKey, v: TS.TimeSeries) => {
+            if (ids.find(e => e == k.key.id) != undefined) {
+              return HMap.set(k, v)(s)
+            } else {
+              return s
+            }
+          }
+        )(curr)
+      ))
+      
       yield* $(log.debug(`GraphData Services now observes <${HSet.size(newSet)}> keys`))
       yield* $(observed.set(newSet))
     })

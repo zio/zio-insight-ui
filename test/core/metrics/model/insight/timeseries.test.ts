@@ -115,6 +115,7 @@ describe("TimeSeries", () => {
     expect(e2.when.getTime()).toEqual(now.getTime())
     expect(C.size(res)).toEqual(2)
   })
+
 })
 
 describe("TimeSeriesConvert", () => {
