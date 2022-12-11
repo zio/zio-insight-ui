@@ -138,7 +138,6 @@ const parseCurrentState : (_: CombinedState) => T.Effect<never, InvalidMetricSta
   else { return T.fail( new InvalidMetricStates(`Invalid metric state value <${JSON.stringify(comb)}>`)) } 
 }
 
-
 export const metricStatesFromInsight : (value: unknown) => T.Effect<never, InvalidMetricStates, MetricState[]> = (value: unknown) =>
   T.gen(function* ($) { 
     const parsed = insightMetricStatesSchema.safeParse(value), 

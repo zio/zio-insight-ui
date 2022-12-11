@@ -4,20 +4,20 @@ import * as App from "@components/App"
 import * as HS from "@tsplus/stdlib/collections/HashSet"
 import * as Ex from "@effect/core/io/Exit"
 import * as FiberId from "@effect/core/io/FiberId"
-import * as Insight from "@core/metrics/service/InsightService"
+import * as Insight from "@core/metrics/services/InsightService"
 import { TableMetricKeys } from "@components/TableMetricKey"
 import { Scrollable } from "./Scrollable"
 import { InsightKey } from "@core/metrics/model/zio/MetricKey"
-import * as GDM from "@core/metrics/service/GraphDataManager"
+import * as GDM from "@core/metrics/services/GraphDataManager"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 
-export interface ChartConfigProps {
+export interface ChartConfigPanelProps {
   id: string
   onDone: (_: string) => void
 }
 
-export const ChartConfig: React.FC<ChartConfigProps> = (props) => {
+export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
   const appRt = React.useContext(App.RuntimeContext)
 
   const closeHandler = () => {

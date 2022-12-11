@@ -4,14 +4,14 @@ import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout"
 import * as App from "@components/App"
 import "@styles/grid.css"
 import { ChartPanel } from "./panel/ChartPanel"
-import { ChartConfig } from "./panel/ChartConfig"
+import { ChartConfigPanel } from "./panel/ChartConfigPanel"
 import { GridFrame } from "./panel/GridFrame"
 import * as TK from "@data/testkeys"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as MB from "@tsplus/stdlib/data/Maybe"
-import * as InsightSvc from "@core/metrics/service/InsightService"
-import * as GDM from "@core/metrics/service/GraphDataManager"
+import * as InsightSvc from "@core/metrics/services/InsightService"
+import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as IdSvc from "@core/services/IdGenerator"
 import * as MdIcons from "react-icons/md"
 import * as BiIcons from "react-icons/bi"
@@ -237,7 +237,10 @@ export function InsightGridLayout() {
         case "Success":
           const newPanel = <ChartPanel id={res.value} />
           const cfgPanel = (
-            <ChartConfig id={res.value} onDone={(k: string) => configurePanel(k)} />
+            <ChartConfigPanel
+              id={res.value}
+              onDone={(k: string) => configurePanel(k)}
+            />
           )
 
           const newLayout: Layout = { i: res.value, x: 0, y: 0, w: 3, h: 6 }

@@ -8,8 +8,8 @@ import * as MB from "@tsplus/stdlib/data/Maybe"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import { RuntimeContext } from "@components/App"
-import * as GDS from "@core/metrics/service/GraphDataService"
-import * as GDM from "@core/metrics/service/GraphDataManager"
+import * as GDS from "@core/metrics/services/GraphDataService"
+import * as GDM from "@core/metrics/services/GraphDataManager"
 import { Chart } from "chart.js/auto"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import { keyAsString } from "@core/metrics/model/zio/MetricKey"
@@ -17,12 +17,15 @@ import { keyAsString } from "@core/metrics/model/zio/MetricKey"
 // required import for time based axis
 import "chartjs-adapter-date-fns"
 
-interface ChartData {
+// A single line in the chart consists of the configuration for the visual
+// properties of the line (color, line style, ...) and the array of points
+interface LineData {
   tsConfig: TS.TimeSeriesConfig
   data: { x: Date; y: number }[]
 }
 
-type TSData = HMap.HashMap<TS.TimeSeriesKey, ChartData>
+// A chart constists of mutiple lines
+type TSData = HMap.HashMap<TS.TimeSeriesKey, LineData>
 
 export const ChartPanel: React.FC<{ id: string }> = (props) => {
   const appRt = React.useContext(RuntimeContext)
@@ -44,8 +47,8 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
       return HMap.reduceWithIndex(
         HMap.empty(),
         (s: TSData, k: TS.TimeSeriesKey, v: C.Chunk<TS.TimeSeriesEntry>) => {
-          const mbConfig = MB.map<ChartData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
-            HMap.get<TS.TimeSeriesKey, ChartData>(k)(current)
+          const mbConfig = MB.map<LineData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
+            HMap.get<TS.TimeSeriesKey, LineData>(k)(current)
           )
 
           const cfg = MB.getOrElse(() => new TS.TimeSeriesConfig(k, label(k)))(mbConfig)
@@ -55,7 +58,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
             data: Coll.toArray(v).map((e) => {
               return { x: e.when, y: e.value }
             })
-          } as ChartData
+          } as LineData
 
           return HMap.set(k, cData)(s)
         }

@@ -1,11 +1,7 @@
 
 export class Color {
-  public r: number;
-  public g: number;
-  public b: number;
-  public a: number;
 
-  constructor(r: number, g: number, b: number, a: number) {
+  constructor(readonly r: number, readonly g: number, readonly b: number, readonly a: number) {
     this.r = r || 128
     this.g = g || 128
     this.b = b || 128

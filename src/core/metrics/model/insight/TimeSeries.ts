@@ -13,38 +13,39 @@ import * as MK  from "@core/metrics/model/zio/MetricKey"
 
 // A time series key uniquely defines a single measured piece of data over a 
 // period of time
-export interface TimeSeriesKey {
-  key: MK.InsightKey,
-  subKey: MB.Maybe<string>
+export class TimeSeriesKey{
+
+  constructor(
+    readonly key: MK.InsightKey,
+    readonly subKey: MB.Maybe<string>
+  ){}
 }
 
 // The basic rendering config for a TimeSeries 
 export class TimeSeriesConfig {
-  readonly id: TimeSeriesKey
-  readonly title: string
   readonly tension: number
   readonly lineColor: Color.Color
   readonly pointColor: Color.Color
 
-  constructor(id: TimeSeriesKey, title: string) {
-    this.id = id
-    this.title = title
-    this.tension = Math.floor((Math.random() * 3 + 3)) / 10
-    this.lineColor = Color.fromRandom()
-    this.pointColor = Color.fromRandom()
+  constructor(
+    readonly id: TimeSeriesKey, 
+    readonly title: string,
+    tension?: number, 
+    lineColor?: Color.Color,
+    pointColor?: Color.Color
+  ) {
+    this.tension = tension || Math.floor((Math.random() * 3 + 3)) / 10
+    this.lineColor = lineColor || Color.fromRandom()
+    this.pointColor = pointColor || Color.fromRandom()
   }
 }
 
 export class TimeSeriesEntry {
-  readonly id: TimeSeriesKey
-  readonly when: Date
-  readonly value: number
-
-  constructor(id: TimeSeriesKey, when: Date, value: number) {
-    this.id = id
-    this.when = when
-    this.value = value
-  }
+  constructor(
+    readonly id: TimeSeriesKey, 
+    readonly when: Date, 
+    readonly value: number
+  ) {}
 
   asString() : string {
     return `TimeSeriesEntry(${this.id}, ${formatDate(this.when)}, ${this.value})`

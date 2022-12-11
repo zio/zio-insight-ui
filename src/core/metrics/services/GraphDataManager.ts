@@ -3,18 +3,18 @@ import * as L from "@effect/core/io/Layer"
 import * as GDS from "./GraphDataService"
 import * as Log from "@core/services/Logger"
 import * as MB from "@tsplus/stdlib/data/Maybe"
-import * as MM from "@core/metrics/service/MetricsManager"
+import * as MM from "@core/metrics/services/MetricsManager"
 import * as MS from "@core/services/MemoryStore"
 import { Tag } from "@tsplus/stdlib/service/Tag"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
-// The graph data manager provides map of ids to GraphDataServices. 
+// The graph data manager provides map a of ids to GraphDataServices. 
 // While the GraphDataService manages the data for a single panel, 
 // the GraphDataManager manages the GraphDataServices for an entire
 // Dashboard.
 // The motivation is to create the GraphDataManager inside the root 
 // of a single Dashboard, so that the current state of retrieved metrics
-// wont be lost if views are (un)mounted.
+// won't be lost if views are (un)mounted.
 
 // The GraphDataManager lives in the runtime and as such is available 
 // throughout the lifetime of the application. 

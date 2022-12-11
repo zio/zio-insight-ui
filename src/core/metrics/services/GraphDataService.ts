@@ -10,7 +10,7 @@ import * as TS from "@core/metrics/model/insight/TimeSeries"
 import { InsightKey } from "@core/metrics/model/zio/MetricKey"
 import { Tag } from "@tsplus/stdlib/service/Tag"
 import * as Log from "@core/services/Logger"
-import * as MM from "@core/metrics/service/MetricsManager"
+import * as MM from "@core/metrics/services/MetricsManager"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import { MetricState }  from "../model/zio/MetricState"
 
@@ -173,7 +173,6 @@ function makeGraphDataService(
     })
 
   const maxEntries = () => currMaxEntries.get
-
 
   const data = () => T.sync(() => S.fromHub(dataHub))
 

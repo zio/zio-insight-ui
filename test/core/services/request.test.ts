@@ -1,5 +1,5 @@
 import * as T from '@effect/core/io/Effect'
-import * as Api from '@core/metrics/service/InsightService'
+import * as Api from '@core/metrics/services/InsightService'
 import { appLayerStatic } from '@core/AppLayer'
 import { pipe } from '@tsplus/stdlib/data/Function'
 
