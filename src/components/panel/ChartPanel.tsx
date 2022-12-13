@@ -47,6 +47,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
       return HMap.reduceWithIndex(
         HMap.empty(),
         (s: TSData, k: TS.TimeSeriesKey, v: C.Chunk<TS.TimeSeriesEntry>) => {
+          // TODO: Tap into the DashboardConfigService to retrieve the TSConfig
           const mbConfig = MB.map<LineData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
             HMap.get<TS.TimeSeriesKey, LineData>(k)(current)
           )
