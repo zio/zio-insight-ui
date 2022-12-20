@@ -4,7 +4,7 @@ import * as AL from "@core/AppLayer"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
 const testRt = AL.unsafeMakeRuntime(
-  AL.appLayerStatic
+  AL.appLayerStatic(Log.All)
 ).runtime
 
 describe("Logger", () => { 

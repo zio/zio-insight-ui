@@ -1,4 +1,6 @@
-
+import * as T from "@effect/core/io/Effect"
+import { Tag } from "@tsplus/stdlib/service/Tag"
+import { Hash } from "@tsplus/stdlib/structure/Hash"
 
 // The dashboard manager keeps track of the configured dashboards 
 // within the application. 
@@ -24,22 +26,69 @@
 // and uses the Content Manager to create the content panel and potentially the 
 // associated config panel. 
 
+export interface Tagged { 
+  readonly _tag: string
+}
+
+export const metricsCfgTag = Tag<MetricsConfig>()
+
+export class MetricsConfig implements Tagged { 
+  readonly _tag = "MetricsConfig"
+}
+
+export class PanelConfig {
+  constructor(
+    readonly id: string, 
+    readonly x: number, 
+    readonly y: number, 
+    readonly w: number, 
+    readonly h: number, 
+    readonly config: Tagged
+  ) {}
+}
+
 export class DashboardConfig { 
   constructor(
-    // The title of the dashboard that will be used 
-    readonly title: string
+    // The unique id used to locate the dashboard config within the persistence layer 
+    readonly id: string,
+    // The title of the dashboard that will be used in the UI
+    readonly title: string,
+    // A textual description of the dashboard to show in the UI where appropriate
+    readonly description : string = "",
+    // The actual dashboard content
+    readonly content: PanelConfig[] = []
   ) {}
 
   copy(p: {
-    title?: string
+    id?: string
+    title?: string,
+    content?: PanelConfig[]
+    description?: string
   }
   ) { 
     return new DashboardConfig(
-      p.title || this.title
+      p.id || this.id,
+      p.title || this.title,
+      p.description || this.description,
+      p.content || this.content
     )
   }
 }
 
-export interface DashboardManager { 
+export interface DashboardManager {
+  
+  // Create a new and empty dashboard with a new id 
+  create: () => T.Effect<never, never, DashboardConfig>
+
+  // Get a dashboard by its id // if the dashboard could not be 
+  // found, create and return an empty one 
+  get: (id: string) => T.Effect<never, never, DashboardConfig>
+
+  put: (cfg: DashboardConfig) => T.Effect<never, never, void>
+
+  delete: (id: string) => T.Effect<never, never, void>
+
+  list: () => T.Effect<never, never, DashboardConfig[]>
+
 
 }

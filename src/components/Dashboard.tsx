@@ -262,7 +262,7 @@ export function InsightGridLayout() {
   }
 
   const configMode = (panelId: string) => {
-    return MB.getOrElse(() => false)(MB.map((v) => v === panelId)(dbState.configure))
+    return MB.getOrElse(() => false)(MB.map((v) => v == panelId)(dbState.configure))
   }
 
   const ResponsiveGridLayout = WidthProvider(Responsive)

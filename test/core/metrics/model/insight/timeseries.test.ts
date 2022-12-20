@@ -13,7 +13,7 @@ import {
 } from "../../../../../src/data/testkeys"
 import * as MT from "@core/metrics/model/zio/MetricType"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
 
 const makeKey = (name: string, metricType: MT.MetricType) => 
   <TS.TimeSeriesKey>{

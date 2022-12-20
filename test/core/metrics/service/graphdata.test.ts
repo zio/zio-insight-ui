@@ -8,10 +8,11 @@ import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as GDS from "@core/metrics/services/GraphDataService"
 import * as MM from "@core/metrics/services/MetricsManager"
 import * as TK from  "../../../../src/data/testkeys"
+import * as Log from "@core/services/Logger"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
 const testRt = AL.unsafeMakeRuntime(
-  AL.appLayerStatic
+  AL.appLayerStatic(Log.Off)
 ).runtime
 
 const gds = GDS.createGraphDataService()

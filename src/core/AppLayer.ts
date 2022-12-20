@@ -26,9 +26,9 @@ export const appLayerLive : L.Layer<never, never, AppLayer> = pipe(
   L.provideToAndMerge(GDM.live)
 )
 
-export const appLayerStatic : L.Layer<never, never, AppLayer> = pipe(
+export const appLayerStatic = (lvl: Log.LogLevel) => pipe(
   Log.ConsoleLive,
-  L.provideToAndMerge(Log.live(Log.All)),
+  L.provideToAndMerge(Log.live(lvl)),
   L.provideToAndMerge(IdSvc.live),
   L.provideToAndMerge(InsightMetricsStatic),
   L.provideToAndMerge(MM.live),

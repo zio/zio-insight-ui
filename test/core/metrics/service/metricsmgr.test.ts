@@ -6,10 +6,11 @@ import * as Insight from "@core/metrics/services/InsightService"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as AL from "@core/AppLayer"
 import * as Model from "@core/metrics/model/zio/MetricKey"
+import * as Log from "@core/services/Logger"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
 const testRt = AL.unsafeMakeRuntime(
-  AL.appLayerStatic
+  AL.appLayerStatic(Log.Off)
 ).runtime
 
 const newKeys = C.make(<Model.InsightKey>{
