@@ -1,5 +1,5 @@
 import React from "react"
-import { InsightKey } from "@core/metrics/model/zio/MetricKey"
+import { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 
 /**
  * A component for rendering available metric keys in a table. Effectively this

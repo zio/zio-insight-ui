@@ -9,7 +9,7 @@ import { Ord } from "@tsplus/stdlib/prelude/Ord"
 import { formatDate } from "@core/utils" 
 import * as State from "@core/metrics/model/zio/MetricState"
 import { pipe } from "@tsplus/stdlib/data/Function"
-import * as MK  from "@core/metrics/model/zio/MetricKey"
+import * as MK  from "@core/metrics/model/zio/metrics/MetricKey"
 
 // A time series key uniquely defines a single measured piece of data over a 
 // period of time

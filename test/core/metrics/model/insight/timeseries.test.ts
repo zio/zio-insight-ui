@@ -4,14 +4,14 @@ import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as MB from "@tsplus/stdlib/data/Maybe"
 import * as AL from "@core/AppLayer"
 import * as TS from "@core/metrics/model/insight/TimeSeries"
-import * as Insight from "@core/metrics/model/zio/MetricState"
+import * as Insight from "@core/metrics/model/zio/metrics/MetricState"
 import * as Log from "@core/services/Logger"
 import states from "@data/state.json"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import { 
   counterId, gaugeId, summaryId, histId, frequencyId
 } from "../../../../../src/data/testkeys"
-import * as MT from "@core/metrics/model/zio/MetricType"
+import * as MT from "@core/metrics/model/zio/metrics/MetricType"
 
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
 

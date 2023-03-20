@@ -12,7 +12,7 @@ import * as GDS from "@core/metrics/services/GraphDataService"
 import * as GDM from "@core/metrics/services/GraphDataManager"
 import { Chart } from "chart.js/auto"
 import { pipe } from "@tsplus/stdlib/data/Function"
-import { keyAsString } from "@core/metrics/model/zio/MetricKey"
+import { keyAsString } from "@core/metrics/model/zio/metrics/MetricKey"
 
 // required import for time based axis
 import "chartjs-adapter-date-fns"

@@ -2,7 +2,7 @@ import * as T from "@effect/core/io/Effect"
 import * as L from "@effect/core/io/Layer"
 import * as S from "@effect/core/io/Scope"
 import * as E from "@effect/core/io/Exit"
-import { InsightMetricsLive, InsightMetrics, InsightMetricsStatic } from "./metrics/services/InsightService"
+import * as Insight from "./metrics/services/InsightService"
 import * as Log from "./services/Logger"
 import * as MM from "@core/metrics/services/MetricsManager"
 import * as GDM from "@core/metrics/services/GraphDataManager"
@@ -12,7 +12,7 @@ import { pipe } from "@tsplus/stdlib/data/Function"
 export type AppLayer = 
   Log.ConsoleService | 
   Log.LogService | 
-  InsightMetrics | 
+  Insight.InsightService | 
   MM.MetricsManager | 
   IdSvc.IdGenerator |
   GDM.GraphDataManager
@@ -21,7 +21,7 @@ export const appLayerLive : L.Layer<never, never, AppLayer> = pipe(
   Log.ConsoleLive,
   L.provideToAndMerge(Log.live(Log.Debug)),
   L.provideToAndMerge(IdSvc.live),
-  L.provideToAndMerge(InsightMetricsLive),
+  L.provideToAndMerge(Insight.live),
   L.provideToAndMerge(MM.live),
   L.provideToAndMerge(GDM.live)
 )
@@ -30,7 +30,7 @@ export const appLayerStatic = (lvl: Log.LogLevel) => pipe(
   Log.ConsoleLive,
   L.provideToAndMerge(Log.live(lvl)),
   L.provideToAndMerge(IdSvc.live),
-  L.provideToAndMerge(InsightMetricsStatic),
+  L.provideToAndMerge(Insight.dev),
   L.provideToAndMerge(MM.live),
   L.provideToAndMerge(GDM.live)
 )
