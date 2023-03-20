@@ -1,11 +1,11 @@
 import * as T from "@effect/core/io/Effect"
 import * as Z from "zod"
 
-export const locationSchema = Z.object({
-  location: Z.string(),
-  file: Z.string(),
-  line: Z.number()
-})
+export const locationSchema = Z.tuple([
+  Z.string(),
+  Z.string(),
+  Z.number()
+])
 
 export const fiberIdSchema = Z.object({
   id: Z.number(),
@@ -15,7 +15,7 @@ export const fiberIdSchema = Z.object({
 
 export const fiberInfoSchema = Z.object({
   id: fiberIdSchema,
-  parent: Z.nullable(fiberIdSchema),
+  parent: Z.optional(fiberIdSchema),
   status: Z.unknown(),
   children: Z.array(fiberIdSchema)
 })

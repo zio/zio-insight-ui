@@ -19,7 +19,7 @@ export const Fibers: React.FC<{}> = () => {
         })
       )
       .then((fibers) => setFibers(fibers))
-  })
+  }, [])
 
   return <h1>{fibers.length}</h1>
 }

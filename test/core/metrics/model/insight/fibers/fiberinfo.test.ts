@@ -5,13 +5,13 @@ import * as Log from "@core/services/Logger"
 
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
 
-describe("MetricKeys Parser", () => {
+describe("FiberInfos Parser", () => {
 
-  it("should parse the metric keys from the server", async () => {
+  it("should parse the fiber infos from the server", async () => {
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const svc = yield* $(T.service(Insight.InsightService))
-        return  yield* $(svc.getMetricKeys)
+        return  yield* $(svc.getFibers)
       }
     ))
 

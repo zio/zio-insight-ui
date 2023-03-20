@@ -90,7 +90,7 @@ describe("MetricsManager", () => {
 
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
-        const insight = yield* $(T.service(Insight.InsightMetrics))
+        const insight = yield* $(T.service(Insight.InsightService))
         const mm = yield* $(T.service(MM.MetricsManager))
 
         const keys = yield* $(
