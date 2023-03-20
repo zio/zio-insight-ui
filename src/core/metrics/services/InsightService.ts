@@ -31,7 +31,7 @@ interface StateRequest {
 function makeLiveMetrics(logger: Log.LogService) : InsightMetrics {
   return ({
     getMetricKeys: pipe(
-      Req.request(`${baseUrl}/insight/keys`),
+      Req.request(`${baseUrl}/insight/metrics/keys`),
       T.flatMap(Req.jsonFromResponse),
       T.flatMap(metricKeysFromInsight),
       T.tap(keys => logger.info(`Got ${keys.length} metric keys from server`))
@@ -39,7 +39,7 @@ function makeLiveMetrics(logger: Log.LogService) : InsightMetrics {
     getMetricStates: (keys : string[]) => 
       T.gen(function* ($) {
         const req = <StateRequest>{selection: keys}
-        const raw = yield* $(Req.request(`${baseUrl}/insight/metrics`, { method: "POST", body: JSON.stringify(req)}))
+        const raw = yield* $(Req.request(`${baseUrl}/insight/metrics/metrics`, { method: "POST", body: JSON.stringify(req)}))
         const json = yield* $(Req.jsonFromResponse(raw))
         
         return yield* $(metricStatesFromInsight(json))
