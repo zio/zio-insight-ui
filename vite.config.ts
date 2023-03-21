@@ -4,7 +4,9 @@ import { visualizer } from "rollup-plugin-visualizer"
 import { defineConfig } from "vite"
 import svgr from "vite-plugin-svgr"
 import tsConfigPaths from "vite-tsconfig-paths"
-import { EsLinter, linterPlugin } from "vite-plugin-linter"
+
+import pkgLinter from "vite-plugin-linter"
+const { EsLinter, linterPlugin } = pkgLinter
 
 // https://vitejs.dev/config/
 export default defineConfig((configEnv) => ({

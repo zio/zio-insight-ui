@@ -37,8 +37,10 @@ const makeKey = (name: string, metricType: MT.MetricType) =>
 const entries = (id: string) =>
   pipe(
     Insight.metricStatesFromInsight(states),
-    T.map((states) => states.find((s) => s.id == id)!),
-    T.map((entry) => TS.tsEntriesFromState(entry))
+    T.map((states) => states.find((s) => s.id == id)),
+    T.map((entry) =>
+      entry ? TS.tsEntriesFromState(entry) : C.empty<TS.TimeSeriesEntry>()
+    )
   )
 
 describe("TimeSeries", () => {
