@@ -7,7 +7,7 @@ import * as Log from "@core/services/Logger"
 import * as Color from "@core/Color"
 import { Ord } from "@tsplus/stdlib/prelude/Ord"
 import { formatDate } from "@core/utils" 
-import * as State from "@core/metrics/model/zio/MetricState"
+import * as State from "@core/metrics/model/zio/metrics/MetricState"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as MK  from "@core/metrics/model/zio/metrics/MetricKey"
 

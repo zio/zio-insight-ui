@@ -12,7 +12,7 @@ import { Tag } from "@tsplus/stdlib/service/Tag"
 import * as Log from "@core/services/Logger"
 import * as MM from "@core/metrics/services/MetricsManager"
 import { pipe } from "@tsplus/stdlib/data/Function"
-import { MetricState }  from "../model/zio/MetricState"
+import { MetricState }  from "../model/zio/metrics/MetricState"
 
 // The Graph Data Service provides the data for a visual widget on the dashboard. 
 // Each widget must have a unique id (i.e retrieved via the IdService), the widget 

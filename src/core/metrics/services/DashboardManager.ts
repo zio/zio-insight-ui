@@ -1,6 +1,5 @@
 import * as T from "@effect/core/io/Effect"
 import { Tag } from "@tsplus/stdlib/service/Tag"
-import { Hash } from "@tsplus/stdlib/structure/Hash"
 
 // The dashboard manager keeps track of the configured dashboards 
 // within the application. 

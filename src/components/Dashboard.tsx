@@ -104,7 +104,7 @@ export function InsightGridLayout() {
   // an existing metric to actually see some graph being rendered
   const randomKey = T.gen(function* ($) {
     const gdm = yield* $(T.service(GDM.GraphDataManager))
-    const app = yield* $(T.service(InsightSvc.InsightMetrics))
+    const app = yield* $(T.service(InsightSvc.InsightService))
     const idSvc = yield* $(T.service(IdSvc.IdGenerator))
     const panelId = yield* $(idSvc.nextId("panel"))
     const keys = yield* $(app.getMetricKeys)
