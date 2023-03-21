@@ -13,7 +13,6 @@ export const fiberInfoSchema = Z.object({
   id: fiberIdSchema,
   parent: Z.optional(fiberIdSchema),
   status: Z.unknown(),
-  children: Z.array(fiberIdSchema),
 })
 
 export const fibersInfoSchema = Z.array(fiberInfoSchema)
