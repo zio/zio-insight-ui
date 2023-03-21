@@ -1,5 +1,5 @@
 import keysObj from "@data/keys.json"
-import * as MK from "@core/metrics/model/zio/MetricKey"
+import * as MK from "@core/metrics/model/zio/metrics/MetricKey"
 import * as T from "@effect/core/io/Effect"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 

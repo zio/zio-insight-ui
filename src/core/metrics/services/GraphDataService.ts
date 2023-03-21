@@ -7,12 +7,12 @@ import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import * as Ref from "@effect/core/io/Ref"
 import * as TS from "@core/metrics/model/insight/TimeSeries"
-import { InsightKey } from "@core/metrics/model/zio/MetricKey"
+import { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import { Tag } from "@tsplus/stdlib/service/Tag"
 import * as Log from "@core/services/Logger"
-import * as MM from "@core/metrics/service/MetricsManager"
+import * as MM from "@core/metrics/services/MetricsManager"
 import { pipe } from "@tsplus/stdlib/data/Function"
-import { MetricState }  from "../model/zio/MetricState"
+import { MetricState }  from "../model/zio/metrics/MetricState"
 
 // The Graph Data Service provides the data for a visual widget on the dashboard. 
 // Each widget must have a unique id (i.e retrieved via the IdService), the widget 
@@ -143,8 +143,22 @@ function makeGraphDataService(
   
   const setMetrics = (...keys: InsightKey[]) => 
     T.gen(function * ($) {
-      const newSet = HSet.from(keys)
+      const ids = keys.map(k => k.id)
+      const newSet = HSet.from(keys)      
       yield *$(mm.modifySubscription(subscriptionId, _ => C.from(keys)))
+
+      yield* $(timeseries.update(curr => 
+        HMap.reduceWithIndex(HMap.empty<TS.TimeSeriesKey, TS.TimeSeries>(),
+          (s: HMap.HashMap<TS.TimeSeriesKey, TS.TimeSeries>, k: TS.TimeSeriesKey, v: TS.TimeSeries) => {
+            if (ids.find(e => e == k.key.id) != undefined) {
+              return HMap.set(k, v)(s)
+            } else {
+              return s
+            }
+          }
+        )(curr)
+      ))
+      
       yield* $(log.debug(`GraphData Services now observes <${HSet.size(newSet)}> keys`))
       yield* $(observed.set(newSet))
     })
@@ -159,7 +173,6 @@ function makeGraphDataService(
     })
 
   const maxEntries = () => currMaxEntries.get
-
 
   const data = () => T.sync(() => S.fromHub(dataHub))
 

@@ -1,15 +1,16 @@
 import * as T from "@effect/core/io/Effect"
 import * as S from "@effect/core/stream/Stream"
 import * as F from "@effect/core/io/Fiber"
-import * as MM from "@core/metrics/service/MetricsManager"
-import * as Insight from "@core/metrics/service/InsightService"
+import * as MM from "@core/metrics/services/MetricsManager"
+import * as Insight from "@core/metrics/services/InsightService"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as AL from "@core/AppLayer"
-import * as Model from "@core/metrics/model/zio/MetricKey"
+import * as Model from "@core/metrics/model/zio/metrics/MetricKey"
+import * as Log from "@core/services/Logger"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
 const testRt = AL.unsafeMakeRuntime(
-  AL.appLayerStatic
+  AL.appLayerStatic(Log.Off)
 ).runtime
 
 const newKeys = C.make(<Model.InsightKey>{
@@ -89,7 +90,7 @@ describe("MetricsManager", () => {
 
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
-        const insight = yield* $(T.service(Insight.InsightMetrics))
+        const insight = yield* $(T.service(Insight.InsightService))
         const mm = yield* $(T.service(MM.MetricsManager))
 
         const keys = yield* $(

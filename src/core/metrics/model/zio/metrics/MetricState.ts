@@ -24,7 +24,7 @@ const freqStateSchema = Z.object({
   occurrences: Z.unknown()
 })
 
-// From the API we get the occurences as an "unknown", but we now it is actually 
+// From the API we get the occurrences as an "unknown", but we now it is actually 
 // a map <string, number>, so we do the conversion here before we pass it onwards to any 
 // downstream component
 interface RawFrequencyState extends Z.TypeOf<typeof freqStateSchema> {}
@@ -137,7 +137,6 @@ const parseCurrentState : (_: CombinedState) => T.Effect<never, InvalidMetricSta
   else if (comb.Summary !== undefined) { return T.succeed(comb.Summary!) }
   else { return T.fail( new InvalidMetricStates(`Invalid metric state value <${JSON.stringify(comb)}>`)) } 
 }
-
 
 export const metricStatesFromInsight : (value: unknown) => T.Effect<never, InvalidMetricStates, MetricState[]> = (value: unknown) =>
   T.gen(function* ($) { 

@@ -4,14 +4,14 @@ import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout"
 import * as App from "@components/App"
 import "@styles/grid.css"
 import { ChartPanel } from "./panel/ChartPanel"
-import { ChartConfig } from "./panel/ChartConfig"
+import { ChartConfigPanel } from "./panel/ChartConfigPanel"
 import { GridFrame } from "./panel/GridFrame"
 import * as TK from "@data/testkeys"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as MB from "@tsplus/stdlib/data/Maybe"
-import * as InsightSvc from "@core/metrics/service/InsightService"
-import * as GDM from "@core/metrics/service/GraphDataManager"
+import * as InsightSvc from "@core/metrics/services/InsightService"
+import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as IdSvc from "@core/services/IdGenerator"
 import * as MdIcons from "react-icons/md"
 import * as BiIcons from "react-icons/bi"
@@ -104,7 +104,7 @@ export function InsightGridLayout() {
   // an existing metric to actually see some graph being rendered
   const randomKey = T.gen(function* ($) {
     const gdm = yield* $(T.service(GDM.GraphDataManager))
-    const app = yield* $(T.service(InsightSvc.InsightMetrics))
+    const app = yield* $(T.service(InsightSvc.InsightService))
     const idSvc = yield* $(T.service(IdSvc.IdGenerator))
     const panelId = yield* $(idSvc.nextId("panel"))
     const keys = yield* $(app.getMetricKeys)
@@ -173,28 +173,58 @@ export function InsightGridLayout() {
       )
   }
 
-  const toggle = (panelId: string, curr: MB.Maybe<string>) => {
-    switch (curr._tag) {
-      case "None":
-        return MB.some(panelId)
-      case "Some":
-        if (curr.value === panelId) {
-          return MB.none
-        } else {
-          return curr
+  const toggle = (panelId: string, view: "Max" | "Cfg") => {
+    setState((state) => {
+      const curr = (() => {
+        switch (view) {
+          case "Max":
+            return state.maximized
+          case "Cfg":
+            return state.configure
         }
-    }
+      })()
+
+      const newVal = (() => {
+        switch (curr._tag) {
+          case "None":
+            return MB.some(panelId)
+          case "Some":
+            if (curr.value === panelId) {
+              return MB.none
+            } else {
+              return curr
+            }
+        }
+      })()
+
+      switch (view) {
+        case "Max":
+          return {
+            breakpoint: state.breakpoint,
+            layouts: state.layouts,
+            content: state.content,
+            maximized: newVal,
+            configure: state.configure
+          }
+        case "Cfg":
+          return {
+            breakpoint: state.breakpoint,
+            layouts: state.layouts,
+            content: state.content,
+            maximized: state.maximized,
+            configure: newVal
+          }
+      }
+    })
   }
 
   // A callback to toggle the maximized state for a panel with a given id.
   // If a panel is currently maximized, this method needs to be called with
   // the id of the currently maximized panel to restore the normal state.
-  const maximizePanel = (panelId: string) =>
-    updateState({ newMaximized: toggle(panelId, dbState.maximized) })
+  const maximizePanel = (panelId: string) => toggle(panelId, "Max")
 
   // A callback to toggle the config mode for a panel with a given id.
-  const configurePanel = (panelId: string) =>
-    updateState({ newConfigure: toggle(panelId, dbState.configure) })
+  const configurePanel = (panelId: string) => toggle(panelId, "Cfg")
 
   // A callback to create a panel
   // TODO: Most like this should create a TSConfig and stick that into the underlying
@@ -206,7 +236,12 @@ export function InsightGridLayout() {
           break
         case "Success":
           const newPanel = <ChartPanel id={res.value} />
-          const cfgPanel = <ChartConfig id={res.value} />
+          const cfgPanel = (
+            <ChartConfigPanel
+              id={res.value}
+              onDone={(k: string) => configurePanel(k)}
+            />
+          )
 
           const newLayout: Layout = { i: res.value, x: 0, y: 0, w: 3, h: 6 }
           const layouts = dbState.layouts
@@ -227,7 +262,7 @@ export function InsightGridLayout() {
   }
 
   const configMode = (panelId: string) => {
-    return MB.getOrElse(() => false)(MB.map((v) => v === panelId)(dbState.configure))
+    return MB.getOrElse(() => false)(MB.map((v) => v == panelId)(dbState.configure))
   }
 
   const ResponsiveGridLayout = WidthProvider(Responsive)

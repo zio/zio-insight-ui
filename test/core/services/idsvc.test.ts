@@ -8,7 +8,7 @@ describe("IdSvc", () => {
 
   const layer = pipe(
     Log.ConsoleLive,
-    L.provideToAndMerge(Log.live(Log.All)),
+    L.provideToAndMerge(Log.live(Log.Off)),
     L.provideTo(IdSvc.live)
   )
 

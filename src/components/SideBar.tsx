@@ -79,7 +79,7 @@ export const SideBar: React.FC<{}> = (props) => {
             key={e.path}
             data-tip={e.title}
             className={({ isActive }) => {
-              return `py-2 text-2xl font-extralight w-full flex flex-row border-b ${
+              return `py-2 text-xl font-extralight w-full flex flex-row border-b ${
                 isActive ? "bg-accent" : "hover:bg-base-100"
               } ${shown ? "" : "tooltip tooltip-right tooltip-secondary"}`
             }}
