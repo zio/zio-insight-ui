@@ -107,10 +107,10 @@ export class MetricState {
   }
 
   insightKey() {
-    return <InsightKey>{
+    return {
       id: this.id,
       key: this.key,
-    }
+    } as InsightKey
   }
 }
 
@@ -120,7 +120,7 @@ export class InvalidMetricStates {
 }
 
 const parseFrequency = (state: RawFrequencyState) => {
-  const res = <[string, number][]>[]
+  const res: [string, number][] = []
 
   Object.keys(state).forEach((k) => {
     const v = state[k]
@@ -129,9 +129,9 @@ const parseFrequency = (state: RawFrequencyState) => {
     }
   })
 
-  return <FrequencyState>{
+  return {
     occurrences: HMap.from(res),
-  }
+  } as FrequencyState
 }
 
 // A helper function to unwrap the combined state we get from the Insight connector

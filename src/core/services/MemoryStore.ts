@@ -48,7 +48,7 @@ function makeMemoryStore<K, V>(
         const mbSvc = yield* $(itemByKey(k))
         switch (mbSvc._tag) {
           case "None":
-            return yield* $(T.fail(<KeyDoesNotExist<K>>{ key: k }))
+            return yield* $(T.fail({ key: k } as KeyDoesNotExist<K>))
           case "Some":
             return mbSvc.value
         }
@@ -87,19 +87,19 @@ function makeMemoryStore<K, V>(
       })
     )
 
-  return <MemoryStore<K, V>>{
+  return {
     get,
     set,
     remove,
     update,
     getAll: pipe(elements.get),
-  }
+  } as MemoryStore<K, V>
 }
 
 export function createMemoryStore<K, V>() {
   return T.gen(function* ($) {
     const sem = yield* $(Sem.make(1))
-    const elems = yield* $(Ref.makeRef(() => <HMap.HashMap<K, V>>HMap.empty()))
+    const elems = yield* $(Ref.makeRef(() => HMap.empty() as HMap.HashMap<K, V>))
 
     return makeMemoryStore<K, V>(sem, elems)
   })

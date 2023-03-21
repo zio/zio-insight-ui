@@ -1,10 +1,11 @@
-import * as Log from "@core/services/Logger"
 import * as C from "@effect/core/io/Clock"
 import * as T from "@effect/core/io/Effect"
 import * as L from "@effect/core/io/Layer"
 import * as Ref from "@effect/core/io/Ref"
 import * as Sem from "@effect/core/stm/TSemaphore"
 import { Tag } from "@tsplus/stdlib/service/Tag"
+
+import * as Log from "@core/services/Logger"
 
 /**
  * A simple ID generator to generate unique strings within the application,
@@ -41,12 +42,11 @@ function make(
       })
     )
 
-  return T.sync(
-    () =>
-      <IdGenerator>{
-        nextId: (prefix: string) => update(prefix),
-      }
-  )
+  return T.sync(() => {
+    return {
+      nextId: (prefix: string) => update(prefix),
+    } as IdGenerator
+  })
 }
 
 export const live = L.fromEffect(IdGenerator)(

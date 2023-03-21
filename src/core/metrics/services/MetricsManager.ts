@@ -1,7 +1,3 @@
-import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
-import type { MetricState } from "@core/metrics/model/zio/metrics/MetricState"
-import * as IdSvc from "@core/services/IdGenerator"
-import * as Log from "@core/services/Logger"
 import * as T from "@effect/core/io/Effect"
 import * as Hub from "@effect/core/io/Hub"
 import * as L from "@effect/core/io/Layer"
@@ -14,6 +10,11 @@ import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as D from "@tsplus/stdlib/data/Duration"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import { Tag } from "@tsplus/stdlib/service/Tag"
+
+import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
+import type { MetricState } from "@core/metrics/model/zio/metrics/MetricState"
+import * as IdSvc from "@core/services/IdGenerator"
+import * as Log from "@core/services/Logger"
 
 import * as Insight from "./InsightService"
 
@@ -131,7 +132,7 @@ function makeMetricsManager(
       T.catchAll((err) =>
         pipe(
           log.warn(`Error getting metric states from server: <${JSON.stringify(err)}>`),
-          T.flatMap((_) => T.sync(() => <MetricState[]>[]))
+          T.flatMap((_) => T.sync(() => [] as MetricState[]))
         )
       ),
       T.tap((res) => log.debug(`Got <${res.length}> metric states from Application`))
@@ -161,18 +162,17 @@ function makeMetricsManager(
 
   return pipe(
     T.forkDaemon(T.schedule(Sch.fixed(D.seconds(5)))(pollMetrics())),
-    T.map(
-      () =>
-        <MetricsManager>{
-          createSubscription,
-          removeSubscription,
-          modifySubscription,
-          registeredKeys,
-          updates,
-          reset,
-          poll: pollMetrics,
-        }
-    )
+    T.map(() => {
+      return {
+        createSubscription,
+        removeSubscription,
+        modifySubscription,
+        registeredKeys,
+        updates,
+        reset,
+        poll: pollMetrics,
+      } as MetricsManager
+    })
   )
 }
 

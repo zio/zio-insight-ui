@@ -1,8 +1,5 @@
 import * as App from "@components/App"
 import { TableMetricKeys } from "@components/TableMetricKey"
-import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
-import * as GDM from "@core/metrics/services/GraphDataManager"
-import * as Insight from "@core/metrics/services/InsightService"
 import * as T from "@effect/core/io/Effect"
 import * as Ex from "@effect/core/io/Exit"
 import * as FiberId from "@effect/core/io/FiberId"
@@ -10,6 +7,10 @@ import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as HS from "@tsplus/stdlib/collections/HashSet"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as React from "react"
+
+import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
+import * as GDM from "@core/metrics/services/GraphDataManager"
+import * as Insight from "@core/metrics/services/InsightService"
 
 import { Scrollable } from "./Scrollable"
 
@@ -122,7 +123,8 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
         <TableMetricKeys
           available={available}
           selection={selected}
-          onSelect={updateSelected}></TableMetricKeys>
+          onSelect={updateSelected}
+        ></TableMetricKeys>
       </Scrollable>
       <div className="m-2 flex-none flex flex-row justify-end">
         <span className="btn btn-neutral" onClick={closeHandler}>
@@ -130,7 +132,8 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
         </span>
         <span
           className={`ml-2 btn ${selected.length > 0 ? "btn-primary" : "btn-disabled"}`}
-          onClick={applySelection}>
+          onClick={applySelection}
+        >
           {selected.length > 0 ? "Apply Changes" : "Nothing Selected"}
         </span>
       </div>

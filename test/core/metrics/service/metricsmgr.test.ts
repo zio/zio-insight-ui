@@ -1,24 +1,25 @@
-import * as AL from "@core/AppLayer"
-import type * as Model from "@core/metrics/model/zio/metrics/MetricKey"
-import * as Insight from "@core/metrics/services/InsightService"
-import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
 import * as T from "@effect/core/io/Effect"
 import * as F from "@effect/core/io/Fiber"
 import * as S from "@effect/core/stream/Stream"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
+import * as AL from "@core/AppLayer"
+import type * as Model from "@core/metrics/model/zio/metrics/MetricKey"
+import * as Insight from "@core/metrics/services/InsightService"
+import * as MM from "@core/metrics/services/MetricsManager"
+import * as Log from "@core/services/Logger"
+
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
 
-const newKeys = C.make(<Model.InsightKey>{
+const newKeys = C.make({
   id: "1234-5678",
-  key: <Model.MetricKey>{
+  key: {
     name: "foo",
     labels: [],
     metricType: "Counter",
-  },
-})
+  } as Model.MetricKey,
+} as Model.InsightKey)
 
 describe("MetricsManager", () => {
   it("can be reset", async () => {
@@ -90,7 +91,7 @@ describe("MetricsManager", () => {
         const keys = yield* $(
           pipe(
             insight.getMetricKeys,
-            T.catchAll((_) => T.sync(() => <Model.InsightKey[]>[]))
+            T.catchAll((_) => T.sync(() => [] as Model.InsightKey[]))
           )
         )
 

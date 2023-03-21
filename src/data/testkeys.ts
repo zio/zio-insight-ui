@@ -1,8 +1,9 @@
-import * as MK from "@core/metrics/model/zio/metrics/MetricKey"
 import keysObj from "@data/keys.json"
 import * as T from "@effect/core/io/Effect"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import { pipe } from "@tsplus/stdlib/data/Function"
+
+import * as MK from "@core/metrics/model/zio/metrics/MetricKey"
 
 export const staticKeys: T.Effect<
   never,
@@ -10,7 +11,7 @@ export const staticKeys: T.Effect<
   HMap.HashMap<string, MK.InsightKey>
 > = pipe(
   MK.metricKeysFromInsight(keysObj),
-  T.map((keys) => <[string, MK.InsightKey][]>keys.map((k) => [k.id, k])),
+  T.map((keys) => keys.map((k) => [k.id, k]) as [string, MK.InsightKey][]),
   T.map(HMap.from),
   T.catchAll((_) => T.sync(() => HMap.empty<string, MK.InsightKey>()))
 )

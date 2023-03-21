@@ -1,11 +1,12 @@
-import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
-import * as MS from "@core/services/MemoryStore"
 import * as T from "@effect/core/io/Effect"
 import * as L from "@effect/core/io/Layer"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as MB from "@tsplus/stdlib/data/Maybe"
 import { Tag } from "@tsplus/stdlib/service/Tag"
+
+import * as MM from "@core/metrics/services/MetricsManager"
+import * as Log from "@core/services/Logger"
+import * as MS from "@core/services/MemoryStore"
 
 import * as GDS from "./GraphDataService"
 
@@ -48,7 +49,7 @@ function makeGraphDataManager(
     pipe(
       store.get(panelId),
       T.map((v) => MB.some(v)),
-      T.catchAll((_) => T.sync(() => <MB.Maybe<GDS.GraphDataService>>MB.none))
+      T.catchAll((_) => T.sync(() => MB.none as MB.Maybe<GDS.GraphDataService>))
     )
 
   const createGDS = () =>
@@ -67,18 +68,18 @@ function makeGraphDataManager(
         case "None":
           return yield* $(store.set(panelId, createGDS()))
         case "Some":
-          return yield* $(T.fail(<PanelAlreadyRegistered>{ id: panelId }))
+          return yield* $(T.fail({ id: panelId } as PanelAlreadyRegistered))
       }
     })
 
   const deregisterPanel = (panelId: string) =>
     store.remove(panelId, (gds) => gds.close())
 
-  return <GraphDataManager>{
+  return {
     lookup: lookupPanel,
     register: registerPanel,
     deregister: deregisterPanel,
-  }
+  } as GraphDataManager
 }
 
 export const live: L.Layer<

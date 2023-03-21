@@ -1,7 +1,8 @@
+import * as T from "@effect/core/io/Effect"
+
 import * as AL from "@core/AppLayer"
 import * as Insight from "@core/metrics/services/InsightService"
 import * as Log from "@core/services/Logger"
-import * as T from "@effect/core/io/Effect"
 
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
 

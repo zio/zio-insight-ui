@@ -87,7 +87,8 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
           <span
             className={`${
               props.maximized || cfgEnabled ? "ml-2 underline text-2xl" : ""
-            }`}>
+            }`}
+          >
             {props.title}
           </span>
           {controls()}
@@ -97,7 +98,8 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
           <div
             className={`overflow-auto grid grid-col-1 place-items-stretch ${
               props.maximized || cfgEnabled ? "" : "p-2 border"
-            }`}>
+            }`}
+          >
             {(() => {
               if (cfgEnabled) return props.config || props.content
               else return props.content

@@ -1,11 +1,5 @@
 // required import for time based axis
-import "chartjs-adapter-date-fns"
-
 import { RuntimeContext } from "@components/App"
-import * as TS from "@core/metrics/model/insight/TimeSeries"
-import { keyAsString } from "@core/metrics/model/zio/metrics/MetricKey"
-import * as GDM from "@core/metrics/services/GraphDataManager"
-import type * as GDS from "@core/metrics/services/GraphDataService"
 import * as T from "@effect/core/io/Effect"
 import * as F from "@effect/core/io/Fiber"
 import * as S from "@effect/core/stream/Stream"
@@ -15,7 +9,13 @@ import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as MB from "@tsplus/stdlib/data/Maybe"
 import { Chart } from "chart.js/auto"
+import "chartjs-adapter-date-fns"
 import * as React from "react"
+
+import * as TS from "@core/metrics/model/insight/TimeSeries"
+import { keyAsString } from "@core/metrics/model/zio/metrics/MetricKey"
+import * as GDM from "@core/metrics/services/GraphDataManager"
+import type * as GDS from "@core/metrics/services/GraphDataService"
 
 // A single line in the chart consists of the configuration for the visual
 // properties of the line (color, line style, ...) and the array of points

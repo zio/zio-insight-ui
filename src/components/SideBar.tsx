@@ -71,7 +71,8 @@ export const SideBar: React.FC<{}> = (props) => {
     <div
       className={`${
         shown ? "w-48" : "w-14"
-      } flex flex-col bg-neutral text-neutral-content border-r`}>
+      } flex flex-col bg-neutral text-neutral-content border-r`}
+    >
       <div className="h-[70px] border-b-2 relative">{collapseBtn}</div>
       <div className="h-full flex flex-col">
         {entries.map((e) => (
@@ -83,7 +84,8 @@ export const SideBar: React.FC<{}> = (props) => {
                 isActive ? "bg-accent" : "hover:bg-base-100"
               } ${shown ? "" : "tooltip tooltip-right tooltip-secondary"}`
             }}
-            to={e.path}>
+            to={e.path}
+          >
             <div className="h-8 w-full flex flex-row justify-left">
               <span>{e.icon}</span>
               {shown ? <span className="flex self-center">{e.title}</span> : <></>}

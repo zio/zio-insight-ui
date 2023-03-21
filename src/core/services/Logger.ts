@@ -1,4 +1,3 @@
-import { formatDate } from "@core/utils"
 import * as C from "@effect/core/io/Clock"
 import * as T from "@effect/core/io/Effect"
 import * as L from "@effect/core/io/Layer"
@@ -6,19 +5,21 @@ import * as Ref from "@effect/core/io/Ref"
 import { pipe } from "@tsplus/stdlib/data/Function/pipe"
 import { Tag } from "@tsplus/stdlib/service/Tag"
 
+import { formatDate } from "@core/utils"
+
 export interface LogLevel {
   name: string
   intLevel: number
 }
 
-export const Off = <LogLevel>{ name: "OFF", intLevel: 0 }
-export const Fatal = <LogLevel>{ name: "FATAL", intLevel: 100 }
-export const Error = <LogLevel>{ name: "ERROR", intLevel: 200 }
-export const Warn = <LogLevel>{ name: "WARN", intLevel: 300 }
-export const Info = <LogLevel>{ name: "INFO", intLevel: 400 }
-export const Debug = <LogLevel>{ name: "DEBUG", intLevel: 500 }
-export const Trace = <LogLevel>{ name: "TRACE", intLevel: 600 }
-export const All = <LogLevel>{ name: "ALL", intLevel: 10000 }
+export const Off: LogLevel = { name: "OFF", intLevel: 0 }
+export const Fatal: LogLevel = { name: "FATAL", intLevel: 100 }
+export const Error: LogLevel = { name: "ERROR", intLevel: 200 }
+export const Info: LogLevel = { name: "INFO", intLevel: 400 }
+export const Debug: LogLevel = { name: "DEBUG", intLevel: 500 }
+export const Warn: LogLevel = { name: "WARN", intLevel: 300 }
+export const Trace: LogLevel = { name: "TRACE", intLevel: 600 }
+export const All: LogLevel = { name: "ALL", intLevel: 10000 }
 
 export interface ConsoleService {
   readonly log: (msg: string) => T.Effect<never, never, void>
@@ -91,7 +92,7 @@ function makeLogger(l: LogLevel) {
         })
       )
 
-    return <LogService>{
+    return {
       setLogLevel: (newLvl: LogLevel) => lvl.set(newLvl),
       log: (lvl: LogLevel, msg: string) => doLog(lvl, msg),
       fatal: (msg: string) => doLog(Fatal, msg),
@@ -100,7 +101,7 @@ function makeLogger(l: LogLevel) {
       info: (msg: string) => doLog(Info, msg),
       debug: (msg: string) => doLog(Debug, msg),
       trace: (msg: string) => doLog(Trace, msg),
-    }
+    } as LogService
   })
 }
 

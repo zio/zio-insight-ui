@@ -1,6 +1,7 @@
-import * as AL from "@core/AppLayer"
 import * as React from "react"
 import { IconContext } from "react-icons/lib"
+
+import * as AL from "@core/AppLayer"
 
 import { AppRouter } from "./AppRouter"
 
@@ -15,7 +16,8 @@ export function App() {
       <IconContext.Provider
         value={{
           className: "text-neutral-content text-3xl mx-2",
-        }}>
+        }}
+      >
         <AppRouter />
       </IconContext.Provider>
     </RuntimeContext.Provider>

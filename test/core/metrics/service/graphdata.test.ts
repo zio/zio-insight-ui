@@ -1,7 +1,3 @@
-import * as AL from "@core/AppLayer"
-import * as GDS from "@core/metrics/services/GraphDataService"
-import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
 import * as T from "@effect/core/io/Effect"
 import * as F from "@effect/core/io/Fiber"
 import * as S from "@effect/core/stream/Stream"
@@ -9,6 +5,11 @@ import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import { pipe } from "@tsplus/stdlib/data/Function"
+
+import * as AL from "@core/AppLayer"
+import * as GDS from "@core/metrics/services/GraphDataService"
+import * as MM from "@core/metrics/services/MetricsManager"
+import * as Log from "@core/services/Logger"
 
 import * as TK from "../../../../src/data/testkeys"
 

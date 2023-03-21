@@ -1,8 +1,3 @@
-import * as Color from "@core/Color"
-import type * as MK from "@core/metrics/model/zio/metrics/MetricKey"
-import type * as State from "@core/metrics/model/zio/metrics/MetricState"
-import type * as Log from "@core/services/Logger"
-import { formatDate } from "@core/utils"
 import * as T from "@effect/core/io/Effect"
 import * as Ref from "@effect/core/io/Ref"
 import * as C from "@tsplus/stdlib/collections/Chunk"
@@ -10,6 +5,12 @@ import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as MB from "@tsplus/stdlib/data/Maybe"
 import type { Ord } from "@tsplus/stdlib/prelude/Ord"
+
+import * as Color from "@core/Color"
+import type * as MK from "@core/metrics/model/zio/metrics/MetricKey"
+import type * as State from "@core/metrics/model/zio/metrics/MetricState"
+import type * as Log from "@core/services/Logger"
+import { formatDate } from "@core/utils"
 
 // A time series key uniquely defines a single measured piece of data over a
 // period of time
@@ -48,13 +49,13 @@ export class TimeSeriesEntry {
   }
 }
 
-const OrdTimeSeriesEntry = <Ord<TimeSeriesEntry>>{
+const OrdTimeSeriesEntry = {
   compare: (x: TimeSeriesEntry, y: TimeSeriesEntry) => {
     if (x.when.getTime() < y.when.getTime()) return -1
     else if (x.when.getTime() > y.when.getTime()) return 1
     else return 0
   },
-}
+} as Ord<TimeSeriesEntry>
 
 export interface TimeSeries {
   readonly id: TimeSeriesKey
@@ -86,7 +87,7 @@ export const makeTimeSeries =
         }
       }
 
-      return <TimeSeries>{
+      return {
         id,
         maxEntries: () => maxRef.get,
         updateMaxEntries: (newMax: number) =>
@@ -116,31 +117,31 @@ export const makeTimeSeries =
             }
           }),
         entries: () => entriesRef.get,
-      }
+      } as TimeSeries
     })
   }
 
 export const tsEntriesFromState = (s: State.MetricState) => {
   const ts = new Date(s.retrieved)
-  const res = <TimeSeriesEntry[]>[]
+  const res = [] as TimeSeriesEntry[]
 
   switch (s.key.metricType) {
     case "Counter": {
-      const counter = <State.CounterState>s.state
+      const counter = s.state as State.CounterState
       res.push(
         new TimeSeriesEntry({ key: s.insightKey(), subKey: MB.none }, ts, counter.count)
       )
       break
     }
     case "Gauge": {
-      const gauge = <State.GaugeState>s.state
+      const gauge = s.state as State.GaugeState
       res.push(
         new TimeSeriesEntry({ key: s.insightKey(), subKey: MB.none }, ts, gauge.value)
       )
       break
     }
     case "Histogram": {
-      const hist = <State.HistogramState>s.state
+      const hist = s.state as State.HistogramState
       hist.buckets.forEach(([k, v]) =>
         res.push(
           new TimeSeriesEntry({ key: s.insightKey(), subKey: MB.some(`${k}`) }, ts, v)
@@ -158,7 +159,7 @@ export const tsEntriesFromState = (s: State.MetricState) => {
       break
     }
     case "Summary": {
-      const summ = <State.SummaryState>s.state
+      const summ = s.state as State.SummaryState
       summ.quantiles.forEach(([q, v]) =>
         res.push(
           new TimeSeriesEntry({ key: s.insightKey(), subKey: MB.some(`${q}`) }, ts, v)
@@ -178,7 +179,7 @@ export const tsEntriesFromState = (s: State.MetricState) => {
       break
     }
     case "Frequency": {
-      const freq = <State.FrequencyState>s.state
+      const freq = s.state as State.FrequencyState
       HMap.forEachWithIndex<string, number>((k, v) =>
         res.push(
           new TimeSeriesEntry({ key: s.insightKey(), subKey: MB.some(`${k}`) }, ts, v)

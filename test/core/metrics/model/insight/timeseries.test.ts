@@ -1,14 +1,15 @@
-import * as AL from "@core/AppLayer"
-import * as TS from "@core/metrics/model/insight/TimeSeries"
-import * as Insight from "@core/metrics/model/zio/metrics/MetricState"
-import type * as MT from "@core/metrics/model/zio/metrics/MetricType"
-import * as Log from "@core/services/Logger"
 import states from "@data/state.json"
 import * as T from "@effect/core/io/Effect"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as MB from "@tsplus/stdlib/data/Maybe"
+
+import * as AL from "@core/AppLayer"
+import * as TS from "@core/metrics/model/insight/TimeSeries"
+import * as Insight from "@core/metrics/model/zio/metrics/MetricState"
+import type * as MT from "@core/metrics/model/zio/metrics/MetricType"
+import * as Log from "@core/services/Logger"
 
 import {
   counterId,
@@ -20,8 +21,8 @@ import {
 
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
 
-const makeKey = (name: string, metricType: MT.MetricType) =>
-  <TS.TimeSeriesKey>{
+const makeKey = (name: string, metricType: MT.MetricType) => {
+  return {
     key: {
       id: name,
       key: {
@@ -31,7 +32,8 @@ const makeKey = (name: string, metricType: MT.MetricType) =>
       },
     },
     subKey: MB.none,
-  }
+  } as TS.TimeSeriesKey
+}
 
 // just a helper to get time series entries from a state id
 const entries = (id: string) =>
@@ -62,11 +64,11 @@ describe("TimeSeries", () => {
         const log = yield* $(T.service(Log.LogService))
         const key = makeKey("foo", "Counter")
         const ts = yield* $(TS.makeTimeSeries(key, 2)(log))
-        const e = <TS.TimeSeriesEntry>{
+        const e = {
           id: key,
           when: new Date(),
           value: 100,
-        }
+        } as TS.TimeSeriesEntry
         yield* $(ts.record(e))
         return yield* $(ts.entries())
       })
@@ -80,11 +82,11 @@ describe("TimeSeries", () => {
       T.gen(function* ($) {
         const log = yield* $(T.service(Log.LogService))
         const ts = yield* $(TS.makeTimeSeries(makeKey("foo", "Counter"), 2)(log))
-        const e = <TS.TimeSeriesEntry>{
+        const e = {
           id: makeKey("bar", "Counter"),
           when: new Date(),
           value: 100,
-        }
+        } as TS.TimeSeriesEntry
         yield* $(ts.record(e))
         return yield* $(ts.entries())
       })
@@ -97,14 +99,13 @@ describe("TimeSeries", () => {
     const now = new Date()
     const key = makeKey("foo", "Counter")
     const entries = [...Array(5).keys()]
-      .map(
-        (n) =>
-          <TS.TimeSeriesEntry>{
-            id: key,
-            when: new Date(now.getTime() - n * 1000),
-            value: n,
-          }
-      )
+      .map((n) => {
+        return {
+          id: key,
+          when: new Date(now.getTime() - n * 1000),
+          value: n,
+        } as TS.TimeSeriesEntry
+      })
       .reverse()
 
     const res = await testRt.unsafeRunPromise(

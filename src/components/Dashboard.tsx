@@ -1,11 +1,7 @@
-import "@styles/grid.css"
-
 import * as App from "@components/App"
-import * as GDM from "@core/metrics/services/GraphDataManager"
-import * as InsightSvc from "@core/metrics/services/InsightService"
-import * as IdSvc from "@core/services/IdGenerator"
 import * as TK from "@data/testkeys"
 import * as T from "@effect/core/io/Effect"
+import "@styles/grid.css"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as MB from "@tsplus/stdlib/data/Maybe"
@@ -14,6 +10,10 @@ import type { Layout, Layouts } from "react-grid-layout"
 import { Responsive, WidthProvider } from "react-grid-layout"
 import * as BiIcons from "react-icons/bi"
 import * as MdIcons from "react-icons/md"
+
+import * as GDM from "@core/metrics/services/GraphDataManager"
+import * as InsightSvc from "@core/metrics/services/InsightService"
+import * as IdSvc from "@core/services/IdGenerator"
 
 import { ChartConfigPanel } from "./panel/ChartConfigPanel"
 import { ChartPanel } from "./panel/ChartPanel"
@@ -300,7 +300,8 @@ export function InsightGridLayout() {
           onBreakpointChange={(bp: string, _: number) =>
             updateState({ newBreakpoint: bp })
           }
-          rowHeight={50}>
+          rowHeight={50}
+        >
           {Coll.toArray(dbState.content).map((el) => {
             const id = el[0]
             return (
@@ -315,7 +316,8 @@ export function InsightGridLayout() {
                   configure={configurePanel}
                   maximize={maximizePanel}
                   content={el[1].content}
-                  config={el[1].config}></GridFrame>
+                  config={el[1].config}
+                ></GridFrame>
               </div>
             )
           })}
@@ -342,7 +344,8 @@ export function InsightGridLayout() {
             configure={configurePanel}
             maximize={maximizePanel}
             content={mbMax.value.content}
-            config={mbMax.value.config}></GridFrame>
+            config={mbMax.value.config}
+          ></GridFrame>
         )
     }
   }

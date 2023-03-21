@@ -33,7 +33,13 @@ module.exports = {
     "no-irregular-whitespace": "off",
     "object-shorthand": "error",
     "prefer-destructuring": "off",
-    "sort-imports": "off",
+    "sort-imports": ["error", { 
+      ignoreCase: true,
+      ignoreDeclarationSort: true,
+      ignoreMemberSort: false,
+      memberSyntaxSortOrder: ["none", "all", "multiple", "single"],
+      allowSeparatedGroups: true
+    }],
 
     // all other rules, sorted alphabetically
     "@typescript-eslint/ban-ts-comment": "off",
@@ -53,7 +59,7 @@ module.exports = {
     "import/no-duplicates": "error",
     "import/no-unresolved": "error",
     "import/order": "off",
-    "simple-import-sort/imports": "error",
+    "simple-import-sort/imports": "off",
     "sort-destructure-keys/sort-destructure-keys": "error"
   }
 }

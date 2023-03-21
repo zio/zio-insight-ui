@@ -26,6 +26,7 @@ export function Metrics() {
             /* ignore */
           }}
         />
-      }></GridFrame>
+      }
+    ></GridFrame>
   )
 }

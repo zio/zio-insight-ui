@@ -1,7 +1,3 @@
-import * as TS from "@core/metrics/model/insight/TimeSeries"
-import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
-import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
 import * as T from "@effect/core/io/Effect"
 import * as F from "@effect/core/io/Fiber"
 import * as Hub from "@effect/core/io/Hub"
@@ -12,6 +8,11 @@ import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import { Tag } from "@tsplus/stdlib/service/Tag"
+
+import * as TS from "@core/metrics/model/insight/TimeSeries"
+import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
+import * as MM from "@core/metrics/services/MetricsManager"
+import * as Log from "@core/services/Logger"
 
 import type { MetricState } from "../model/zio/metrics/MetricState"
 
@@ -92,7 +93,7 @@ function makeGraphDataService(
               series.entries(),
               T.map(
                 (entries) =>
-                  <[TS.TimeSeriesKey, C.Chunk<TS.TimeSeriesEntry>]>[id, entries]
+                  [id, entries] as [TS.TimeSeriesKey, C.Chunk<TS.TimeSeriesEntry>]
               )
             )
           )
@@ -197,24 +198,23 @@ function makeGraphDataService(
   return pipe(
     subscriber(),
     T.flatMap((f) =>
-      T.sync(
-        () =>
-          <GraphDataService>{
-            subscription: subscriptionId,
-            setMetrics,
-            metrics,
-            setMaxEntries,
-            maxEntries,
-            current,
-            data,
-            close: () =>
-              pipe(
-                stopped.set(true),
-                T.flatMap((_) => mm.removeSubscription(subscriptionId)),
-                T.flatMap((_) => F.interrupt(f))
-              ),
-          }
-      )
+      T.sync(() => {
+        return {
+          subscription: subscriptionId,
+          setMetrics,
+          metrics,
+          setMaxEntries,
+          maxEntries,
+          current,
+          data,
+          close: () =>
+            pipe(
+              stopped.set(true),
+              T.flatMap((_) => mm.removeSubscription(subscriptionId)),
+              T.flatMap((_) => F.interrupt(f))
+            ),
+        } as GraphDataService
+      })
     )
   )
 }

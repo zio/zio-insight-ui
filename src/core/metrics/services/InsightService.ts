@@ -1,3 +1,11 @@
+import staticKeys from "@data/keys.json"
+import staticFibers from "@data/sampleFibers.json"
+import staticStates from "@data/state.json"
+import * as T from "@effect/core/io/Effect"
+import * as L from "@effect/core/io/Layer"
+import { pipe } from "@tsplus/stdlib/data/Function"
+import { Tag } from "@tsplus/stdlib/service/Tag"
+
 import type {
   FiberInfo,
   InvalidFibers,
@@ -15,13 +23,6 @@ import type {
 import { metricStatesFromInsight } from "@core/metrics/model/zio/metrics/MetricState"
 import * as Log from "@core/services/Logger"
 import * as Req from "@core/services/Request"
-import staticKeys from "@data/keys.json"
-import staticFibers from "@data/sampleFibers.json"
-import staticStates from "@data/state.json"
-import * as T from "@effect/core/io/Effect"
-import * as L from "@effect/core/io/Layer"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import { Tag } from "@tsplus/stdlib/service/Tag"
 
 const baseUrl = "http://127.0.0.1:8080/insight"
 
@@ -59,7 +60,7 @@ function makeLiveMetrics(logger: Log.LogService): InsightService {
     ),
     getMetricStates: (keys: string[]) =>
       T.gen(function* ($) {
-        const req = <StateRequest>{ selection: keys }
+        const req: StateRequest = { selection: keys }
         const raw = yield* $(
           Req.request(`${baseUrl}/metrics/metrics`, {
             method: "POST",

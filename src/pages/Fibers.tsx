@@ -1,8 +1,9 @@
 import * as App from "@components/App"
-import type { FiberInfo } from "@core/metrics/model/insight/fibers/FiberInfo"
-import * as Insight from "@core/metrics/services/InsightService"
 import * as T from "@effect/core/io/Effect"
 import * as React from "react"
+
+import type { FiberInfo } from "@core/metrics/model/insight/fibers/FiberInfo"
+import * as Insight from "@core/metrics/services/InsightService"
 
 export const Fibers: React.FC<{}> = () => {
   const appRt = React.useContext(App.RuntimeContext)

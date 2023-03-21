@@ -1,5 +1,6 @@
-import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import React from "react"
+
+import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 
 /**
  * A component for rendering available metric keys in a table. Effectively this
@@ -57,7 +58,8 @@ const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
         checked={props.checked}
         onChange={() => {
           props.toggled(props.metricKey)
-        }}></input>
+        }}
+      ></input>
     </td>
     <td>{props.metricKey.key.metricType}</td>
     <td>{props.metricKey.key.name}</td>

@@ -24,13 +24,13 @@ export const insightKeySchema = Z.object({
 
 export interface InsightKey extends Z.TypeOf<typeof insightKeySchema> {}
 
-export const OrdInsightKey = <Ord<InsightKey>>{
+export const OrdInsightKey = {
   compare: (x: InsightKey, y: InsightKey) => {
     if (x.id < y.id) return -1
     else if (x.id > y.id) return 1
     else return 0
   },
-}
+} as Ord<InsightKey>
 
 export const keyAsString = (mk: MetricKey) =>
   `${mk.metricType}:${mk.name}:${mk.labels.map((l) => l.key + "=" + l.value).join(",")}`
