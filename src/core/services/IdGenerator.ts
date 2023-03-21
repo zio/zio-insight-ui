@@ -1,18 +1,18 @@
+import * as Log from "@core/services/Logger"
+import * as C from "@effect/core/io/Clock"
 import * as T from "@effect/core/io/Effect"
 import * as L from "@effect/core/io/Layer"
 import * as Ref from "@effect/core/io/Ref"
-import { Tag } from "@tsplus/stdlib/service/Tag"
-import * as C from "@effect/core/io/Clock"
-import * as Log from "@core/services/Logger"
 import * as Sem from "@effect/core/stm/TSemaphore"
+import { Tag } from "@tsplus/stdlib/service/Tag"
 
 /**
- * A simple ID generator to generate unique strings within the application, 
- * can be used to generated distinguished keys for anything that needs to be 
- * distinguished. 
+ * A simple ID generator to generate unique strings within the application,
+ * can be used to generated distinguished keys for anything that needs to be
+ * distinguished.
  */
-export interface IdGenerator { 
-  readonly nextId : (_ : string) => T.Effect<never, never, string>
+export interface IdGenerator {
+  readonly nextId: (_: string) => T.Effect<never, never, string>
 }
 
 export const IdGenerator = Tag<IdGenerator>()
@@ -20,18 +20,17 @@ export const IdGenerator = Tag<IdGenerator>()
 function make(
   log: Log.LogService,
   sem: Sem.TSemaphore,
-  lastTS : Ref.Ref<number>,
+  lastTS: Ref.Ref<number>,
   cnt: Ref.Ref<number>
 ) {
-
-  // make sure the key generator runs atomically 
-  const update = (prefix: string) => 
+  // make sure the key generator runs atomically
+  const update = (prefix: string) =>
     Sem.withPermit(sem)(
-      T.gen(function* ($) { 
+      T.gen(function* ($) {
         const now = yield* $(C.currentTime)
         const curr = yield* $(lastTS.getAndSet(now))
         if (curr == now) {
-          yield* $(cnt.update(c => c+1))
+          yield* $(cnt.update((c) => c + 1))
         } else {
           yield* $(cnt.set(1))
         }
@@ -42,10 +41,11 @@ function make(
       })
     )
 
-  return (
-    T.sync(() => <IdGenerator>{ 
-      nextId : (prefix: string) => update(prefix)
-    })
+  return T.sync(
+    () =>
+      <IdGenerator>{
+        nextId: (prefix: string) => update(prefix),
+      }
   )
 }
 
@@ -61,4 +61,4 @@ export const live = L.fromEffect(IdGenerator)(
 )
 
 export const nextId = (prefix: string) =>
-  T.serviceWithEffect(IdGenerator, svc => svc.nextId(prefix))
+  T.serviceWithEffect(IdGenerator, (svc) => svc.nextId(prefix))

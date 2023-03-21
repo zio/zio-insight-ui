@@ -1,26 +1,23 @@
-import * as T from "@effect/core/io/Effect"
-import * as S from "@effect/core/stream/Stream"
-import * as F from "@effect/core/io/Fiber"
 import * as AL from "@core/AppLayer"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import * as HSet from "@tsplus/stdlib/collections/HashSet"
-import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as GDS from "@core/metrics/services/GraphDataService"
 import * as MM from "@core/metrics/services/MetricsManager"
-import * as TK from  "../../../../src/data/testkeys"
 import * as Log from "@core/services/Logger"
+import * as T from "@effect/core/io/Effect"
+import * as F from "@effect/core/io/Fiber"
+import * as S from "@effect/core/stream/Stream"
+import * as C from "@tsplus/stdlib/collections/Chunk"
+import * as HMap from "@tsplus/stdlib/collections/HashMap"
+import * as HSet from "@tsplus/stdlib/collections/HashSet"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
-const testRt = AL.unsafeMakeRuntime(
-  AL.appLayerStatic(Log.Off)
-).runtime
+import * as TK from "../../../../src/data/testkeys"
+
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
 
 const gds = GDS.createGraphDataService()
 
 describe("GraphDataService", () => {
-
   it("should start with an empty set of keys", async () => {
-
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const svc = yield* $(gds)
@@ -33,7 +30,6 @@ describe("GraphDataService", () => {
   })
 
   it("should allow to register keys for observation", async () => {
-
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const svc = yield* $(gds)
@@ -63,7 +59,6 @@ describe("GraphDataService", () => {
   })
 
   it("should push updates to relevant timeseries", async () => {
-    
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
@@ -73,13 +68,7 @@ describe("GraphDataService", () => {
         const data = yield* $(svc.data())
         yield* $(svc.setMetrics(counterKey))
 
-        const f = yield* $(
-          pipe(
-            S.take(1)(data),
-            S.runCollect,
-            T.fork
-          )
-        )
+        const f = yield* $(pipe(S.take(1)(data), S.runCollect, T.fork))
 
         yield* $(mm.poll())
         const res = yield* $(F.join(f))
@@ -93,7 +82,6 @@ describe("GraphDataService", () => {
   })
 
   it("should drop timeseries when the corresponding metric key has been removed", async () => {
-
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
@@ -105,13 +93,7 @@ describe("GraphDataService", () => {
         const data = yield* $(svc.data())
         yield* $(svc.setMetrics(ck, gk))
 
-        const f = yield* $(
-          pipe(
-            S.take(1)(data),
-            S.runCollect,
-            T.fork
-          )
-        )
+        const f = yield* $(pipe(S.take(1)(data), S.runCollect, T.fork))
 
         yield* $(mm.poll())
         // We wait until the GDS has been updated

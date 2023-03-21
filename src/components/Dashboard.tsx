@@ -1,20 +1,23 @@
-import * as T from "@effect/core/io/Effect"
-import * as React from "react"
-import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout"
-import * as App from "@components/App"
 import "@styles/grid.css"
-import { ChartPanel } from "./panel/ChartPanel"
-import { ChartConfigPanel } from "./panel/ChartConfigPanel"
-import { GridFrame } from "./panel/GridFrame"
-import * as TK from "@data/testkeys"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import * as Coll from "@tsplus/stdlib/collections/Collection"
-import * as MB from "@tsplus/stdlib/data/Maybe"
-import * as InsightSvc from "@core/metrics/services/InsightService"
+
+import * as App from "@components/App"
 import * as GDM from "@core/metrics/services/GraphDataManager"
+import * as InsightSvc from "@core/metrics/services/InsightService"
 import * as IdSvc from "@core/services/IdGenerator"
-import * as MdIcons from "react-icons/md"
+import * as TK from "@data/testkeys"
+import * as T from "@effect/core/io/Effect"
+import * as Coll from "@tsplus/stdlib/collections/Collection"
+import * as HMap from "@tsplus/stdlib/collections/HashMap"
+import * as MB from "@tsplus/stdlib/data/Maybe"
+import * as React from "react"
+import type { Layout, Layouts } from "react-grid-layout"
+import { Responsive, WidthProvider } from "react-grid-layout"
 import * as BiIcons from "react-icons/bi"
+import * as MdIcons from "react-icons/md"
+
+import { ChartConfigPanel } from "./panel/ChartConfigPanel"
+import { ChartPanel } from "./panel/ChartPanel"
+import { GridFrame } from "./panel/GridFrame"
 
 // An Insight Dashboard uses react-grid-layout under the covers to allow the users to create and arrange their
 // panels as they see fit. In that sense a dashboard is a collection of views, each of which is an instance of
@@ -75,11 +78,11 @@ export function InsightGridLayout() {
     breakpoint: "md",
     layouts: {
       md: [],
-      lg: []
+      lg: [],
     },
     content: HMap.empty(),
     maximized: MB.none,
-    configure: MB.none
+    configure: MB.none,
   } as DashboardState)
 
   const updateState = (p: {
@@ -95,7 +98,7 @@ export function InsightGridLayout() {
         layouts: p.newLayouts || curr.layouts,
         content: p.newContent || curr.content,
         maximized: p.newMaximized || curr.maximized,
-        configure: p.newConfigure || curr.configure
+        configure: p.newConfigure || curr.configure,
       } as DashboardState
     })
   }
@@ -140,7 +143,7 @@ export function InsightGridLayout() {
 
           return {
             breakpoint: curr.breakpoint,
-            layouts: layouts,
+            layouts,
             content: HMap.remove(panelId)(curr.content),
             // If we close the currently maximized panel we need to clear the
             // maximized flag as well
@@ -167,7 +170,7 @@ export function InsightGridLayout() {
                     return curr.configure
                   }
               }
-            })()
+            })(),
           } as DashboardState
         })
       )
@@ -204,7 +207,7 @@ export function InsightGridLayout() {
             layouts: state.layouts,
             content: state.content,
             maximized: newVal,
-            configure: state.configure
+            configure: state.configure,
           }
         case "Cfg":
           return {
@@ -212,7 +215,7 @@ export function InsightGridLayout() {
             layouts: state.layouts,
             content: state.content,
             maximized: state.maximized,
-            configure: newVal
+            configure: newVal,
           }
       }
     })
@@ -234,7 +237,7 @@ export function InsightGridLayout() {
       switch (res._tag) {
         case "Failure":
           break
-        case "Success":
+        case "Success": {
           const newPanel = <ChartPanel id={res.value} />
           const cfgPanel = (
             <ChartConfigPanel
@@ -254,9 +257,10 @@ export function InsightGridLayout() {
             newContent: HMap.set(res.value, {
               title: `${res.value}`,
               content: newPanel,
-              config: cfgPanel
-            } as ConfigurableContent)(dbState.content)
+              config: cfgPanel,
+            } as ConfigurableContent)(dbState.content),
           })
+        }
       }
     })
   }

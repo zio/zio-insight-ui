@@ -1,6 +1,6 @@
 // A Dashboard config is the configuration for an entire Dashboard
-// and can be used to (de)serialize a dashboard state to/from local 
-// storage. 
+// and can be used to (de)serialize a dashboard state to/from local
+// storage.
 
 export class PanelLayout {
   constructor(
@@ -9,7 +9,7 @@ export class PanelLayout {
     readonly y: number,
     readonly w: number,
     readonly h: number
-  ){}
+  ) {}
 }
 
 export class DashboardConfig {}

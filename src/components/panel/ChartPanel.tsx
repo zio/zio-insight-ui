@@ -1,21 +1,21 @@
-import * as T from "@effect/core/io/Effect"
-import * as S from "@effect/core/stream/Stream"
-import * as F from "@effect/core/io/Fiber"
-import * as React from "react"
-import * as TS from "@core/metrics/model/insight/TimeSeries"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import * as MB from "@tsplus/stdlib/data/Maybe"
-import * as C from "@tsplus/stdlib/collections/Chunk"
-import * as Coll from "@tsplus/stdlib/collections/Collection"
-import { RuntimeContext } from "@components/App"
-import * as GDS from "@core/metrics/services/GraphDataService"
-import * as GDM from "@core/metrics/services/GraphDataManager"
-import { Chart } from "chart.js/auto"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import { keyAsString } from "@core/metrics/model/zio/metrics/MetricKey"
-
 // required import for time based axis
 import "chartjs-adapter-date-fns"
+
+import { RuntimeContext } from "@components/App"
+import * as TS from "@core/metrics/model/insight/TimeSeries"
+import { keyAsString } from "@core/metrics/model/zio/metrics/MetricKey"
+import * as GDM from "@core/metrics/services/GraphDataManager"
+import type * as GDS from "@core/metrics/services/GraphDataService"
+import * as T from "@effect/core/io/Effect"
+import * as F from "@effect/core/io/Fiber"
+import * as S from "@effect/core/stream/Stream"
+import type * as C from "@tsplus/stdlib/collections/Chunk"
+import * as Coll from "@tsplus/stdlib/collections/Collection"
+import * as HMap from "@tsplus/stdlib/collections/HashMap"
+import { pipe } from "@tsplus/stdlib/data/Function"
+import * as MB from "@tsplus/stdlib/data/Maybe"
+import { Chart } from "chart.js/auto"
+import * as React from "react"
 
 // A single line in the chart consists of the configuration for the visual
 // properties of the line (color, line style, ...) and the array of points
@@ -58,7 +58,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
             tsConfig: cfg,
             data: Coll.toArray(v).map((e) => {
               return { x: e.when, y: e.value }
-            })
+            }),
           } as LineData
 
           return HMap.set(k, cData)(s)
@@ -95,7 +95,9 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
     return () => {
       try {
         appRt.unsafeRunSync(F.interrupt(updater))
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }
   }, [])
 
@@ -110,10 +112,10 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
           x: {
             type: "time",
             time: {
-              unit: "minute"
-            }
-          }
-        }
+              unit: "minute",
+            },
+          },
+        },
       },
       data: {
         datasets: Coll.toArray(HMap.values(chartData)).map((cd) => {
@@ -122,19 +124,22 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
             data: cd.data,
             tension: cd.tsConfig.tension,
             backgroundColor: cd.tsConfig.pointColor.toRgb(),
-            borderColor: cd.tsConfig.lineColor.toRgba()
+            borderColor: cd.tsConfig.lineColor.toRgba(),
           }
-        })
-      }
+        }),
+      },
     })
   }
 
   React.useEffect(() => {
-    if (chartRef) {
-      const ref = chartRef.current!.getContext("2d")!
-      const chart = createChart(ref)
-      return () => {
-        chart.destroy()
+    const cur = chartRef.current
+    if (cur) {
+      const ref = cur.getContext("2d")
+      if (ref) {
+        const chart = createChart(ref)
+        return () => {
+          chart.destroy()
+        }
       }
     }
   }, [chartData])

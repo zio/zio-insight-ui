@@ -1,16 +1,17 @@
-import * as React from "react"
-import * as T from "@effect/core/io/Effect"
 import * as App from "@components/App"
-import * as HS from "@tsplus/stdlib/collections/HashSet"
+import { TableMetricKeys } from "@components/TableMetricKey"
+import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
+import * as GDM from "@core/metrics/services/GraphDataManager"
+import * as Insight from "@core/metrics/services/InsightService"
+import * as T from "@effect/core/io/Effect"
 import * as Ex from "@effect/core/io/Exit"
 import * as FiberId from "@effect/core/io/FiberId"
-import * as Insight from "@core/metrics/services/InsightService"
-import { TableMetricKeys } from "@components/TableMetricKey"
-import { Scrollable } from "./Scrollable"
-import { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
-import * as GDM from "@core/metrics/services/GraphDataManager"
-import { pipe } from "@tsplus/stdlib/data/Function"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
+import * as HS from "@tsplus/stdlib/collections/HashSet"
+import { pipe } from "@tsplus/stdlib/data/Function"
+import * as React from "react"
+
+import { Scrollable } from "./Scrollable"
 
 export interface ChartConfigPanelProps {
   id: string
@@ -41,7 +42,11 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
             pipe(
               gdm.lookup(props.id),
               T.flatMap((svc) => svc.setMetrics(...selected)),
-              T.catchAll((_) => T.sync(() => {}))
+              T.catchAll((_) =>
+                T.sync(() => {
+                  /* ignore */
+                })
+              )
             )
           )
         })
@@ -76,8 +81,12 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
 
         return () => {
           try {
-            run(FiberId.none)((_) => {})
-          } catch {}
+            run(FiberId.none)((_) => {
+              /* ignore */
+            })
+          } catch {
+            /* ignore */
+          }
         }
       }
     )

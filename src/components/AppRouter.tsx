@@ -1,13 +1,14 @@
-import * as React from "react"
-import { Routes, Route } from "react-router-dom"
+import { Dashboard } from "@pages/Dashboard"
 import { Fibers } from "@pages/Fibers"
 import { Help } from "@pages/Help"
-import { Dashboard } from "@pages/Dashboard"
 import { Metrics } from "@pages/Metrics"
 import { NotFound } from "@pages/NotFound"
 import { Profiling } from "@pages/Profiling"
 import { Services } from "@pages/Services"
 import { Settings } from "@pages/Settings"
+import * as React from "react"
+import { Route, Routes } from "react-router-dom"
+
 import { AppLayout } from "./AppLayout"
 
 export function AppRouter() {

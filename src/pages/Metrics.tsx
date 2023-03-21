@@ -1,6 +1,6 @@
-import * as React from "react"
-import { GridFrame } from "@components/panel/GridFrame"
 import { ChartConfigPanel } from "@components/panel/ChartConfigPanel"
+import { GridFrame } from "@components/panel/GridFrame"
+import * as React from "react"
 
 export function Metrics() {
   return (
@@ -9,10 +9,23 @@ export function Metrics() {
       title="bar"
       configMode={true}
       maximized={false}
-      closePanel={() => {}}
-      configure={() => {}}
-      maximize={() => {}}
+      closePanel={(_: string) => {
+        /* ignore */
+      }}
+      configure={() => {
+        /* ignore */
+      }}
+      maximize={() => {
+        /* ignore */
+      }}
       content={<></>}
-      config={<ChartConfigPanel id="foo" onDone={(_) => {}} />}></GridFrame>
+      config={
+        <ChartConfigPanel
+          id="foo"
+          onDone={(_) => {
+            /* ignore */
+          }}
+        />
+      }></GridFrame>
   )
 }

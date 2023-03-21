@@ -1,10 +1,10 @@
+import * as RxIcons from "@radix-ui/react-icons"
 import * as React from "react"
 import * as AiIcons from "react-icons/ai"
+import * as BoxIcons from "react-icons/bi"
+import * as BsIcons from "react-icons/bs"
 import * as Feather from "react-icons/fi"
 import * as Tabler from "react-icons/tb"
-import * as BoxIcons from "react-icons/bi"
-import * as RxIcons from "@radix-ui/react-icons"
-import * as BsIcons from "react-icons/bs"
 
 interface GridFrameProps {
   // The id to identify the panel within the layout
@@ -99,7 +99,7 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
               props.maximized || cfgEnabled ? "" : "p-2 border"
             }`}>
             {(() => {
-              if (cfgEnabled) return props.config!
+              if (cfgEnabled) return props.config || props.content
               else return props.content
             })()}
           </div>

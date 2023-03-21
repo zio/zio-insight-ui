@@ -4,30 +4,35 @@ import { visualizer } from "rollup-plugin-visualizer"
 import { defineConfig } from "vite"
 import svgr from "vite-plugin-svgr"
 import tsConfigPaths from "vite-tsconfig-paths"
+import { EsLinter, linterPlugin } from "vite-plugin-linter"
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig((configEnv) => ({
   build: {
-    sourcemap: false
+    sourcemap: false,
   },
   resolve: {
     alias: {
       "@static": path.resolve(__dirname, "./src/static"),
       "@styles": path.resolve(__dirname, "./src/styles"),
       "@core": path.resolve(__dirname, "./src/core"),
-      "@components": path.resolve(__dirname, "./src/components")
-    }
+      "@components": path.resolve(__dirname, "./src/components"),
+    },
   },
   plugins: [
     svgr({
       exportAsDefault: false,
       svgrOptions: {
         jsxRuntime: "classic",
-        typescript: false
-      }
+        typescript: false,
+      },
     }),
     react(),
     tsConfigPaths(),
-    visualizer()
-  ]
-})
+    visualizer(),
+    linterPlugin({
+      include: ["src/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"],
+      linters: [new EsLinter({ configEnv })],
+    }),
+  ],
+}))

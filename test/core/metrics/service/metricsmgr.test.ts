@@ -1,31 +1,27 @@
-import * as T from "@effect/core/io/Effect"
-import * as S from "@effect/core/stream/Stream"
-import * as F from "@effect/core/io/Fiber"
-import * as MM from "@core/metrics/services/MetricsManager"
-import * as Insight from "@core/metrics/services/InsightService"
-import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as AL from "@core/AppLayer"
-import * as Model from "@core/metrics/model/zio/metrics/MetricKey"
+import type * as Model from "@core/metrics/model/zio/metrics/MetricKey"
+import * as Insight from "@core/metrics/services/InsightService"
+import * as MM from "@core/metrics/services/MetricsManager"
 import * as Log from "@core/services/Logger"
+import * as T from "@effect/core/io/Effect"
+import * as F from "@effect/core/io/Fiber"
+import * as S from "@effect/core/stream/Stream"
+import * as C from "@tsplus/stdlib/collections/Chunk"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
-const testRt = AL.unsafeMakeRuntime(
-  AL.appLayerStatic(Log.Off)
-).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
 
 const newKeys = C.make(<Model.InsightKey>{
   id: "1234-5678",
   key: <Model.MetricKey>{
     name: "foo",
     labels: [],
-    metricType: "Counter"      
-  }
+    metricType: "Counter",
+  },
 })
 
 describe("MetricsManager", () => {
-
   it("can be reset", async () => {
-
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
@@ -40,7 +36,6 @@ describe("MetricsManager", () => {
   })
 
   it("should allow to register keys", async () => {
-
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
@@ -51,7 +46,7 @@ describe("MetricsManager", () => {
       })
     )
 
-    const mbElem = C.find<Model.InsightKey>(e => e.id == "1234-5678")(res)
+    const mbElem = C.find<Model.InsightKey>((e) => e.id == "1234-5678")(res)
     expect(res.length).toEqual(1)
     expect(mbElem._tag).toEqual("Some")
   })
@@ -87,7 +82,6 @@ describe("MetricsManager", () => {
   })
 
   it("should publish metric state updates", async () => {
-
     const res = await testRt.unsafeRunPromise(
       T.gen(function* ($) {
         const insight = yield* $(T.service(Insight.InsightService))
@@ -96,28 +90,20 @@ describe("MetricsManager", () => {
         const keys = yield* $(
           pipe(
             insight.getMetricKeys,
-            T.catchAll(_ => 
-              T.sync(() => <Model.InsightKey[]>[])
-            )
-          )          
+            T.catchAll((_) => T.sync(() => <Model.InsightKey[]>[]))
+          )
         )
 
         const sub = yield* $(mm.createSubscription(C.from(keys)))
         const states = yield* $(mm.updates())
 
-        // Make sure we are already consuming from the stream before we manually kick off 
-        // the polling 
-        const f = yield* $(
-          pipe(
-            S.take(10)(states),
-            S.runCollect,
-            T.fork
-          )
-        )
+        // Make sure we are already consuming from the stream before we manually kick off
+        // the polling
+        const f = yield* $(pipe(S.take(10)(states), S.runCollect, T.fork))
 
         yield* $(mm.poll())
 
-        // Now the fiber should be done and have the first 10 elements from the state 
+        // Now the fiber should be done and have the first 10 elements from the state
         // updates
         const res = yield* $(F.join(f))
         yield* $(mm.removeSubscription(sub))

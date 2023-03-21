@@ -1,7 +1,8 @@
-import * as React from "react"
 import * as AL from "@core/AppLayer"
-import { AppRouter } from "./AppRouter"
+import * as React from "react"
 import { IconContext } from "react-icons/lib"
+
+import { AppRouter } from "./AppRouter"
 
 // To connect to a real ZIO application we need to use
 // AL.appLayerLive
@@ -13,7 +14,7 @@ export function App() {
     <RuntimeContext.Provider value={runtime}>
       <IconContext.Provider
         value={{
-          className: "text-neutral-content text-3xl mx-2"
+          className: "text-neutral-content text-3xl mx-2",
         }}>
         <AppRouter />
       </IconContext.Provider>

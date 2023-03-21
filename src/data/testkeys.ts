@@ -1,15 +1,18 @@
-import keysObj from "@data/keys.json"
 import * as MK from "@core/metrics/model/zio/metrics/MetricKey"
+import keysObj from "@data/keys.json"
 import * as T from "@effect/core/io/Effect"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
-
 import { pipe } from "@tsplus/stdlib/data/Function"
 
-export const staticKeys : T.Effect<never, never, HMap.HashMap<string, MK.InsightKey>> = pipe(
+export const staticKeys: T.Effect<
+  never,
+  never,
+  HMap.HashMap<string, MK.InsightKey>
+> = pipe(
   MK.metricKeysFromInsight(keysObj),
-  T.map(keys => <[string, MK.InsightKey][]>(keys.map(k => [k.id, k]))),
+  T.map((keys) => <[string, MK.InsightKey][]>keys.map((k) => [k.id, k])),
   T.map(HMap.from),
-  T.catchAll(_ => T.sync(() => HMap.empty<string, MK.InsightKey>()))
+  T.catchAll((_) => T.sync(() => HMap.empty<string, MK.InsightKey>()))
 )
 
 export const keyById = (id: string) => (keys: HMap.HashMap<string, MK.InsightKey>) =>
@@ -47,12 +50,6 @@ export const frequencyKey = pipe(
   T.flatMap(T.getOrFail)
 )
 
-
 // A known histogram id from state.json
 export const histId = "e4697aca-cdca-301f-9a44-21c0f18f080e"
-export const histKey = pipe(
-  staticKeys,
-  T.map(keyById(histId)),
-  T.flatMap(T.getOrFail)
-)
-
+export const histKey = pipe(staticKeys, T.map(keyById(histId)), T.flatMap(T.getOrFail))
