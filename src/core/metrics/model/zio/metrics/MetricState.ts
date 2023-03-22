@@ -119,10 +119,10 @@ export class InvalidMetricStates {
   constructor(readonly reason: string) {}
 }
 
-const parseFrequency = (state: RawFrequencyState) => {
+const parseFrequency = (state: unknown) => {
   const res: [string, number][] = []
 
-  const freqs: Object = state.occurrences ? Object.keys(state.occurrences) : {}
+  const freqs: any = state ? state : {}
 
   Object.keys(freqs).forEach((k) => {
     const v: string = (freqs as any)[k]

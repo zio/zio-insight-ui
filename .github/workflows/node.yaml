@@ -23,5 +23,6 @@ jobs:
       - run: yarn install
       - run: yarn lint
       - run: yarn compile
+      - run: yarn test:compile
       - run: yarn test
       - run: yarn dist
