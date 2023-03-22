@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "clean": "exec rm -Rf dist",
+    "clean": "exec rm -Rf dist build",
     "compile": "tsc -p tsconfig.build.json",
     "test:compile": "tsc -p tsconfig.build-test.json",
     "dev": "vite",
@@ -12,7 +12,10 @@
     "lint": "eslint --ext ts,tsx test src ",
     "lint:fix": "yarn lint --fix",
     "preview": "vite preview",
-    "test": "vitest --run"
+    "test": "vitest --run",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --watch --ui",
+    "build": "yarn clean && yarn compile && yarn test:compile && yarn test && yarn dist"
   },
   "dependencies": {
     "@effect/core": "^0.0.16",
@@ -42,6 +45,8 @@
     "@typescript-eslint/eslint-plugin": "^5.41.0",
     "@typescript-eslint/parser": "^5.41.0",
     "@vitejs/plugin-react": "^3.0.0",
+    "@vitest/coverage-c8": "^0.29.7",
+    "@vitest/ui": "^0.29.7",
     "autoprefixer": "^10.4.13",
     "daisyui": "^2.38.0",
     "eslint": "^8.0.0",
