@@ -1,8 +1,8 @@
+import { pipe } from "@effect/data/Function"
 import * as T from "@effect/io/Effect"
 import * as E from "@effect/io/Exit"
 import * as L from "@effect/io/Layer"
 import * as S from "@effect/io/Scope"
-import { pipe } from "@tsplus/stdlib/data/Function"
 
 import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as MM from "@core/metrics/services/MetricsManager"
@@ -19,7 +19,7 @@ export type AppLayer =
   | IdSvc.IdGenerator
   | GDM.GraphDataManager
 
-export const appLayerLive: L.Layer<never, never, AppLayer> = pipe(
+export const appLayerLive = pipe(
   Log.ConsoleLive,
   L.provideMerge(Log.live(Log.Debug)),
   L.provideMerge(IdSvc.live),
@@ -40,15 +40,15 @@ export const appLayerStatic = (lvl: Log.LogLevel) =>
 
 const appRuntime = <R, E, A>(layer: L.Layer<R, E, A>) =>
   T.gen(function* ($) {
-    const scope = yield* $(S.make)
+    const scope = yield* $(S.make())
     const env = yield* $(L.buildWithScope(scope)(layer))
-    const runtime = yield* $(pipe(T.runtime<A>(), T.provideEnvironment(env)))
+    const runtime = yield* $(pipe(T.runtime<A>(), T.provideContext(env)))
 
     return {
       runtime,
-      clean: S.close(E.unit)(scope),
+      clean: S.close(scope, E.unit()),
     }
   })
 
 export const unsafeMakeRuntime = <E, A>(layer: L.Layer<never, E, A>) =>
-  T.unsafeRunSync(appRuntime(layer))
+  T.runSync(appRuntime(layer))

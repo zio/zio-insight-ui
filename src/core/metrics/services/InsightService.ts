@@ -1,10 +1,10 @@
 import staticKeys from "@data/keys.json"
 import staticFibers from "@data/sampleFibers.json"
 import staticStates from "@data/state.json"
-import * as T from "@effect/core/io/Effect"
-import * as L from "@effect/core/io/Layer"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import { Tag } from "@tsplus/stdlib/service/Tag"
+import * as Ctx from "@effect/data/Context"
+import { pipe } from "@effect/data/Function"
+import * as T from "@effect/io/Effect"
+import * as L from "@effect/io/Layer"
 
 import type {
   FiberInfo,
@@ -42,7 +42,7 @@ export interface InsightService {
   getFibers: T.Effect<never, InsightApiError, FiberInfo[]>
 }
 
-export const InsightService = Tag<InsightService>()
+export const InsightService = Ctx.Tag<InsightService>()
 
 interface StateRequest {
   selection: string[]
@@ -81,11 +81,13 @@ function makeLiveMetrics(logger: Log.LogService): InsightService {
 }
 
 // Define a Layer with Dependency on a Log Service
-export const live: L.Layer<Log.LogService, never, InsightService> = L.fromEffect(
-  InsightService
-)(pipe(T.service(Log.LogService), T.map(makeLiveMetrics)))
+export const live: L.Layer<Log.LogService, never, InsightService> = L.effect(
+  InsightService,
+  pipe(T.service(Log.LogService), T.map(makeLiveMetrics))
+)
 
-export const dev: L.Layer<never, never, InsightService> = L.fromEffect(InsightService)(
+export const dev: L.Layer<never, never, InsightService> = L.effect(
+  InsightService,
   T.succeed({
     getMetricKeys: pipe(T.succeed(staticKeys), T.flatMap(metricKeysFromInsight)),
     getMetricStates: (keyIds: string[]) =>

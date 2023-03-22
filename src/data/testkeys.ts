@@ -1,7 +1,7 @@
 import keysObj from "@data/keys.json"
-import * as T from "@effect/core/io/Effect"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import { pipe } from "@tsplus/stdlib/data/Function"
+import { pipe } from "@effect/data/Function"
+import * as HMap from "@effect/data/HashMap"
+import * as T from "@effect/io/Effect"
 
 import * as MK from "@core/metrics/model/zio/metrics/MetricKey"
 
@@ -12,12 +12,12 @@ export const staticKeys: T.Effect<
 > = pipe(
   MK.metricKeysFromInsight(keysObj),
   T.map((keys) => keys.map((k) => [k.id, k]) as [string, MK.InsightKey][]),
-  T.map(HMap.from),
+  T.map((keys) => HMap.make(...keys)),
   T.catchAll((_) => T.sync(() => HMap.empty<string, MK.InsightKey>()))
 )
 
 export const keyById = (id: string) => (keys: HMap.HashMap<string, MK.InsightKey>) =>
-  HMap.get<string, MK.InsightKey>(id)(keys)
+  HMap.get(id)(keys)
 
 // A known counter id from state.json
 export const counterId = "6e0c3c31-d51d-3dc3-b3a4-f65b3aab5e5a"

@@ -1,6 +1,6 @@
+import { pipe } from "@effect/data/Function"
+import type { Order } from "@effect/data/typeclass/Order"
 import * as T from "@effect/io/Effect"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import type { Ord } from "@tsplus/stdlib/prelude/Ord"
 import * as Z from "zod"
 
 import { metricLabelSchema } from "./MetricLabel"
@@ -30,7 +30,7 @@ export const OrdInsightKey = {
     else if (x.id > y.id) return 1
     else return 0
   },
-} as Ord<InsightKey>
+} as Order<InsightKey>
 
 export const keyAsString = (mk: MetricKey) =>
   `${mk.metricType}:${mk.name}:${mk.labels.map((l) => l.key + "=" + l.value).join(",")}`

@@ -1,5 +1,4 @@
 import * as T from "@effect/io/Effect"
-import * as Either from "@tsplus/stdlib/data/Either"
 
 /**
  * An error indicating a fetch from an URL failed.
@@ -30,19 +29,18 @@ export const request = (input: RequestInfo, init?: RequestInit | undefined) =>
         return resume(T.fail(new FetchError(error)))
       })
 
-    return Either.left(
-      T.sync(() => {
-        controller.abort()
-      })
-    )
+    return T.sync(() => {
+      controller.abort()
+    })
   })
+
 /**
  *
  * @param response Take a response and return an effect that either succeeds
  * turning the response body into a JSON object or fails with an error
  */
 export const jsonFromResponse = (response: Response) =>
-  T.tryCatchPromise(
+  T.attemptCatchPromise(
     () => response.json(),
     (error) => new InvalidJsonResponse(error)
   )
