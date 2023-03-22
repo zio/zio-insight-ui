@@ -1,9 +1,8 @@
+import * as C from "@effect/data/Chunk"
+import { pipe } from "@effect/data/Function"
+import * as HMap from "@effect/data/HashMap"
 import * as Clk from "@effect/io/Clock"
 import * as T from "@effect/io/Effect"
-import * as Chunk from "@tsplus/stdlib/collections/Chunk"
-import * as Coll from "@tsplus/stdlib/collections/Collection"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import { pipe } from "@tsplus/stdlib/data/Function"
 import * as Z from "zod"
 
 import type { InsightKey, MetricKey } from "./MetricKey"
@@ -127,7 +126,7 @@ const parseFrequency = (state: unknown) => {
   })
 
   return {
-    occurrences: HMap.from(res),
+    occurrences: HMap.make(...res),
   } as FrequencyState
 }
 
@@ -171,7 +170,7 @@ const parseCurrentState: (
 
 export const metricStatesFromInsight: (
   value: unknown
-) => T.Effect<never, InvalidMetricStates, MetricState[]> = (value: unknown) =>
+) => T.Effect<never, InvalidMetricStates, C.Chunk<MetricState>> = (value: unknown) =>
   T.gen(function* ($) {
     const parsed = insightMetricStatesSchema.safeParse(value),
       states = parsed.success
@@ -200,5 +199,5 @@ export const metricStatesFromInsight: (
       )
     )
 
-    return Coll.toArray(Chunk.toCollection(res))
+    return res
   })

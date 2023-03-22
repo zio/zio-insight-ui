@@ -1,15 +1,14 @@
-import * as T from "@effect/core/io/Effect"
-import * as Hub from "@effect/core/io/Hub"
-import * as L from "@effect/core/io/Layer"
-import * as Ref from "@effect/core/io/Ref"
-import * as Sch from "@effect/core/io/Schedule"
-import * as S from "@effect/core/stream/Stream"
-import * as C from "@tsplus/stdlib/collections/Chunk"
-import * as Coll from "@tsplus/stdlib/collections/Collection"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import * as D from "@tsplus/stdlib/data/Duration"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import { Tag } from "@tsplus/stdlib/service/Tag"
+import * as C from "@effect/data/Chunk"
+import * as Ctx from "@effect/data/Context"
+import * as D from "@effect/data/Duration"
+import { pipe } from "@effect/data/Function"
+import * as HMap from "@effect/data/HashMap"
+import * as T from "@effect/io/Effect"
+import * as Hub from "@effect/io/Hub"
+import * as L from "@effect/io/Layer"
+import * as Ref from "@effect/io/Ref"
+import * as Sch from "@effect/io/Schedule"
+import * as S from "@effect/stream/Stream"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import type { MetricState } from "@core/metrics/model/zio/metrics/MetricState"
@@ -51,7 +50,7 @@ export interface MetricsManager {
   readonly reset: () => T.Effect<never, never, void>
 }
 
-export const MetricsManager = Tag<MetricsManager>()
+export const MetricsManager = Ctx.Tag<MetricsManager>()
 
 function makeMetricsManager(
   log: Log.LogService,
@@ -70,7 +69,7 @@ function makeMetricsManager(
           log.debug(
             `Adding subscription <${id}> with <${keys.length}> keys to MetricsManager`
           ),
-          T.flatMap((_) => subscriptions.update(HMap.set(id, keys))),
+          T.flatMap((_) => Ref.update(subscriptions, HMap.set(id, keys))),
           T.map((_) => id)
         )
       )
@@ -80,7 +79,7 @@ function makeMetricsManager(
   const removeSubscription = (id: string) =>
     pipe(
       log.debug(`Removing subscription <${id}> from MetricsManager`),
-      T.flatMap((_) => subscriptions.update(HMap.remove(id)))
+      T.flatMap((_) => Ref.update(subscriptions, HMap.remove(id)))
     )
 
   const modifySubscription = (
@@ -89,7 +88,7 @@ function makeMetricsManager(
   ) =>
     pipe(
       log.debug(`Modifying subscription <${id}> in MetricsManager`),
-      T.flatMap((_) => subscriptions.updateAndGet(HMap.update(id, f))),
+      T.flatMap((_) => Ref.updateAndGet(subscriptions, (m) => HMap.set(m, id, f))),
       T.tap((subs) =>
         log.debug(
           `Subscription <${id}> has now <${C.size(
@@ -101,7 +100,7 @@ function makeMetricsManager(
 
   const registeredKeys = () =>
     pipe(
-      subscriptions.get,
+      Ref.get(subscriptions),
       T.map(
         HMap.reduce(C.empty<InsightKey>(), (z, v) =>
           C.concat<InsightKey, InsightKey>(z)(v)
@@ -124,7 +123,7 @@ function makeMetricsManager(
 
   const updates = () => T.sync(() => S.fromHub(metricsHub))
 
-  const reset = () => subscriptions.set(HMap.empty<string, C.Chunk<InsightKey>>())
+  const reset = () => Ref.set(subscriptions, HMap.empty<string, C.Chunk<InsightKey>>())
 
   const getStates = (keys: string[]) =>
     pipe(
@@ -176,16 +175,15 @@ function makeMetricsManager(
   )
 }
 
-export const live = L.fromEffect(MetricsManager)(
+export const live = L.effect(
+  MetricsManager,
   T.gen(function* ($) {
     // TODO: Review the Hub configuration
     const hub = yield* $(Hub.unbounded<MetricState>())
     const insight = yield* $(T.service(Insight.InsightService))
     const idSvc = yield* $(T.service(IdSvc.IdGenerator))
     const log = yield* $(T.service(Log.LogService))
-    const subscriptions = yield* $(
-      Ref.makeRef(() => HMap.empty<string, C.Chunk<InsightKey>>())
-    )
+    const subscriptions = yield* $(Ref.make(HMap.empty<string, C.Chunk<InsightKey>>()))
 
     return yield* $(makeMetricsManager(log, idSvc, insight, hub, subscriptions))
   })
