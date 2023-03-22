@@ -25,11 +25,6 @@ const freqStateSchema = Z.object({
   occurrences: Z.unknown(),
 })
 
-// From the API we get the occurrences as an "unknown", but we now it is actually
-// a map <string, number>, so we do the conversion here before we pass it onwards to any
-// downstream component
-interface RawFrequencyState extends Z.TypeOf<typeof freqStateSchema> {}
-
 export interface FrequencyState {
   occurrences: HMap.HashMap<string, number>
 }
