@@ -122,8 +122,10 @@ export class InvalidMetricStates {
 const parseFrequency = (state: RawFrequencyState) => {
   const res: [string, number][] = []
 
-  Object.keys(state).forEach((k) => {
-    const v = state[k]
+  const freqs: Object = state.occurrences ? Object.keys(state.occurrences) : {}
+
+  Object.keys(freqs).forEach((k) => {
+    const v: string = (freqs as any)[k]
     if (typeof v === "number") {
       res.push([k, v])
     }

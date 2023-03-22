@@ -11,7 +11,7 @@
     "preserveSymlinks": true,
     "moduleResolution": "node",
     "noEmit": false,
-    "lib": ["es2020", "DOM"],
+    "lib": ["ESNext", "DOM"],
     "jsx": "react",
     "strict": true,
     "noImplicitReturns": false,
@@ -23,7 +23,6 @@
     "allowJs": false,
     "checkJs": false,
     "forceConsistentCasingInFileNames": true,
-    "suppressImplicitAnyIndexErrors": true,
     "stripInternal": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
@@ -37,7 +36,7 @@
       "@static/*": ["src/static/*"],
       "@styles/*": ["src/styles/*"],
     },
-    "target": "ES2018",
+    "target": "ESNext",
     "typeRoots": ["./node_modules/@types", "vite/client"]
   },
   "exclude": ["node_modules", "build", "lib"]
