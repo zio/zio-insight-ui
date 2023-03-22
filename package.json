@@ -59,13 +59,13 @@
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.0",
     "ttypescript": "^1.5.13",
-    "typescript": "^4.6.4",
+    "typescript": "^5.0.0",
     "typescript-transform-paths": "^3.4.4",
-    "vite": "^3.2.0",
+    "vite": "^4.0.0",
     "vite-plugin-lint": "^1.0.1",
     "vite-plugin-linter": "^2.0.2",
     "vite-plugin-svgr": "^2.2.2",
-    "vite-tsconfig-paths": "^3.5.2",
+    "vite-tsconfig-paths": "^4.0.0",
     "vitest": "^0.29.0"
   }
 }
