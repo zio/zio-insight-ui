@@ -6,6 +6,7 @@
   "scripts": {
     "clean": "exec rm -Rf dist",
     "compile": "tsc -p tsconfig.build.json",
+    "test:compile": "tsc -p tsconfig.build-test.json",
     "dev": "vite",
     "dist": "vite build",
     "lint": "eslint --ext ts,tsx test src ",
