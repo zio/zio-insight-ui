@@ -1,7 +1,7 @@
-import * as T from "@effect/core/io/Effect"
-import * as E from "@effect/core/io/Exit"
-import * as L from "@effect/core/io/Layer"
-import * as S from "@effect/core/io/Scope"
+import * as T from "@effect/io/Effect"
+import * as E from "@effect/io/Exit"
+import * as L from "@effect/io/Layer"
+import * as S from "@effect/io/Scope"
 import { pipe } from "@tsplus/stdlib/data/Function"
 
 import * as GDM from "@core/metrics/services/GraphDataManager"
@@ -21,21 +21,21 @@ export type AppLayer =
 
 export const appLayerLive: L.Layer<never, never, AppLayer> = pipe(
   Log.ConsoleLive,
-  L.provideToAndMerge(Log.live(Log.Debug)),
-  L.provideToAndMerge(IdSvc.live),
-  L.provideToAndMerge(Insight.live),
-  L.provideToAndMerge(MM.live),
-  L.provideToAndMerge(GDM.live)
+  L.provideMerge(Log.live(Log.Debug)),
+  L.provideMerge(IdSvc.live),
+  L.provideMerge(Insight.live),
+  L.provideMerge(MM.live),
+  L.provideMerge(GDM.live)
 )
 
 export const appLayerStatic = (lvl: Log.LogLevel) =>
   pipe(
     Log.ConsoleLive,
-    L.provideToAndMerge(Log.live(lvl)),
-    L.provideToAndMerge(IdSvc.live),
-    L.provideToAndMerge(Insight.dev),
-    L.provideToAndMerge(MM.live),
-    L.provideToAndMerge(GDM.live)
+    L.provideMerge(Log.live(lvl)),
+    L.provideMerge(IdSvc.live),
+    L.provideMerge(Insight.dev),
+    L.provideMerge(MM.live),
+    L.provideMerge(GDM.live)
   )
 
 const appRuntime = <R, E, A>(layer: L.Layer<R, E, A>) =>

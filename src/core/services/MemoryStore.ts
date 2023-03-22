@@ -1,6 +1,6 @@
-import * as T from "@effect/core/io/Effect"
-import * as Ref from "@effect/core/io/Ref"
-import * as Sem from "@effect/core/stm/TSemaphore"
+import * as T from "@effect/io/Effect"
+import * as Ref from "@effect/io/Ref"
+import * as Sem from "@effect/io/Semaphore"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import { pipe } from "@tsplus/stdlib/data/Function"
 

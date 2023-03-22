@@ -1,6 +1,6 @@
 import * as App from "@components/App"
 import * as TK from "@data/testkeys"
-import * as T from "@effect/core/io/Effect"
+import * as T from "@effect/io/Effect"
 import "@styles/grid.css"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"

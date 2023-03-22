@@ -1,5 +1,5 @@
-import * as T from "@effect/core/io/Effect"
-import * as L from "@effect/core/io/Layer"
+import * as T from "@effect/io/Effect"
+import * as L from "@effect/io/Layer"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import * as MB from "@tsplus/stdlib/data/Maybe"
 import { Tag } from "@tsplus/stdlib/service/Tag"

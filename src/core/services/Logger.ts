@@ -1,9 +1,9 @@
-import * as C from "@effect/core/io/Clock"
-import * as T from "@effect/core/io/Effect"
-import * as L from "@effect/core/io/Layer"
-import * as Ref from "@effect/core/io/Ref"
-import { pipe } from "@tsplus/stdlib/data/Function/pipe"
-import { Tag } from "@tsplus/stdlib/service/Tag"
+import * as Ctx from "@effect/data/Context"
+import { pipe } from "@effect/data/Function"
+import * as C from "@effect/io/Clock"
+import * as T from "@effect/io/Effect"
+import * as L from "@effect/io/Layer"
+import * as Ref from "@effect/io/Ref"
 
 import { formatDate } from "@core/utils"
 
@@ -25,15 +25,17 @@ export interface ConsoleService {
   readonly log: (msg: string) => T.Effect<never, never, void>
 }
 
-export const ConsoleService = Tag<ConsoleService>()
+export const ConsoleService = Ctx.Tag<ConsoleService>()
 
-export const ConsoleLive = L.fromEffect(ConsoleService)(
+export const ConsoleLive = L.effect(
+  ConsoleService,
   T.sync(() => ({
     log: (msg: string) => T.sync(() => console.log(msg)),
   }))
 )
 
-export const ConsoleNull = L.fromEffect(ConsoleService)(
+export const ConsoleNull = L.effect(
+  ConsoleService,
   T.sync(() => ({
     log: (_: string) =>
       T.sync(() => {
@@ -53,10 +55,10 @@ export interface LogService {
   readonly trace: (msg: string) => T.Effect<never, never, void>
 }
 
-export const LogService = Tag<LogService>()
+export const LogService = Ctx.Tag<LogService>()
 
 export const log = (lvl: LogLevel, msg: string) =>
-  T.serviceWithEffect(LogService, (log) => log.log(lvl, msg))
+  T.serviceWithEffect(LogService, (log: LogService) => log.log(lvl, msg))
 
 export const fatal = (msg: string) => log(Fatal, msg)
 export const error = (msg: string) => log(Error, msg)
@@ -67,19 +69,19 @@ export const trace = (msg: string) => log(Trace, msg)
 
 function makeLogger(l: LogLevel) {
   return T.gen(function* ($) {
-    const lvl = yield* $(Ref.makeRef(() => l))
-    const c = yield* $(ConsoleService)
+    const lvl = yield* $(Ref.make(() => l))
+    const c = yield* $(T.service(ConsoleService))
 
     const now = pipe(
-      C.currentTime,
+      C.currentTimeMillis(),
       T.map((now) => new Date(now))
     )
 
     const doLog = (logLvl: LogLevel, msg: string) =>
       T.ifEffect(
         pipe(
-          lvl.get,
-          T.map((l) => l.intLevel >= logLvl.intLevel)
+          Ref.get(lvl),
+          T.map((l) => l().intLevel >= logLvl.intLevel)
         ),
         pipe(
           now,
@@ -93,7 +95,7 @@ function makeLogger(l: LogLevel) {
       )
 
     return {
-      setLogLevel: (newLvl: LogLevel) => lvl.set(newLvl),
+      setLogLevel: (newLvl: LogLevel) => Ref.set(lvl, () => newLvl),
       log: (lvl: LogLevel, msg: string) => doLog(lvl, msg),
       fatal: (msg: string) => doLog(Fatal, msg),
       error: (msg: string) => doLog(Error, msg),
@@ -105,5 +107,5 @@ function makeLogger(l: LogLevel) {
   })
 }
 
-export const noop = L.fromEffect(LogService)(makeLogger(Off))
-export const live = (l: LogLevel) => L.fromEffect(LogService)(makeLogger(l))
+export const noop = L.effect(LogService, makeLogger(Off))
+export const live = (l: LogLevel) => L.effect(LogService, makeLogger(l))

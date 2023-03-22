@@ -1,5 +1,5 @@
 import * as App from "@components/App"
-import * as T from "@effect/core/io/Effect"
+import * as T from "@effect/io/Effect"
 import * as React from "react"
 
 import type { FiberInfo } from "@core/metrics/model/insight/fibers/FiberInfo"

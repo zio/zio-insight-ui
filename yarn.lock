@@ -393,20 +393,25 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@effect/core@^0.0.16":
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/@effect/core/-/core-0.0.16.tgz#b3199462a12609fbaf1c52f218f3ff11d9c8f3f6"
-  integrity sha512-JugbKcqo9CPdm4n7t/buO4nYxKwThafh0tXVvPgRC3RcwuOS1dzo3tIk6RVq1wYh8Kg4df5SwmdED2VvN4c/RA==
-  dependencies:
-    "@effect/printer" "^0.0.4"
-    "@tsplus/stdlib" "^0.2.8"
+"@effect/data@^0.5.0", "@effect/data@~0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.5.0.tgz#2dd88d6b0166de6b37953b9c6faee8ba65608afc"
+  integrity sha512-9yuEyx19MCt4cCUlqJMgtiDxuAVlm9oA14IS4AtsG7Xip/8uKcmxSfynKfiDuPWJukA2QHR54blUzewqBxupvQ==
 
-"@effect/printer@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@effect/printer/-/printer-0.0.4.tgz#3c829e0c3f42c64cb2e7768573b3b49a6e81ebc2"
-  integrity sha512-oTn6U9GCg01E+kYwUBs4LM6k6hVq0pA7ZAYKdj972n2LjYeqg4+We6ZqoYWH2Pw5TDHOavtIEdYqt61uUxiZgg==
+"@effect/io@^0.10.0", "@effect/io@~0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.10.0.tgz#5a2c2f6671b75399d34b9c245c579f9f5595cbd6"
+  integrity sha512-zNST2PjJlbpzle/zCUpui3Ttp8By8Z9gDfRpy6o//ejgL2CCd0G4VflZ74Hy3L8w/GLCVUXput52DfB5bxEsqA==
   dependencies:
-    "@tsplus/stdlib" "^0.2.6"
+    "@effect/data" "~0.5.0"
+
+"@effect/stream@^0.12.1":
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/@effect/stream/-/stream-0.12.1.tgz#9118cde8906ae02452ab7ee81978a436a9f09aec"
+  integrity sha512-Y5CkZXv1M6EAbuqa1tQxL6qeeDlxRchUZq+XHc7kb/sko9Za+G/WyRqoEWm0VmIcyWh6RCzpEsN6m3izXqIT0w==
+  dependencies:
+    "@effect/data" "~0.5.0"
+    "@effect/io" "~0.10.0"
 
 "@esbuild/android-arm64@0.17.12":
   version "0.17.12"
@@ -579,11 +584,6 @@
   version "8.36.0"
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.36.0.tgz#9837f768c03a1e4a30bd304a64fb8844f0e72efe"
   integrity sha512-lxJ9R5ygVm8ZWgYdUweoq5ownDlJ4upvoWmO4eLxBYHdMo+vZ/Rx0EN6MbKWDJOSUGrqJy2Gt+Dyv/VKml0fjg==
-
-"@fp-ts/core@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@fp-ts/core/-/core-0.0.6.tgz#927a2dccacc33d825a339dbb19e504ee66e7e042"
-  integrity sha512-xattmUwkGQkkvFJDdE/H0e3BbPGZVpTS6ZVF5qUjumgN9IgSZ+K2LbhZuSJveDRvKWsmFJH6k3N5xmqXlCGYlQ==
 
 "@humanwhocodes/config-array@^0.11.6", "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"
@@ -894,7 +894,7 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.3.tgz#472eaab5f15c1ffdd7f8628bd4c4f753995ec79e"
   integrity sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==
 
-"@tsplus/stdlib@^0.2.6", "@tsplus/stdlib@^0.2.8":
+"@tsplus/stdlib@^0.2.8":
   version "0.2.8"
   resolved "https://registry.yarnpkg.com/@tsplus/stdlib/-/stdlib-0.2.8.tgz#060380d9d16d5ae059750c469f52e4257a1b6e66"
   integrity sha512-UKAN06h9V/wUflSbOU1WwACisXEi4+PHwGqR+bwxqcClrEAA8KKTTLZ0ATMbqbVAVTudE0vW4pd5iY6vGvSFBw==

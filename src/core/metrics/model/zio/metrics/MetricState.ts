@@ -1,5 +1,5 @@
-import * as Clk from "@effect/core/io/Clock"
-import * as T from "@effect/core/io/Effect"
+import * as Clk from "@effect/io/Clock"
+import * as T from "@effect/io/Effect"
 import * as Chunk from "@tsplus/stdlib/collections/Chunk"
 import * as Coll from "@tsplus/stdlib/collections/Collection"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
@@ -185,7 +185,7 @@ export const metricStatesFromInsight: (
           )
     const now = yield* $(
       pipe(
-        Clk.currentTime,
+        Clk.currentTimeMillis(),
         T.map((t) => new Date(t))
       )
     )

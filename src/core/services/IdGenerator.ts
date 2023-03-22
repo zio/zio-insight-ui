@@ -1,8 +1,8 @@
-import * as C from "@effect/core/io/Clock"
-import * as T from "@effect/core/io/Effect"
-import * as L from "@effect/core/io/Layer"
-import * as Ref from "@effect/core/io/Ref"
-import * as Sem from "@effect/core/stm/TSemaphore"
+import * as C from "@effect/io/Clock"
+import * as T from "@effect/io/Effect"
+import * as L from "@effect/io/Layer"
+import * as Ref from "@effect/io/Ref"
+import * as Sem from "@effect/stm/TSemaphore"
 import { Tag } from "@tsplus/stdlib/service/Tag"
 
 import * as Log from "@core/services/Logger"
@@ -28,7 +28,7 @@ function make(
   const update = (prefix: string) =>
     Sem.withPermit(sem)(
       T.gen(function* ($) {
-        const now = yield* $(C.currentTime)
+        const now = yield* $(C.currentTimeMillis())
         const curr = yield* $(lastTS.getAndSet(now))
         if (curr == now) {
           yield* $(cnt.update((c) => c + 1))
@@ -51,7 +51,7 @@ function make(
 
 export const live = L.fromEffect(IdGenerator)(
   T.gen(function* ($) {
-    const now = yield* $(C.currentTime)
+    const now = yield* $(C.currentTimeMillis())
     const log = yield* $(T.service(Log.LogService))
     const sem = yield* $(Sem.make(1))
     const ts = yield* $(Ref.makeRef(() => now))

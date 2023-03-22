@@ -1,4 +1,4 @@
-import type * as T from "@effect/core/io/Effect"
+import type * as T from "@effect/io/Effect"
 import { Tag } from "@tsplus/stdlib/service/Tag"
 
 // The dashboard manager keeps track of the configured dashboards

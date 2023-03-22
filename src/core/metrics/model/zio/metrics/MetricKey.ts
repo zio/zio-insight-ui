@@ -1,4 +1,4 @@
-import * as T from "@effect/core/io/Effect"
+import * as T from "@effect/io/Effect"
 import { pipe } from "@tsplus/stdlib/data/Function"
 import type { Ord } from "@tsplus/stdlib/prelude/Ord"
 import * as Z from "zod"

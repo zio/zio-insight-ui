@@ -1,5 +1,5 @@
-import * as T from "@effect/core/io/Effect"
-import * as Ref from "@effect/core/io/Ref"
+import * as T from "@effect/io/Effect"
+import * as Ref from "@effect/io/Ref"
 import * as C from "@tsplus/stdlib/collections/Chunk"
 import * as HMap from "@tsplus/stdlib/collections/HashMap"
 import { pipe } from "@tsplus/stdlib/data/Function"
@@ -70,8 +70,8 @@ export interface TimeSeries {
 export const makeTimeSeries =
   (id: TimeSeriesKey, maxEntries: number) => (log: Log.LogService) => {
     return T.gen(function* ($) {
-      const maxRef = yield* $(Ref.makeRef(() => maxEntries))
-      const entriesRef = yield* $(Ref.makeRef(() => C.empty<TimeSeriesEntry>()))
+      const maxRef = yield* $(Ref.make(() => maxEntries))
+      const entriesRef = yield* $(Ref.make(() => C.empty<TimeSeriesEntry>()))
 
       const logPrefix = `TS <${id.key.id}-${MB.getOrElse(() => "")(id.subKey)}> --`
 

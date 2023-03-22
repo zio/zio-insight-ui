@@ -1,4 +1,4 @@
-import * as T from "@effect/core/io/Effect"
+import * as T from "@effect/io/Effect"
 import * as Z from "zod"
 
 export const locationSchema = Z.tuple([Z.string(), Z.string(), Z.number()])
