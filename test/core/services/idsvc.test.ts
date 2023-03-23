@@ -9,7 +9,6 @@ describe("IdSvc", () => {
 
   it("should generate an id", async () => {
     const res = await RT.runPromiseExit(testRt)(IdSvc.nextId("app"))
-
     expect(res._tag).toEqual("Success")
   })
 })
