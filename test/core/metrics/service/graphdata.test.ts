@@ -1,10 +1,11 @@
-import * as T from "@effect/core/io/Effect"
-import * as F from "@effect/core/io/Fiber"
-import * as S from "@effect/core/stream/Stream"
-import * as C from "@tsplus/stdlib/collections/Chunk"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import * as HSet from "@tsplus/stdlib/collections/HashSet"
-import { pipe } from "@tsplus/stdlib/data/Function"
+import * as C from "@effect/data/Chunk"
+import { pipe } from "@effect/data/Function"
+import * as HMap from "@effect/data/HashMap"
+import * as HSet from "@effect/data/HashSet"
+import * as T from "@effect/io/Effect"
+import * as F from "@effect/io/Fiber"
+import * as RT from "@effect/io/Runtime"
+import * as S from "@effect/stream/Stream"
 
 import * as AL from "@core/AppLayer"
 import * as GDS from "@core/metrics/services/GraphDataService"
@@ -19,7 +20,7 @@ const gds = GDS.createGraphDataService()
 
 describe("GraphDataService", () => {
   it("should start with an empty set of keys", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const svc = yield* $(gds)
         yield* $(svc.close())
@@ -31,12 +32,12 @@ describe("GraphDataService", () => {
   })
 
   it("should allow to register keys for observation", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const svc = yield* $(gds)
         const counterKey = yield* $(TK.counterKey)
         const gaugeKey = yield* $(TK.gaugeKey)
-        yield* $(svc.setMetrics(counterKey, gaugeKey, counterKey))
+        yield* $(svc.setMetrics(HSet.make(counterKey, gaugeKey, counterKey)))
         yield* $(svc.close())
         return yield* $(svc.metrics())
       })
@@ -47,7 +48,7 @@ describe("GraphDataService", () => {
   })
 
   it("should start with the default number of max entries", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const svc = yield* $(gds)
         yield* $(svc.close())
@@ -60,14 +61,14 @@ describe("GraphDataService", () => {
   })
 
   it("should push updates to relevant timeseries", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
         const svc = yield* $(gds)
         const counterKey = yield* $(TK.counterKey)
 
         const data = yield* $(svc.data())
-        yield* $(svc.setMetrics(counterKey))
+        yield* $(svc.setMetrics(HSet.make(counterKey)))
 
         const f = yield* $(pipe(S.take(1)(data), S.runCollect, T.fork))
 
@@ -83,7 +84,7 @@ describe("GraphDataService", () => {
   })
 
   it("should drop timeseries when the corresponding metric key has been removed", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
         const svc = yield* $(gds)
@@ -92,7 +93,7 @@ describe("GraphDataService", () => {
         const gk = yield* $(TK.gaugeKey)
 
         const data = yield* $(svc.data())
-        yield* $(svc.setMetrics(ck, gk))
+        yield* $(svc.setMetrics(HSet.make(ck, gk)))
 
         const f = yield* $(pipe(S.take(1)(data), S.runCollect, T.fork))
 
@@ -100,7 +101,7 @@ describe("GraphDataService", () => {
         // We wait until the GDS has been updated
         yield* $(F.join(f))
 
-        yield* $(svc.setMetrics(ck))
+        yield* $(svc.setMetrics(HSet.make(ck)))
         yield* $(svc.close())
 
         return yield* $(svc.current())

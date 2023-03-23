@@ -1,8 +1,10 @@
-import * as T from "@effect/core/io/Effect"
-import * as F from "@effect/core/io/Fiber"
-import * as S from "@effect/core/stream/Stream"
-import * as C from "@tsplus/stdlib/collections/Chunk"
-import { pipe } from "@tsplus/stdlib/data/Function"
+import * as C from "@effect/data/Chunk"
+import { pipe } from "@effect/data/Function"
+import * as HS from "@effect/data/HashSet"
+import * as T from "@effect/io/Effect"
+import * as F from "@effect/io/Fiber"
+import * as RT from "@effect/io/Runtime"
+import * as S from "@effect/stream/Stream"
 
 import * as AL from "@core/AppLayer"
 import type * as Model from "@core/metrics/model/zio/metrics/MetricKey"
@@ -23,7 +25,7 @@ const newKeys = C.make({
 
 describe("MetricsManager", () => {
   it("can be reset", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
         yield* $(mm.reset())
@@ -37,7 +39,7 @@ describe("MetricsManager", () => {
   })
 
   it("should allow to register keys", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
         const id = yield* $(mm.createSubscription(newKeys))
@@ -47,13 +49,13 @@ describe("MetricsManager", () => {
       })
     )
 
-    const mbElem = C.find<Model.InsightKey>((e) => e.id == "1234-5678")(res)
+    const mbElem = C.findFirst<Model.InsightKey>((e) => e.id == "1234-5678")(res)
     expect(res.length).toEqual(1)
     expect(mbElem._tag).toEqual("Some")
   })
 
   it("should allow to remove a subscription", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
         const id = yield* $(mm.createSubscription(newKeys))
@@ -67,7 +69,7 @@ describe("MetricsManager", () => {
   })
 
   it("should only yield distinct keys", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const mm = yield* $(T.service(MM.MetricsManager))
         const id1 = yield* $(mm.createSubscription(newKeys))
@@ -83,7 +85,7 @@ describe("MetricsManager", () => {
   })
 
   it("should publish metric state updates", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const insight = yield* $(T.service(Insight.InsightService))
         const mm = yield* $(T.service(MM.MetricsManager))
@@ -91,11 +93,11 @@ describe("MetricsManager", () => {
         const keys = yield* $(
           pipe(
             insight.getMetricKeys,
-            T.catchAll((_) => T.sync(() => [] as Model.InsightKey[]))
+            T.catchAll((_) => T.sync(() => HS.empty<Model.InsightKey>()))
           )
         )
 
-        const sub = yield* $(mm.createSubscription(C.from(keys)))
+        const sub = yield* $(mm.createSubscription(C.fromIterable(keys)))
         const states = yield* $(mm.updates())
 
         // Make sure we are already consuming from the stream before we manually kick off

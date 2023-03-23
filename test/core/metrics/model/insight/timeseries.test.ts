@@ -1,9 +1,9 @@
 import states from "@data/state.json"
-import * as T from "@effect/core/io/Effect"
-import * as C from "@tsplus/stdlib/collections/Chunk"
-import * as Coll from "@tsplus/stdlib/collections/Collection"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import * as MB from "@tsplus/stdlib/data/Maybe"
+import * as C from "@effect/data/Chunk"
+import { pipe } from "@effect/data/Function"
+import * as Opt from "@effect/data/Option"
+import * as T from "@effect/io/Effect"
+import * as RT from "@effect/io/Runtime"
 
 import * as AL from "@core/AppLayer"
 import * as TS from "@core/metrics/model/insight/TimeSeries"
@@ -31,7 +31,7 @@ const makeKey = (name: string, metricType: MT.MetricType) => {
         metricType,
       },
     },
-    subKey: MB.none,
+    subKey: Opt.none(),
   } as TS.TimeSeriesKey
 }
 
@@ -39,15 +39,17 @@ const makeKey = (name: string, metricType: MT.MetricType) => {
 const entries = (id: string) =>
   pipe(
     Insight.metricStatesFromInsight(states),
-    T.map((states) => states.find((s) => s.id == id)),
+    T.map((states) => C.findFirst(states, (s) => s.id == id)),
     T.map((entry) =>
-      entry ? TS.tsEntriesFromState(entry) : C.empty<TS.TimeSeriesEntry>()
+      Opt.isSome(entry)
+        ? TS.tsEntriesFromState(entry.value)
+        : C.empty<TS.TimeSeriesEntry>()
     )
   )
 
 describe("TimeSeries", () => {
   it("should start with an empty chunk of entries", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const log = yield* $(T.service(Log.LogService))
         const ts = yield* $(TS.makeTimeSeries(makeKey("foo", "Counter"), 2)(log))
@@ -59,7 +61,7 @@ describe("TimeSeries", () => {
   })
 
   it("should allow to record a time entry with a matching id", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const log = yield* $(T.service(Log.LogService))
         const key = makeKey("foo", "Counter")
@@ -78,7 +80,7 @@ describe("TimeSeries", () => {
   })
 
   it("should not record a time entry with a non-matching id", async () => {
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const log = yield* $(T.service(Log.LogService))
         const ts = yield* $(TS.makeTimeSeries(makeKey("foo", "Counter"), 2)(log))
@@ -108,7 +110,7 @@ describe("TimeSeries", () => {
       })
       .reverse()
 
-    const res = await testRt.unsafeRunPromise(
+    const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
         const log = yield* $(T.service(Log.LogService))
         const ts = yield* $(TS.makeTimeSeries(key, 2)(log))
@@ -117,7 +119,7 @@ describe("TimeSeries", () => {
       })
     )
 
-    const [e1, e2] = Coll.toArray(res)
+    const [e1, e2] = C.toReadonlyArray(res)
     expect(e1.when.getTime()).toBeLessThan(e2.when.getTime())
     expect(e1.when.getTime()).toEqual(now.getTime() - 1000)
     expect(e2.when.getTime()).toEqual(now.getTime())
@@ -127,7 +129,7 @@ describe("TimeSeries", () => {
 
 describe("TimeSeriesConvert", () => {
   it("should convert Counters", async () => {
-    const res = await testRt.unsafeRunPromise(entries(counterId))
+    const res = await RT.runPromise(testRt)(entries(counterId))
 
     expect(C.size(res)).toEqual(1)
     const entry = C.unsafeHead(res)
@@ -135,7 +137,7 @@ describe("TimeSeriesConvert", () => {
   })
 
   it("should convert Gauges", async () => {
-    const res = await testRt.unsafeRunPromise(entries(gaugeId))
+    const res = await RT.runPromise(testRt)(entries(gaugeId))
 
     expect(C.size(res)).toEqual(1)
     const entry = C.unsafeHead(res)
@@ -143,20 +145,17 @@ describe("TimeSeriesConvert", () => {
   })
 
   it("should convert Summaries", async () => {
-    const res = await testRt.unsafeRunPromise(entries(summaryId))
-
+    const res = await RT.runPromise(testRt)(entries(summaryId))
     expect(C.size(res)).toEqual(4)
   })
 
   it("should convert Frequencies", async () => {
-    const res = await testRt.unsafeRunPromise(entries(frequencyId))
-
+    const res = await RT.runPromise(testRt)(entries(frequencyId))
     expect(C.size(res)).toEqual(10)
   })
 
   it("should convert Histograms", async () => {
-    const res = await testRt.unsafeRunPromise(entries(histId))
-
+    const res = await RT.runPromise(testRt)(entries(histId))
     expect(C.size(res)).toEqual(102)
   })
 })
