@@ -1,4 +1,4 @@
-import * as C from "@effect/data/Chunk"
+import type * as C from "@effect/data/Chunk"
 import * as Ctx from "@effect/data/Context"
 import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
@@ -161,7 +161,7 @@ function makeGraphDataService(
   const setMetrics = (keys: HSet.HashSet<InsightKey>) =>
     T.gen(function* ($) {
       const ids = HSet.map(keys, (k) => k.id)
-      yield* $(mm.modifySubscription(subscriptionId, (_) => C.fromIterable(keys)))
+      yield* $(mm.modifySubscription(subscriptionId, (_) => HSet.fromIterable(keys)))
 
       yield* $(
         Ref.update(timeseries, (curr) => {
@@ -232,7 +232,7 @@ export function createGraphDataService() {
     const observed = yield* $(Ref.make(HSet.empty()))
     const maxEntries = yield* $(Ref.make(defaultMaxEntries))
     const timeSeries = yield* $(Ref.make(HMap.empty()))
-    const subId = yield* $(mm.createSubscription(C.empty()))
+    const subId = yield* $(mm.createSubscription(HSet.empty()))
     const stopped = yield* $(Ref.make(false))
     const dataHub = yield* $(Hub.sliding<GraphData>(128))
     return yield* $(

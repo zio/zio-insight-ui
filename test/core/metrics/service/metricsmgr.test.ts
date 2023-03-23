@@ -1,4 +1,5 @@
 import * as C from "@effect/data/Chunk"
+import * as D from "@effect/data/Duration"
 import { pipe } from "@effect/data/Function"
 import * as HS from "@effect/data/HashSet"
 import * as T from "@effect/io/Effect"
@@ -12,9 +13,9 @@ import * as Insight from "@core/metrics/services/InsightService"
 import * as MM from "@core/metrics/services/MetricsManager"
 import * as Log from "@core/services/Logger"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Debug)).runtime
 
-const newKeys = C.make({
+const newKeys = HS.make({
   id: "1234-5678",
   key: {
     name: "foo",
@@ -31,7 +32,7 @@ describe("MetricsManager", () => {
         yield* $(mm.reset())
         const keys = yield* $(mm.registeredKeys())
 
-        return C.isEmpty(keys)
+        return HS.size(keys) == 0
       })
     )
 
@@ -49,8 +50,8 @@ describe("MetricsManager", () => {
       })
     )
 
-    const mbElem = C.findFirst<Model.InsightKey>((e) => e.id == "1234-5678")(res)
-    expect(res.length).toEqual(1)
+    const mbElem = C.findFirst(C.fromIterable(res), (e) => e.id == "1234-5678")
+    expect(HS.size(res)).toEqual(1)
     expect(mbElem._tag).toEqual("Some")
   })
 
@@ -65,7 +66,7 @@ describe("MetricsManager", () => {
       })
     )
 
-    expect(C.isEmpty(res)).toBe(true)
+    expect(HS.size(res)).toEqual(0)
   })
 
   it("should only yield distinct keys", async () => {
@@ -81,7 +82,7 @@ describe("MetricsManager", () => {
       })
     )
 
-    expect(C.size(res)).toBe(1)
+    expect(HS.size(res)).toBe(1)
   })
 
   it("should publish metric state updates", async () => {
@@ -97,14 +98,14 @@ describe("MetricsManager", () => {
           )
         )
 
-        const sub = yield* $(mm.createSubscription(C.fromIterable(keys)))
+        const sub = yield* $(mm.createSubscription(keys))
         const states = yield* $(mm.updates())
 
         // Make sure we are already consuming from the stream before we manually kick off
         // the polling
-        const f = yield* $(pipe(S.take(10)(states), S.runCollect, T.fork))
+        const f = yield* $(pipe(S.take(states, 10), S.runCollect, T.fork))
 
-        yield* $(mm.poll())
+        yield* $(T.delay(D.millis(10))(mm.poll()))
 
         // Now the fiber should be done and have the first 10 elements from the state
         // updates

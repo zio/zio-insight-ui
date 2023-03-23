@@ -1,4 +1,5 @@
 import * as C from "@effect/data/Chunk"
+import * as D from "@effect/data/Duration"
 import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
 import * as HSet from "@effect/data/HashSet"
@@ -14,7 +15,7 @@ import * as Log from "@core/services/Logger"
 
 import * as TK from "../../../../src/data/testkeys"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Debug)).runtime
 
 const gds = GDS.createGraphDataService()
 
@@ -66,13 +67,15 @@ describe("GraphDataService", () => {
         const mm = yield* $(T.service(MM.MetricsManager))
         const svc = yield* $(gds)
         const counterKey = yield* $(TK.counterKey)
+        yield* $(Log.debug("Waiting for data...1"))
 
         const data = yield* $(svc.data())
         yield* $(svc.setMetrics(HSet.make(counterKey)))
 
+        yield* $(Log.debug("Waiting for data...2"))
         const f = yield* $(pipe(S.take(1)(data), S.runCollect, T.fork))
 
-        yield* $(mm.poll())
+        yield* $(T.delay(D.millis(10))(mm.poll()))
         const res = yield* $(F.join(f))
         yield* $(svc.close())
 
@@ -97,7 +100,7 @@ describe("GraphDataService", () => {
 
         const f = yield* $(pipe(S.take(1)(data), S.runCollect, T.fork))
 
-        yield* $(mm.poll())
+        yield* $(T.delay(D.millis(10))(mm.poll()))
         // We wait until the GDS has been updated
         yield* $(F.join(f))
 

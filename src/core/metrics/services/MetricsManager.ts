@@ -3,6 +3,7 @@ import * as Ctx from "@effect/data/Context"
 import * as D from "@effect/data/Duration"
 import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
+import * as HS from "@effect/data/HashSet"
 import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
 import * as Hub from "@effect/io/Hub"
@@ -31,17 +32,17 @@ import * as Insight from "./InsightService"
 export interface MetricsManager {
   // Allow components to register their interest in particular keys
   readonly createSubscription: (
-    keys: C.Chunk<InsightKey>
+    keys: HS.HashSet<InsightKey>
   ) => T.Effect<never, never, string>
   // Allow components to completely remove their subscription
   readonly removeSubscription: (id: string) => T.Effect<never, never, void>
   // Modify a given subscription
   readonly modifySubscription: (
     id: string,
-    f: (_: C.Chunk<InsightKey>) => C.Chunk<InsightKey>
+    f: (_: HS.HashSet<InsightKey>) => HS.HashSet<InsightKey>
   ) => T.Effect<never, never, void>
   // Get the union over all registered keys
-  readonly registeredKeys: () => T.Effect<never, never, C.Chunk<InsightKey>>
+  readonly registeredKeys: () => T.Effect<never, never, HS.HashSet<InsightKey>>
   // create a stream for incoming Metric State updates
   readonly updates: () => T.Effect<never, never, S.Stream<never, never, MetricState>>
   // Manually trigger a poll, the poll will cause an update to all connected
@@ -58,17 +59,17 @@ function makeMetricsManager(
   idSvc: IdSvc.IdGenerator,
   insight: Insight.InsightService,
   metricsHub: Hub.Hub<MetricState>,
-  subscriptions: Ref.Ref<HMap.HashMap<string, C.Chunk<InsightKey>>>
+  subscriptions: Ref.Ref<HMap.HashMap<string, HS.HashSet<InsightKey>>>
 ) {
   // create a new subscription for a collection of InsightKeys, the new subscription will have a unique id
   // that can be used to unsubscribe again
-  const createSubscription = (keys: C.Chunk<InsightKey>) =>
+  const createSubscription = (keys: HS.HashSet<InsightKey>) =>
     pipe(
       idSvc.nextId("mm"),
       T.flatMap((id) =>
         pipe(
           log.debug(
-            `Adding subscription <${id}> with <${keys.length}> keys to MetricsManager`
+            `Adding subscription <${id}> with <${HS.size(keys)}> keys to MetricsManager`
           ),
           T.flatMap((_) => Ref.update(subscriptions, HMap.set(id, keys))),
           T.map((_) => id)
@@ -85,43 +86,34 @@ function makeMetricsManager(
 
   const modifySubscription = (
     id: string,
-    f: (_: C.Chunk<InsightKey>) => C.Chunk<InsightKey>
+    f: (_: HS.HashSet<InsightKey>) => HS.HashSet<InsightKey>
   ) =>
     T.gen(function* ($) {
       yield* $(log.debug(`Modifying subscription <${id}> in MetricsManager`))
       const subs = yield* $(Ref.get(subscriptions))
-      const oldKeys = Opt.getOrElse(HMap.get(id)(subs), C.empty<InsightKey>)
+      const oldKeys = Opt.getOrElse(HMap.get(id)(subs), HS.empty<InsightKey>)
       const newKeys = f(oldKeys)
-      yield $(log.debug(`Subscription <${id}> has now <${newKeys.length}> keys`))
+      yield $(log.debug(`Subscription <${id}> has now <${HS.size(newKeys)}> keys`))
       yield* $(Ref.set(subscriptions, HMap.set(id, newKeys)(subs)))
     })
 
   const registeredKeys = () =>
-    pipe(
-      Ref.get(subscriptions),
-      T.map(
-        HMap.reduce(C.empty<InsightKey>(), (z, v) =>
-          C.concat<InsightKey, InsightKey>(z, v)
-        )
-      ),
-      // TODO: can we do this more efficiently ??
-      T.map(
-        C.reduce(C.empty<InsightKey>(), (curr, a) => {
-          if (C.findFirstIndex<InsightKey>((e) => e.id == a.id)(curr)._tag == "Some") {
-            return curr
-          } else {
-            return C.append(a)(curr)
-          }
-        })
-      ),
-      T.tap((res) =>
-        log.debug(`Found <${res.length}> metric keys over all registrations`)
-      )
-    )
+    T.gen(function* ($) {
+      const subs = yield* $(Ref.get(subscriptions))
+      const keys = HMap.reduce(subs, HS.empty<InsightKey>(), (z, v) => HS.union(z, v))
+      yield $(log.debug(`Found <${HS.size(keys)}> metric keys over all registrations`))
+      return keys
+    })
 
-  const updates = () => T.sync(() => S.fromHub(metricsHub))
+  const updates = () =>
+    T.gen(function* ($) {
+      const stream = S.fromHub(metricsHub)
+      yield* $(log.debug(`Created stream for metric updates`))
+      return stream
+    })
 
-  const reset = () => Ref.set(subscriptions, HMap.empty<string, C.Chunk<InsightKey>>())
+  const reset = () =>
+    Ref.set(subscriptions, HMap.empty<string, HS.HashSet<InsightKey>>())
 
   const getStates = (keys: readonly string[]) =>
     pipe(
@@ -129,7 +121,7 @@ function makeMetricsManager(
       T.catchAll((err) =>
         pipe(
           log.warn(`Error getting metric states from server: <${JSON.stringify(err)}>`),
-          T.flatMap((_) => T.sync(() => [] as MetricState[]))
+          T.flatMap((_) => T.succeed(C.empty<MetricState>()))
         )
       ),
       T.tap((res) => log.debug(`Got <${res.length}> metric states from Application`))
@@ -137,21 +129,17 @@ function makeMetricsManager(
 
   const pollMetrics = () =>
     T.gen(function* ($) {
-      const keys = yield* $(pipe(registeredKeys(), T.map(C.map((k) => k.id))))
+      const keys = yield* $(pipe(registeredKeys(), T.map(HS.map((k) => k.id))))
 
-      if (keys.length > 0) {
+      if (HS.size(keys) > 0) {
         // TODO: Most likely it is better to use Chunk in the API rather than arrays
-        const keyArr = C.toReadonlyArray(keys)
+        const keyArr = [...keys]
         yield* $(log.info(`polling metrics for <${keyArr.length}> keys`))
         const states = yield* $(getStates(keyArr))
-        yield* $(metricsHub.publishAll(states))
-
+        const published = yield* $(metricsHub.publishAll(states))
         yield* $(
-          pipe(
-            metricsHub.size(),
-            T.flatMap((cnt) =>
-              log.debug(`Current metric state hub has <${cnt}> elements`)
-            )
+          log.debug(
+            `published <${states.length}> metric states to metrics hub : ${published}`
           )
         )
       }
@@ -181,7 +169,9 @@ export const live = L.effect(
     const insight = yield* $(T.service(Insight.InsightService))
     const idSvc = yield* $(T.service(IdSvc.IdGenerator))
     const log = yield* $(T.service(Log.LogService))
-    const subscriptions = yield* $(Ref.make(HMap.empty<string, C.Chunk<InsightKey>>()))
+    const subscriptions = yield* $(
+      Ref.make(HMap.empty<string, HS.HashSet<InsightKey>>())
+    )
 
     return yield* $(makeMetricsManager(log, idSvc, insight, hub, subscriptions))
   })
