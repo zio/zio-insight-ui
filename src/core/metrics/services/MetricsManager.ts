@@ -3,6 +3,7 @@ import * as Ctx from "@effect/data/Context"
 import * as D from "@effect/data/Duration"
 import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
+import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
 import * as Hub from "@effect/io/Hub"
 import * as L from "@effect/io/Layer"
@@ -86,30 +87,27 @@ function makeMetricsManager(
     id: string,
     f: (_: C.Chunk<InsightKey>) => C.Chunk<InsightKey>
   ) =>
-    pipe(
-      log.debug(`Modifying subscription <${id}> in MetricsManager`),
-      T.flatMap((_) => Ref.updateAndGet(subscriptions, (m) => HMap.set(m, id, f))),
-      T.tap((subs) =>
-        log.debug(
-          `Subscription <${id}> has now <${C.size(
-            HMap.unsafeGet<string, C.Chunk<InsightKey>>(id)(subs)
-          )}> keys`
-        )
-      )
-    )
+    T.gen(function* ($) {
+      yield* $(log.debug(`Modifying subscription <${id}> in MetricsManager`))
+      const subs = yield* $(Ref.get(subscriptions))
+      const oldKeys = Opt.getOrElse(HMap.get(id)(subs), C.empty<InsightKey>)
+      const newKeys = f(oldKeys)
+      yield $(log.debug(`Subscription <${id}> has now <${newKeys.length}> keys`))
+      yield* $(Ref.set(subscriptions, HMap.set(id, newKeys)(subs)))
+    })
 
   const registeredKeys = () =>
     pipe(
       Ref.get(subscriptions),
       T.map(
         HMap.reduce(C.empty<InsightKey>(), (z, v) =>
-          C.concat<InsightKey, InsightKey>(z)(v)
+          C.concat<InsightKey, InsightKey>(z, v)
         )
       ),
       // TODO: can we do this more efficiently ??
       T.map(
         C.reduce(C.empty<InsightKey>(), (curr, a) => {
-          if (C.findIndex<InsightKey>((e) => e.id == a.id)(curr)._tag == "Some") {
+          if (C.findFirstIndex<InsightKey>((e) => e.id == a.id)(curr)._tag == "Some") {
             return curr
           } else {
             return C.append(a)(curr)
@@ -125,7 +123,7 @@ function makeMetricsManager(
 
   const reset = () => Ref.set(subscriptions, HMap.empty<string, C.Chunk<InsightKey>>())
 
-  const getStates = (keys: string[]) =>
+  const getStates = (keys: readonly string[]) =>
     pipe(
       insight.getMetricStates(keys),
       T.catchAll((err) =>
@@ -139,18 +137,18 @@ function makeMetricsManager(
 
   const pollMetrics = () =>
     T.gen(function* ($) {
-      const keys = yield* $(registeredKeys())
+      const keys = yield* $(pipe(registeredKeys(), T.map(C.map((k) => k.id))))
 
       if (keys.length > 0) {
         // TODO: Most likely it is better to use Chunk in the API rather than arrays
-        const keyArr = Coll.toArray(C.toCollection(keys)).map((ik) => ik.id)
+        const keyArr = C.toReadonlyArray(keys)
         yield* $(log.info(`polling metrics for <${keyArr.length}> keys`))
         const states = yield* $(getStates(keyArr))
         yield* $(metricsHub.publishAll(states))
 
         yield* $(
           pipe(
-            metricsHub.size,
+            metricsHub.size(),
             T.flatMap((cnt) =>
               log.debug(`Current metric state hub has <${cnt}> elements`)
             )

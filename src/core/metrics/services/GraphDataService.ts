@@ -1,13 +1,13 @@
+import * as C from "@effect/data/Chunk"
+import * as Ctx from "@effect/data/Context"
+import { pipe } from "@effect/data/Function"
+import * as HMap from "@effect/data/HashMap"
+import * as HSet from "@effect/data/HashSet"
 import * as T from "@effect/io/Effect"
 import * as F from "@effect/io/Fiber"
 import * as Hub from "@effect/io/Hub"
 import * as Ref from "@effect/io/Ref"
 import * as S from "@effect/stream/Stream"
-import * as C from "@tsplus/stdlib/collections/Chunk"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import * as HSet from "@tsplus/stdlib/collections/HashSet"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import { Tag } from "@tsplus/stdlib/service/Tag"
 
 import * as TS from "@core/metrics/model/insight/TimeSeries"
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
@@ -26,7 +26,7 @@ export type GraphData = HMap.HashMap<TS.TimeSeriesKey, C.Chunk<TS.TimeSeriesEntr
 export interface GraphDataService {
   subscription: string
   // set the list of currently observed metric keys
-  setMetrics: (...keys: InsightKey[]) => T.Effect<never, never, void>
+  setMetrics: (keys: InsightKey[]) => T.Effect<never, never, void>
   // get the current set of observed keys
   metrics: () => T.Effect<never, never, HSet.HashSet<InsightKey>>
   // adjust the maximum number of observed data points
@@ -41,7 +41,7 @@ export interface GraphDataService {
   close: () => T.Effect<never, never, void>
 }
 
-export const GraphDataService = Tag<GraphDataService>()
+export const GraphDataService = Ctx.Tag<GraphDataService>()
 
 export const defaultMaxEntries = 10
 
@@ -58,14 +58,19 @@ function makeGraphDataService(
   // create a new TimeSeries with a given id with the current number of max entries
   const createTS = (id: TS.TimeSeriesKey) =>
     T.gen(function* ($) {
-      const max = yield* $(currMaxEntries.get)
+      const max = yield* $(Ref.get(currMaxEntries))
       yield* $(log.debug(`creating new Timeseries`))
       return yield* $(TS.makeTimeSeries(id, max)(log))
     })
 
   const getOrCreateTS = (id: TS.TimeSeriesKey) =>
     T.gen(function* ($) {
-      const mbTS = yield* $(pipe(timeseries.get, T.map(HMap.get(id))))
+      const mbTS = yield* $(
+        pipe(
+          Ref.get(timeseries),
+          T.map((ts) => HMap.get(ts, id))
+        )
+      )
 
       switch (mbTS._tag) {
         case "None":
@@ -73,7 +78,7 @@ function makeGraphDataService(
             pipe(
               createTS(id),
               T.flatMap((ts) =>
-                pipe(timeseries.updateAndGet(HMap.set(id, ts)), T.as(ts))
+                pipe(Ref.updateAndGet(timeseries, HMap.set(id, ts)), T.as(ts))
               )
             )
           )
@@ -84,7 +89,7 @@ function makeGraphDataService(
 
   const current = () =>
     T.gen(function* ($) {
-      const ts = yield* $(timeseries.get)
+      const ts = yield* $(Ref.get(timeseries))
 
       const snapshot: C.Chunk<[TS.TimeSeriesKey, C.Chunk<TS.TimeSeriesEntry>]> =
         yield* $(
@@ -99,7 +104,7 @@ function makeGraphDataService(
           )
         )
 
-      return HMap.from<TS.TimeSeriesKey, C.Chunk<TS.TimeSeriesEntry>>(snapshot)
+      return HMap.fromIterable<TS.TimeSeriesKey, C.Chunk<TS.TimeSeriesEntry>>(snapshot)
     })
 
   // This will be started in the background to consume metric updates from the metrics manager and update
@@ -119,7 +124,7 @@ function makeGraphDataService(
 
           const contains = yield* $(
             pipe(
-              observed.get,
+              Ref.get(observed),
               T.map(HSet.filter((k) => k.id == ms.id)),
               T.map(HSet.size),
               T.map((s) => s > 0)
@@ -146,52 +151,53 @@ function makeGraphDataService(
         })
 
       const runner = pipe(
-        S.takeUntilEffect<MetricState, never, never>((_) => stopped.get)(strState),
+        S.takeUntilEffect<MetricState, never, never>((_) => Ref.get(stopped))(strState),
         S.runForEach(handleMetricState)
       )
 
       return yield* $(T.forkDaemon(runner))
     })
 
-  const setMetrics = (...keys: InsightKey[]) =>
+  const setMetrics = (keys: InsightKey[]) =>
     T.gen(function* ($) {
       const ids = keys.map((k) => k.id)
-      const newSet = HSet.from(keys)
-      yield* $(mm.modifySubscription(subscriptionId, (_) => C.from(keys)))
+      const newSet = HSet.make(...keys)
+      yield* $(mm.modifySubscription(subscriptionId, (_) => C.fromIterable(keys)))
 
       yield* $(
-        timeseries.update((curr) =>
-          HMap.reduceWithIndex(
+        Ref.update(timeseries, (curr) => {
+          return HMap.reduceWithIndex(
+            curr,
             HMap.empty<TS.TimeSeriesKey, TS.TimeSeries>(),
             (
               s: HMap.HashMap<TS.TimeSeriesKey, TS.TimeSeries>,
-              k: TS.TimeSeriesKey,
-              v: TS.TimeSeries
+              v: TS.TimeSeries,
+              k: TS.TimeSeriesKey
             ) => {
               if (ids.find((e) => e == k.key.id) != undefined) {
-                return HMap.set(k, v)(s)
+                return HMap.set(s, k, v)
               } else {
                 return s
               }
             }
-          )(curr)
-        )
+          )
+        })
       )
 
       yield* $(log.debug(`GraphData Services now observes <${HSet.size(newSet)}> keys`))
-      yield* $(observed.set(newSet))
+      yield* $(Ref.set(observed, newSet))
     })
 
-  const metrics = () => observed.get
+  const metrics = () => Ref.get(observed)
 
   const setMaxEntries = (newMax: number) =>
     T.gen(function* ($) {
-      const series = yield* $(timeseries.get)
+      const series = yield* $(Ref.get(timeseries))
       yield* $(T.forEach(HMap.values(series), (ts) => ts.updateMaxEntries(newMax)))
-      yield* $(currMaxEntries.set(newMax))
+      yield* $(Ref.set(currMaxEntries, newMax))
     })
 
-  const maxEntries = () => currMaxEntries.get
+  const maxEntries = () => Ref.get(currMaxEntries)
 
   const data = () => T.sync(() => S.fromHub(dataHub))
 
@@ -209,7 +215,7 @@ function makeGraphDataService(
           data,
           close: () =>
             pipe(
-              stopped.set(true),
+              Ref.set(stopped, true),
               T.flatMap((_) => mm.removeSubscription(subscriptionId)),
               T.flatMap((_) => F.interrupt(f))
             ),
@@ -224,11 +230,11 @@ export function createGraphDataService() {
   return T.gen(function* ($) {
     const log = yield* $(T.service(Log.LogService))
     const mm = yield* $(T.service(MM.MetricsManager))
-    const observed = yield* $(Ref.makeRef(() => HSet.empty()))
-    const maxEntries = yield* $(Ref.makeRef(() => defaultMaxEntries))
-    const timeSeries = yield* $(Ref.makeRef(() => HMap.empty()))
+    const observed = yield* $(Ref.make(HSet.empty()))
+    const maxEntries = yield* $(Ref.make(defaultMaxEntries))
+    const timeSeries = yield* $(Ref.make(HMap.empty()))
     const subId = yield* $(mm.createSubscription(C.empty()))
-    const stopped = yield* $(Ref.makeRef(() => false))
+    const stopped = yield* $(Ref.make(false))
     const dataHub = yield* $(Hub.sliding<GraphData>(128))
     return yield* $(
       makeGraphDataService(

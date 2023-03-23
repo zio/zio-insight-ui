@@ -37,7 +37,9 @@ type InsightApiError =
 // Rather, use Layer injection into the actual service
 export interface InsightService {
   getMetricKeys: T.Effect<never, InsightApiError, InsightKey[]>
-  getMetricStates: (ids: string[]) => T.Effect<never, InsightApiError, MetricState[]>
+  getMetricStates: (
+    ids: readonly string[]
+  ) => T.Effect<never, InsightApiError, MetricState[]>
 
   getFibers: T.Effect<never, InsightApiError, FiberInfo[]>
 }
