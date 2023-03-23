@@ -104,6 +104,21 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
     }
   }, [])
 
+  const chartDataSets = (() => {
+    const ds = HMap.values(
+      HMap.map(chartData, (cd) => {
+        return {
+          label: cd.tsConfig.title,
+          data: cd.data,
+          tension: cd.tsConfig.tension,
+          backgroundColor: cd.tsConfig.pointColor.toRgb(),
+          borderColor: cd.tsConfig.lineColor.toRgba(),
+        }
+      })
+    )
+    return Array(...ds)
+  })()
+
   const createChart = (ref: CanvasRenderingContext2D) => {
     return new Chart(ref, {
       type: "line",
@@ -121,15 +136,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
         },
       },
       data: {
-        datasets: Coll.toArray(HMap.values(chartData)).map((cd) => {
-          return {
-            label: cd.tsConfig.title,
-            data: cd.data,
-            tension: cd.tsConfig.tension,
-            backgroundColor: cd.tsConfig.pointColor.toRgb(),
-            borderColor: cd.tsConfig.lineColor.toRgba(),
-          }
-        }),
+        datasets: chartDataSets,
       },
     })
   }
