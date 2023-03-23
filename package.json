@@ -12,7 +12,7 @@
     "lint": "eslint --ext ts,tsx test src ",
     "lint:fix": "yarn lint --fix",
     "preview": "vite preview",
-    "test": "vitest --run",
+    "test": "vitest --run --coverage",
     "test:watch": "vitest --watch",
     "test:ui": "vitest --watch --ui",
     "build": "yarn clean && yarn compile && yarn test:compile && yarn test && yarn dist"
