@@ -10,6 +10,7 @@ import type { Layout, Layouts } from "react-grid-layout"
 import { Responsive, WidthProvider } from "react-grid-layout"
 import * as BiIcons from "react-icons/bi"
 import * as MdIcons from "react-icons/md"
+import * as HS from "@effect/data/HashSet"
 
 import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as InsightSvc from "@core/metrics/services/InsightService"
@@ -111,11 +112,11 @@ export function InsightGridLayout() {
     const app = yield* $(T.service(InsightSvc.InsightService))
     const idSvc = yield* $(T.service(IdSvc.IdGenerator))
     const panelId = yield* $(idSvc.nextId("panel"))
-    const keys = yield* $(app.getMetricKeys)
-    const idx = Math.floor(Math.random() * keys.length)
+    const keys = C.fromIterable(yield* $(app.getMetricKeys))
+    const idx = Math.floor(Math.random() * C.size(keys))
     const res : InsightKey = Opt.getOrElse(C.get(keys, idx), () => yield* $(TK.gaugeKey))
     const gds = yield* $(gdm.register(panelId))
-    yield* $(gds.setMetrics([res]))
+    yield* $(gds.setMetrics(HS.make(res)))
 
     return panelId
   })

@@ -26,7 +26,7 @@ export type GraphData = HMap.HashMap<TS.TimeSeriesKey, C.Chunk<TS.TimeSeriesEntr
 export interface GraphDataService {
   subscription: string
   // set the list of currently observed metric keys
-  setMetrics: (keys: InsightKey[]) => T.Effect<never, never, void>
+  setMetrics: (keys: HSet.HashSet<InsightKey>) => T.Effect<never, never, void>
   // get the current set of observed keys
   metrics: () => T.Effect<never, never, HSet.HashSet<InsightKey>>
   // adjust the maximum number of observed data points
@@ -158,10 +158,9 @@ function makeGraphDataService(
       return yield* $(T.forkDaemon(runner))
     })
 
-  const setMetrics = (keys: InsightKey[]) =>
+  const setMetrics = (keys: HSet.HashSet<InsightKey>) =>
     T.gen(function* ($) {
-      const ids = keys.map((k) => k.id)
-      const newSet = HSet.make(...keys)
+      const ids = HSet.map(keys, (k) => k.id)
       yield* $(mm.modifySubscription(subscriptionId, (_) => C.fromIterable(keys)))
 
       yield* $(
@@ -174,7 +173,7 @@ function makeGraphDataService(
               v: TS.TimeSeries,
               k: TS.TimeSeriesKey
             ) => {
-              if (ids.find((e) => e == k.key.id) != undefined) {
+              if (HSet.has(ids, k.key.id)) {
                 return HMap.set(s, k, v)
               } else {
                 return s
@@ -184,8 +183,8 @@ function makeGraphDataService(
         })
       )
 
-      yield* $(log.debug(`GraphData Services now observes <${HSet.size(newSet)}> keys`))
-      yield* $(Ref.set(observed, newSet))
+      yield* $(log.debug(`GraphData Services now observes <${HSet.size(keys)}> keys`))
+      yield* $(Ref.set(observed, keys))
     })
 
   const metrics = () => Ref.get(observed)

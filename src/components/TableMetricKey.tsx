@@ -1,3 +1,4 @@
+import * as HS from "@effect/data/HashSet"
 import React from "react"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
@@ -6,16 +7,16 @@ import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
  * A component for rendering available metric keys in a table. Effectively this
  */
 interface TableMetricKeysProps {
-  available: InsightKey[]
+  available: HS.HashSet<InsightKey>
   // The initially selected keys
-  selection: InsightKey[]
+  selection: HS.HashSet<InsightKey>
   // a Callback that can be used to change the selection state
   onSelect: (key: InsightKey) => void
 }
 
 export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
-  const isSelected = (k: InsightKey) => (selection: InsightKey[]) => {
-    return selection.find((e) => e.id == k.id) != undefined
+  const isSelected = (k: InsightKey) => (selection: HS.HashSet<InsightKey>) => {
+    return HS.some(selection, (e) => e.id == k.id)
   }
 
   return (
@@ -30,7 +31,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
           </tr>
         </thead>
         <tbody>
-          {props.available.map((k) => (
+          {HS.map(props.available, (k) => (
             <RowMetricKey
               key={k.id}
               metricKey={k}

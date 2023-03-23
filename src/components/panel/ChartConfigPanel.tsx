@@ -4,7 +4,6 @@ import { pipe } from "@effect/data/Function"
 import * as HS from "@effect/data/HashSet"
 import * as T from "@effect/io/Effect"
 import * as Ex from "@effect/io/Exit"
-import * as FiberId from "@effect/io/FiberId"
 import * as RT from "@effect/io/Runtime"
 import * as React from "react"
 
@@ -26,23 +25,22 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
     props.onDone(props.id)
   }
 
-  const [available, setAvailable] = React.useState<InsightKey[]>([])
-  const [selected, setSelected] = React.useState<InsightKey[]>([])
+  const [available, setAvailable] = React.useState<HS.HashSet<InsightKey>>(HS.empty)
+  const [selected, setSelected] = React.useState<HS.HashSet<InsightKey>>(HS.empty)
 
   const availableKeys = pipe(
     Insight.getMetricKeys,
-    T.catchAll((_) => T.sync(() => [] as InsightKey[]))
+    T.catchAll((_) => T.sync(() => HS.empty<InsightKey>()))
   )
 
   const applySelection = () => {
-    RT.runPromise(
-      appRt,
+    RT.runPromise(appRt)(
       T.gen(function* ($) {
         const gdm = yield* $(T.service(GDM.GraphDataManager))
         yield* $(
           pipe(
             gdm.lookup(props.id),
-            T.flatMap((svc) => svc.setMetrics(...selected)),
+            T.flatMap((svc) => svc.setMetrics(selected)),
             T.catchAll((_) =>
               T.sync(() => {
                 /* ignore */
@@ -60,15 +58,14 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
       pipe(
         gdm.lookup(props.id),
         T.flatMap((svc) => svc.metrics()),
-        T.catchAll((_) => T.sync(() => HS.empty<InsightKey>())),
-        T.map(Coll.toArray)
+        T.catchAll((_) => T.sync(() => HS.empty<InsightKey>()))
       )
     )
     return keys
   })
 
   React.useEffect(() => {
-    const run = RT.runSync(pipe(availableKeys, T.zip(initialSelection)), (e) => {
+    RT.runCallback(appRt)(pipe(availableKeys, T.zip(initialSelection)), (e) => {
       if (Ex.isSuccess(e)) {
         const [allKeys, selection] = e.value
         setAvailable(allKeys)
@@ -79,25 +76,21 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
 
       return () => {
         try {
-          run(FiberId.none)((_) => {
-            /* ignore */
-          })
+          /* ignore */
         } catch {
           /* ignore */
         }
       }
-    })(appRt)
+    })
   }, [props.id])
 
   const updateSelected = (k: InsightKey) =>
     setSelected((curr) => {
       const newSelection = (() => {
-        if (curr.find((e) => e.id == k.id)) {
-          return curr.filter((e) => e.id != k.id)
+        if (HS.some(curr, (e) => e.id == k.id)) {
+          return HS.filter(curr, (e) => e.id != k.id)
         } else {
-          const s = curr.slice()
-          s.push(k)
-          return s
+          return HS.add(curr, k)
         }
       })()
 
@@ -127,10 +120,12 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
           Discard Changes
         </span>
         <span
-          className={`ml-2 btn ${selected.length > 0 ? "btn-primary" : "btn-disabled"}`}
+          className={`ml-2 btn ${
+            HS.size(selected) > 0 ? "btn-primary" : "btn-disabled"
+          }`}
           onClick={applySelection}
         >
-          {selected.length > 0 ? "Apply Changes" : "Nothing Selected"}
+          {HS.size(selected) > 0 ? "Apply Changes" : "Nothing Selected"}
         </span>
       </div>
     </div>

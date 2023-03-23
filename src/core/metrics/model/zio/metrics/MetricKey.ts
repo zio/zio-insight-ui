@@ -1,5 +1,5 @@
-import * as C from "@effect/data/Chunk"
 import { pipe } from "@effect/data/Function"
+import * as HS from "@effect/data/HashSet"
 import type { Order } from "@effect/data/typeclass/Order"
 import * as T from "@effect/io/Effect"
 import * as Z from "zod"
@@ -47,12 +47,12 @@ export class InvalidMetricKeys {
 
 export const metricKeysFromInsight: (
   value: unknown
-) => T.Effect<never, InvalidMetricKeys, C.Chunk<InsightKey>> = (value: unknown) =>
+) => T.Effect<never, InvalidMetricKeys, HS.HashSet<InsightKey>> = (value: unknown) =>
   pipe(
     T.sync(() => InsightMetricKeys.safeParse(value)),
     T.flatMap((result) =>
       result.success
-        ? T.succeed(C.fromIterable(result.data.keys))
+        ? T.succeed(HS.fromIterable(result.data.keys))
         : T.fail(new InvalidMetricKeys(result.error.toString()))
     )
   )

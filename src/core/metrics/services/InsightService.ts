@@ -4,6 +4,7 @@ import staticStates from "@data/state.json"
 import * as C from "@effect/data/Chunk"
 import * as Ctx from "@effect/data/Context"
 import { pipe } from "@effect/data/Function"
+import * as HS from "@effect/data/HashSet"
 import * as T from "@effect/io/Effect"
 import * as L from "@effect/io/Layer"
 
@@ -37,7 +38,7 @@ type InsightApiError =
 // As a best practice, do not require services in the individual methods of the interface
 // Rather, use Layer injection into the actual service
 export interface InsightService {
-  getMetricKeys: T.Effect<never, InsightApiError, C.Chunk<InsightKey>>
+  getMetricKeys: T.Effect<never, InsightApiError, HS.HashSet<InsightKey>>
   getMetricStates: (
     ids: readonly string[]
   ) => T.Effect<never, InsightApiError, C.Chunk<MetricState>>
@@ -59,7 +60,7 @@ function makeLiveMetrics(logger: Log.LogService): InsightService {
       Req.request(`${baseUrl}/metrics/keys`),
       T.flatMap(Req.jsonFromResponse),
       T.flatMap(metricKeysFromInsight),
-      T.tap((keys) => logger.info(`Got ${keys.length} metric keys from server`))
+      T.tap((keys) => logger.info(`Got ${HS.size(keys)} metric keys from server`))
     ),
     getMetricStates: (keys: readonly string[]) =>
       T.gen(function* ($) {
