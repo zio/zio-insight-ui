@@ -1,6 +1,8 @@
 import * as App from "@components/App"
+import * as TK from "@data/testkeys"
 import * as C from "@effect/data/Chunk"
 import * as HMap from "@effect/data/HashMap"
+import * as HS from "@effect/data/HashSet"
 import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
 import * as RT from "@effect/io/Runtime"
@@ -10,8 +12,8 @@ import type { Layout, Layouts } from "react-grid-layout"
 import { Responsive, WidthProvider } from "react-grid-layout"
 import * as BiIcons from "react-icons/bi"
 import * as MdIcons from "react-icons/md"
-import * as HS from "@effect/data/HashSet"
 
+import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as InsightSvc from "@core/metrics/services/InsightService"
 import * as IdSvc from "@core/services/IdGenerator"
@@ -19,7 +21,6 @@ import * as IdSvc from "@core/services/IdGenerator"
 import { ChartConfigPanel } from "./panel/ChartConfigPanel"
 import { ChartPanel } from "./panel/ChartPanel"
 import { GridFrame } from "./panel/GridFrame"
-import { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 
 // An Insight Dashboard uses react-grid-layout under the covers to allow the users to create and arrange their
 // panels as they see fit. In that sense a dashboard is a collection of views, each of which is an instance of
@@ -114,7 +115,8 @@ export function InsightGridLayout() {
     const panelId = yield* $(idSvc.nextId("panel"))
     const keys = C.fromIterable(yield* $(app.getMetricKeys))
     const idx = Math.floor(Math.random() * C.size(keys))
-    const res : InsightKey = Opt.getOrElse(C.get(keys, idx), () => yield* $(TK.gaugeKey))
+    const gk = yield* $(TK.gaugeKey)
+    const res: InsightKey = Opt.getOrElse(C.get(keys, idx), () => gk)
     const gds = yield* $(gdm.register(panelId))
     yield* $(gds.setMetrics(HS.make(res)))
 
@@ -232,7 +234,7 @@ export function InsightGridLayout() {
   // A callback to create a panel
   // TODO: Most like this should create a TSConfig and stick that into the underlying
   // panel as an init parameter. That would make the entire dashboard serializable
-  const addPanel = () => { 
+  const addPanel = () => {
     RT.runCallback(appRt)(randomKey, (res) => {
       switch (res._tag) {
         case "Failure":
@@ -302,7 +304,7 @@ export function InsightGridLayout() {
           }
           rowHeight={50}
         >
-          { HMap.mapWithIndex(dbState.content, (ct, id) => {
+          {HMap.mapWithIndex(dbState.content, (ct, id) => {
             return (
               <div key={id} className="w-full h-full bg-neutral text-neutral-content">
                 <GridFrame
