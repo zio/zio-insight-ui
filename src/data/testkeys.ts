@@ -1,7 +1,7 @@
 import keysObj from "@data/keys.json"
-import * as C from "@effect/data/Chunk"
 import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
+import * as HS from "@effect/data/HashSet"
 import * as T from "@effect/io/Effect"
 
 import * as MK from "@core/metrics/model/zio/metrics/MetricKey"
@@ -13,7 +13,7 @@ export const staticKeys: T.Effect<
 > = pipe(
   T.gen(function* ($) {
     const keys = yield* $(MK.metricKeysFromInsight(keysObj))
-    const keyMap = C.map(keys, (k) => [k.id, k]) as C.Chunk<[string, MK.InsightKey]>
+    const keyMap = HS.map(keys, (k) => [k.id, k]) as HS.HashSet<[string, MK.InsightKey]>
     return HMap.fromIterable(keyMap)
   }),
   T.catchAll((_) => T.sync(() => HMap.empty<string, MK.InsightKey>()))
