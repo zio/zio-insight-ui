@@ -1,20 +1,26 @@
-import * as T from "@effect/core/io/Effect"
-import * as React from "react"
-import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout"
 import * as App from "@components/App"
-import "@styles/grid.css"
-import { ChartPanel } from "./panel/ChartPanel"
-import { ChartConfigPanel } from "./panel/ChartConfigPanel"
-import { GridFrame } from "./panel/GridFrame"
 import * as TK from "@data/testkeys"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import * as Coll from "@tsplus/stdlib/collections/Collection"
-import * as MB from "@tsplus/stdlib/data/Maybe"
-import * as InsightSvc from "@core/metrics/services/InsightService"
-import * as GDM from "@core/metrics/services/GraphDataManager"
-import * as IdSvc from "@core/services/IdGenerator"
-import * as MdIcons from "react-icons/md"
+import * as C from "@effect/data/Chunk"
+import * as HMap from "@effect/data/HashMap"
+import * as HS from "@effect/data/HashSet"
+import * as Opt from "@effect/data/Option"
+import * as T from "@effect/io/Effect"
+import * as RT from "@effect/io/Runtime"
+import "@styles/grid.css"
+import * as React from "react"
+import type { Layout, Layouts } from "react-grid-layout"
+import { Responsive, WidthProvider } from "react-grid-layout"
 import * as BiIcons from "react-icons/bi"
+import * as MdIcons from "react-icons/md"
+
+import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
+import * as GDM from "@core/metrics/services/GraphDataManager"
+import * as InsightSvc from "@core/metrics/services/InsightService"
+import * as IdSvc from "@core/services/IdGenerator"
+
+import { ChartConfigPanel } from "./panel/ChartConfigPanel"
+import { ChartPanel } from "./panel/ChartPanel"
+import { GridFrame } from "./panel/GridFrame"
 
 // An Insight Dashboard uses react-grid-layout under the covers to allow the users to create and arrange their
 // panels as they see fit. In that sense a dashboard is a collection of views, each of which is an instance of
@@ -56,14 +62,14 @@ interface DashboardState {
   // If set, maximized will contain the id of a panel that shall be shown maximized,
   // In that case the corresponding panel will take all space of the dashboard view
   // including the control buttons at the top of the Dashboard
-  maximized: MB.Maybe<string>
+  maximized: Opt.Option<string>
   // If set, configure will call the configure function to create a configuration panel
   // for the configuration of the panel with the given id.
   // If both maximized AND configure are set, the configure panel takes precedence
   // Typically a config dialog would modify the state in some Memory Store service
   // within the app runtime so that any interested panel can consume the modified
   // configuration.
-  configure: MB.Maybe<string>
+  configure: Opt.Option<string>
 }
 
 export function InsightGridLayout() {
@@ -75,19 +81,19 @@ export function InsightGridLayout() {
     breakpoint: "md",
     layouts: {
       md: [],
-      lg: []
+      lg: [],
     },
     content: HMap.empty(),
-    maximized: MB.none,
-    configure: MB.none
+    maximized: Opt.none(),
+    configure: Opt.none(),
   } as DashboardState)
 
   const updateState = (p: {
     newBreakpoint?: string
     newLayouts?: Layouts
     newContent?: HMap.HashMap<string, ConfigurableContent>
-    newMaximized?: MB.Maybe<string>
-    newConfigure?: MB.Maybe<string>
+    newMaximized?: Opt.Option<string>
+    newConfigure?: Opt.Option<string>
   }) => {
     setState((curr) => {
       return {
@@ -95,7 +101,7 @@ export function InsightGridLayout() {
         layouts: p.newLayouts || curr.layouts,
         content: p.newContent || curr.content,
         maximized: p.newMaximized || curr.maximized,
-        configure: p.newConfigure || curr.configure
+        configure: p.newConfigure || curr.configure,
       } as DashboardState
     })
   }
@@ -107,11 +113,12 @@ export function InsightGridLayout() {
     const app = yield* $(T.service(InsightSvc.InsightService))
     const idSvc = yield* $(T.service(IdSvc.IdGenerator))
     const panelId = yield* $(idSvc.nextId("panel"))
-    const keys = yield* $(app.getMetricKeys)
-    const idx = Math.floor(Math.random() * keys.length)
-    const res = keys.at(idx) || (yield* $(TK.gaugeKey))
+    const keys = C.fromIterable(yield* $(app.getMetricKeys))
+    const idx = Math.floor(Math.random() * C.size(keys))
+    const gk = yield* $(TK.gaugeKey)
+    const res: InsightKey = Opt.getOrElse(C.get(keys, idx), () => gk)
     const gds = yield* $(gdm.register(panelId))
-    yield* $(gds.setMetrics(res))
+    yield* $(gds.setMetrics(HS.make(res)))
 
     return panelId
   })
@@ -123,54 +130,52 @@ export function InsightGridLayout() {
       return l.filter((c) => c.i != id)
     }
 
-    appRt
-      .unsafeRunPromise(
-        T.gen(function* ($) {
-          const gdm = yield* $(T.service(GDM.GraphDataManager))
-          yield* $(gdm.deregister(panelId))
-        })
-      )
-      .then(() =>
-        setState((curr) => {
-          const layouts = curr.layouts
+    RT.runPromise(appRt)(
+      T.gen(function* ($) {
+        const gdm = yield* $(T.service(GDM.GraphDataManager))
+        yield* $(gdm.deregister(panelId))
+      })
+    ).then(() =>
+      setState((curr) => {
+        const layouts = curr.layouts
 
-          for (const k in layouts) {
-            layouts[k] = removeFromLayout(panelId, layouts[k] || [])
-          }
+        for (const k in layouts) {
+          layouts[k] = removeFromLayout(panelId, layouts[k] || [])
+        }
 
-          return {
-            breakpoint: curr.breakpoint,
-            layouts: layouts,
-            content: HMap.remove(panelId)(curr.content),
-            // If we close the currently maximized panel we need to clear the
-            // maximized flag as well
-            maximized: (() => {
-              switch (curr.maximized._tag) {
-                case "None":
-                  return MB.none
-                case "Some":
-                  if (curr.maximized.value == panelId) {
-                    return MB.none
-                  } else {
-                    return curr.maximized
-                  }
-              }
-            })(),
-            configure: (() => {
-              switch (curr.configure._tag) {
-                case "None":
-                  return MB.none
-                case "Some":
-                  if (curr.configure.value == panelId) {
-                    return MB.none
-                  } else {
-                    return curr.configure
-                  }
-              }
-            })()
-          } as DashboardState
-        })
-      )
+        return {
+          breakpoint: curr.breakpoint,
+          layouts,
+          content: HMap.remove(panelId)(curr.content),
+          // If we close the currently maximized panel we need to clear the
+          // maximized flag as well
+          maximized: (() => {
+            switch (curr.maximized._tag) {
+              case "None":
+                return Opt.none()
+              case "Some":
+                if (curr.maximized.value == panelId) {
+                  return Opt.none()
+                } else {
+                  return curr.maximized
+                }
+            }
+          })(),
+          configure: (() => {
+            switch (curr.configure._tag) {
+              case "None":
+                return Opt.none()
+              case "Some":
+                if (curr.configure.value == panelId) {
+                  return Opt.none()
+                } else {
+                  return curr.configure
+                }
+            }
+          })(),
+        } as DashboardState
+      })
+    )
   }
 
   const toggle = (panelId: string, view: "Max" | "Cfg") => {
@@ -187,10 +192,10 @@ export function InsightGridLayout() {
       const newVal = (() => {
         switch (curr._tag) {
           case "None":
-            return MB.some(panelId)
+            return Opt.some(panelId)
           case "Some":
             if (curr.value === panelId) {
-              return MB.none
+              return Opt.none()
             } else {
               return curr
             }
@@ -204,7 +209,7 @@ export function InsightGridLayout() {
             layouts: state.layouts,
             content: state.content,
             maximized: newVal,
-            configure: state.configure
+            configure: state.configure,
           }
         case "Cfg":
           return {
@@ -212,7 +217,7 @@ export function InsightGridLayout() {
             layouts: state.layouts,
             content: state.content,
             maximized: state.maximized,
-            configure: newVal
+            configure: newVal,
           }
       }
     })
@@ -230,11 +235,11 @@ export function InsightGridLayout() {
   // TODO: Most like this should create a TSConfig and stick that into the underlying
   // panel as an init parameter. That would make the entire dashboard serializable
   const addPanel = () => {
-    appRt.unsafeRunAsyncWith(randomKey, (res) => {
+    RT.runCallback(appRt)(randomKey, (res) => {
       switch (res._tag) {
         case "Failure":
           break
-        case "Success":
+        case "Success": {
           const newPanel = <ChartPanel id={res.value} />
           const cfgPanel = (
             <ChartConfigPanel
@@ -254,15 +259,16 @@ export function InsightGridLayout() {
             newContent: HMap.set(res.value, {
               title: `${res.value}`,
               content: newPanel,
-              config: cfgPanel
-            } as ConfigurableContent)(dbState.content)
+              config: cfgPanel,
+            } as ConfigurableContent)(dbState.content),
           })
+        }
       }
     })
   }
 
   const configMode = (panelId: string) => {
-    return MB.getOrElse(() => false)(MB.map((v) => v == panelId)(dbState.configure))
+    return Opt.getOrElse(() => false)(Opt.map((v) => v == panelId)(dbState.configure))
   }
 
   const ResponsiveGridLayout = WidthProvider(Responsive)
@@ -296,22 +302,23 @@ export function InsightGridLayout() {
           onBreakpointChange={(bp: string, _: number) =>
             updateState({ newBreakpoint: bp })
           }
-          rowHeight={50}>
-          {Coll.toArray(dbState.content).map((el) => {
-            const id = el[0]
+          rowHeight={50}
+        >
+          {HMap.mapWithIndex(dbState.content, (ct, id) => {
             return (
               <div key={id} className="w-full h-full bg-neutral text-neutral-content">
                 <GridFrame
                   key={id}
-                  title={el[1].title}
+                  title={ct.title}
                   maximized={false}
                   configMode={false}
                   id={id}
                   closePanel={removePanel}
                   configure={configurePanel}
                   maximize={maximizePanel}
-                  content={el[1].content}
-                  config={el[1].config}></GridFrame>
+                  content={ct.content}
+                  config={ct.config}
+                ></GridFrame>
               </div>
             )
           })}
@@ -321,7 +328,7 @@ export function InsightGridLayout() {
   }
 
   const renderMaximized = (id: string) => {
-    const mbMax = HMap.get<string, ConfigurableContent>(id)(dbState.content)
+    const mbMax = HMap.get(dbState.content, id)
 
     switch (mbMax._tag) {
       case "None":
@@ -338,7 +345,8 @@ export function InsightGridLayout() {
             configure={configurePanel}
             maximize={maximizePanel}
             content={mbMax.value.content}
-            config={mbMax.value.config}></GridFrame>
+            config={mbMax.value.config}
+          ></GridFrame>
         )
     }
   }

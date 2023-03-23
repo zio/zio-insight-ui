@@ -1,52 +1,54 @@
-import * as T from "@effect/core/io/Effect"
-import * as L from "@effect/core/io/Layer"
-import * as S from "@effect/core/io/Scope"
-import * as E from "@effect/core/io/Exit"
+import { pipe } from "@effect/data/Function"
+import * as T from "@effect/io/Effect"
+import * as E from "@effect/io/Exit"
+import * as L from "@effect/io/Layer"
+import * as S from "@effect/io/Scope"
+
+import * as GDM from "@core/metrics/services/GraphDataManager"
+import * as MM from "@core/metrics/services/MetricsManager"
+import * as IdSvc from "@core/services/IdGenerator"
+
 import * as Insight from "./metrics/services/InsightService"
 import * as Log from "./services/Logger"
-import * as MM from "@core/metrics/services/MetricsManager"
-import * as GDM from "@core/metrics/services/GraphDataManager"
-import * as IdSvc from "@core/services/IdGenerator"
-import { pipe } from "@tsplus/stdlib/data/Function"
 
-export type AppLayer = 
-  Log.ConsoleService | 
-  Log.LogService | 
-  Insight.InsightService | 
-  MM.MetricsManager | 
-  IdSvc.IdGenerator |
-  GDM.GraphDataManager
+export type AppLayer =
+  | Log.ConsoleService
+  | Log.LogService
+  | Insight.InsightService
+  | MM.MetricsManager
+  | IdSvc.IdGenerator
+  | GDM.GraphDataManager
 
-export const appLayerLive : L.Layer<never, never, AppLayer> = pipe(
+export const appLayerLive = pipe(
   Log.ConsoleLive,
-  L.provideToAndMerge(Log.live(Log.Debug)),
-  L.provideToAndMerge(IdSvc.live),
-  L.provideToAndMerge(Insight.live),
-  L.provideToAndMerge(MM.live),
-  L.provideToAndMerge(GDM.live)
+  L.provideMerge(Log.live(Log.Debug)),
+  L.provideMerge(IdSvc.live),
+  L.provideMerge(Insight.live),
+  L.provideMerge(MM.live),
+  L.provideMerge(GDM.live)
 )
 
-export const appLayerStatic = (lvl: Log.LogLevel) => pipe(
-  Log.ConsoleLive,
-  L.provideToAndMerge(Log.live(lvl)),
-  L.provideToAndMerge(IdSvc.live),
-  L.provideToAndMerge(Insight.dev),
-  L.provideToAndMerge(MM.live),
-  L.provideToAndMerge(GDM.live)
-)
-  
+export const appLayerStatic = (lvl: Log.LogLevel) =>
+  pipe(
+    Log.ConsoleLive,
+    L.provideMerge(Log.live(lvl)),
+    L.provideMerge(IdSvc.live),
+    L.provideMerge(Insight.dev),
+    L.provideMerge(MM.live),
+    L.provideMerge(GDM.live)
+  )
 
-const appRuntime = <R, E, A>(layer: L.Layer<R, E, A>) => 
-  T.gen(function*($) {
-    const scope = yield* $(S.make)
+const appRuntime = <R, E, A>(layer: L.Layer<R, E, A>) =>
+  T.gen(function* ($) {
+    const scope = yield* $(S.make())
     const env = yield* $(L.buildWithScope(scope)(layer))
-    const runtime = yield* $(pipe(T.runtime<A>(), T.provideEnvironment(env)))
+    const runtime = yield* $(pipe(T.runtime<A>(), T.provideContext(env)))
 
-    return { 
-      runtime, 
-      clean: S.close(E.unit)(scope)
+    return {
+      runtime,
+      clean: S.close(scope, E.unit()),
     }
   })
-  
-export const unsafeMakeRuntime = <E,A>(layer: L.Layer<never, E, A>) =>
-  T.unsafeRunSync(appRuntime(layer))
+
+export const unsafeMakeRuntime = <E, A>(layer: L.Layer<never, E, A>) =>
+  T.runSync(appRuntime(layer))

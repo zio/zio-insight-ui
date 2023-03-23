@@ -6,6 +6,10 @@ export const freqTypeSchema = Z.literal("Frequency")
 export const histTypeSchema = Z.literal("Histogram")
 export const summTypeSchema = Z.literal("Summary")
 
-export const metricTypeSchema = gaugeTypeSchema.or(cntTypeSchema).or(freqTypeSchema).or(histTypeSchema).or(summTypeSchema)
+export const metricTypeSchema = gaugeTypeSchema
+  .or(cntTypeSchema)
+  .or(freqTypeSchema)
+  .or(histTypeSchema)
+  .or(summTypeSchema)
 
 export type MetricType = Z.infer<typeof metricTypeSchema>

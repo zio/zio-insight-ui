@@ -1,6 +1,6 @@
+import Logo from "@static/ZIO.png"
 import * as React from "react"
 import * as FaIcons from "react-icons/fa"
-import Logo from "@static/ZIO.png"
 
 export const NavBar: React.FC<{}> = () => {
   const ghButton = (

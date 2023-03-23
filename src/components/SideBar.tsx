@@ -1,11 +1,11 @@
 import * as React from "react"
-import { NavLink } from "react-router-dom"
-import * as VscIcons from "react-icons/vsc"
 import * as AiIcons from "react-icons/ai"
-import * as MdIcons from "react-icons/md"
 import * as BsIcons from "react-icons/bs"
-import * as GiIcons from "react-icons/gi"
 import * as FaIcons from "react-icons/fa"
+import * as GiIcons from "react-icons/gi"
+import * as MdIcons from "react-icons/md"
+import * as VscIcons from "react-icons/vsc"
+import { NavLink } from "react-router-dom"
 
 interface NavEntry {
   title: string
@@ -17,38 +17,38 @@ const entries: NavEntry[] = [
   {
     title: "Dashboard",
     path: "/",
-    icon: <VscIcons.VscGraphLine />
+    icon: <VscIcons.VscGraphLine />,
   },
   {
     title: "Metrics",
     path: "/metrics",
-    icon: <VscIcons.VscGraphLine />
+    icon: <VscIcons.VscGraphLine />,
   },
   {
     title: "Services",
     path: "/services",
-    icon: <AiIcons.AiOutlinePartition />
+    icon: <AiIcons.AiOutlinePartition />,
   },
   {
     title: "Profiling",
     path: "/profiling",
-    icon: <BsIcons.BsSpeedometer2 />
+    icon: <BsIcons.BsSpeedometer2 />,
   },
   {
     title: "Fibers",
     path: "/fibers",
-    icon: <GiIcons.GiFamilyTree />
+    icon: <GiIcons.GiFamilyTree />,
   },
   {
     title: "Help",
     path: "/help",
-    icon: <MdIcons.MdOutlineLiveHelp />
+    icon: <MdIcons.MdOutlineLiveHelp />,
   },
   {
     title: "Settings",
     path: "/settings",
-    icon: <VscIcons.VscSettings />
-  }
+    icon: <VscIcons.VscSettings />,
+  },
 ]
 
 export const SideBar: React.FC<{}> = (props) => {
@@ -71,7 +71,8 @@ export const SideBar: React.FC<{}> = (props) => {
     <div
       className={`${
         shown ? "w-48" : "w-14"
-      } flex flex-col bg-neutral text-neutral-content border-r`}>
+      } flex flex-col bg-neutral text-neutral-content border-r`}
+    >
       <div className="h-[70px] border-b-2 relative">{collapseBtn}</div>
       <div className="h-full flex flex-col">
         {entries.map((e) => (
@@ -83,7 +84,8 @@ export const SideBar: React.FC<{}> = (props) => {
                 isActive ? "bg-accent" : "hover:bg-base-100"
               } ${shown ? "" : "tooltip tooltip-right tooltip-secondary"}`
             }}
-            to={e.path}>
+            to={e.path}
+          >
             <div className="h-8 w-full flex flex-row justify-left">
               <span>{e.icon}</span>
               {shown ? <span className="flex self-center">{e.title}</span> : <></>}

@@ -1,64 +1,64 @@
-import * as T from "@effect/core/io/Effect"
-import * as L from "@effect/core/io/Layer"
-import * as Ref from "@effect/core/io/Ref"
-import { Tag } from "@tsplus/stdlib/service/Tag"
-import * as C from "@effect/core/io/Clock"
+import * as Ctx from "@effect/data/Context"
+import * as C from "@effect/io/Clock"
+import * as T from "@effect/io/Effect"
+import * as L from "@effect/io/Layer"
+import * as Ref from "@effect/io/Ref"
+
 import * as Log from "@core/services/Logger"
-import * as Sem from "@effect/core/stm/TSemaphore"
 
 /**
- * A simple ID generator to generate unique strings within the application, 
- * can be used to generated distinguished keys for anything that needs to be 
- * distinguished. 
+ * A simple ID generator to generate unique strings within the application,
+ * can be used to generated distinguished keys for anything that needs to be
+ * distinguished.
  */
-export interface IdGenerator { 
-  readonly nextId : (_ : string) => T.Effect<never, never, string>
+export interface IdGenerator {
+  readonly nextId: (_: string) => T.Effect<never, never, string>
 }
 
-export const IdGenerator = Tag<IdGenerator>()
+export const IdGenerator = Ctx.Tag<IdGenerator>()
 
 function make(
   log: Log.LogService,
-  sem: Sem.TSemaphore,
-  lastTS : Ref.Ref<number>,
+  sem: T.Semaphore,
+  lastTS: Ref.Ref<number>,
   cnt: Ref.Ref<number>
 ) {
-
-  // make sure the key generator runs atomically 
-  const update = (prefix: string) => 
-    Sem.withPermit(sem)(
-      T.gen(function* ($) { 
-        const now = yield* $(C.currentTime)
-        const curr = yield* $(lastTS.getAndSet(now))
+  // make sure the key generator runs atomically
+  const update = (prefix: string) =>
+    sem.withPermits(1)(
+      T.gen(function* ($) {
+        const now = yield* $(C.currentTimeMillis())
+        const curr = yield* $(Ref.getAndSet(lastTS, now))
         if (curr == now) {
-          yield* $(cnt.update(c => c+1))
+          yield* $(Ref.update(cnt, (c) => c + 1))
         } else {
-          yield* $(cnt.set(1))
+          yield* $(Ref.set(cnt, 1))
         }
-        const next = yield* $(cnt.get)
+        const next = yield* $(Ref.get(cnt))
         const res = `${prefix}-${now}-${next}`
         yield* $(log.debug(`Generated Id: <${res}>`))
         return res
       })
     )
 
-  return (
-    T.sync(() => <IdGenerator>{ 
-      nextId : (prefix: string) => update(prefix)
-    })
-  )
+  return T.sync(() => {
+    return {
+      nextId: (prefix: string) => update(prefix),
+    } as IdGenerator
+  })
 }
 
-export const live = L.fromEffect(IdGenerator)(
+export const live = L.effect(
+  IdGenerator,
   T.gen(function* ($) {
-    const now = yield* $(C.currentTime)
+    const now = yield* $(C.currentTimeMillis())
     const log = yield* $(T.service(Log.LogService))
-    const sem = yield* $(Sem.make(1))
-    const ts = yield* $(Ref.makeRef(() => now))
-    const cnt = yield* $(Ref.makeRef(() => 0))
+    const sem = yield* $(T.makeSemaphore(1))
+    const ts = yield* $(Ref.make(now))
+    const cnt = yield* $(Ref.make(0))
     return yield* $(make(log, sem, ts, cnt))
   })
 )
 
 export const nextId = (prefix: string) =>
-  T.serviceWithEffect(IdGenerator, svc => svc.nextId(prefix))
+  T.serviceWithEffect(IdGenerator, (svc) => svc.nextId(prefix))

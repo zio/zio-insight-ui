@@ -1,27 +1,27 @@
-import * as T from "@effect/core/io/Effect"
-import * as S from "@effect/core/stream/Stream"
-import * as F from "@effect/core/io/Fiber"
-import * as React from "react"
-import * as TS from "@core/metrics/model/insight/TimeSeries"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import * as MB from "@tsplus/stdlib/data/Maybe"
-import * as C from "@tsplus/stdlib/collections/Chunk"
-import * as Coll from "@tsplus/stdlib/collections/Collection"
-import { RuntimeContext } from "@components/App"
-import * as GDS from "@core/metrics/services/GraphDataService"
-import * as GDM from "@core/metrics/services/GraphDataManager"
-import { Chart } from "chart.js/auto"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import { keyAsString } from "@core/metrics/model/zio/metrics/MetricKey"
-
 // required import for time based axis
+import { RuntimeContext } from "@components/App"
+import * as C from "@effect/data/Chunk"
+import { pipe } from "@effect/data/Function"
+import * as HMap from "@effect/data/HashMap"
+import * as Opt from "@effect/data/Option"
+import * as T from "@effect/io/Effect"
+import * as F from "@effect/io/Fiber"
+import * as RT from "@effect/io/Runtime"
+import * as S from "@effect/stream/Stream"
+import { Chart } from "chart.js/auto"
 import "chartjs-adapter-date-fns"
+import * as React from "react"
+
+import * as TS from "@core/metrics/model/insight/TimeSeries"
+import { keyAsString } from "@core/metrics/model/zio/metrics/MetricKey"
+import * as GDM from "@core/metrics/services/GraphDataManager"
+import type * as GDS from "@core/metrics/services/GraphDataService"
 
 // A single line in the chart consists of the configuration for the visual
 // properties of the line (color, line style, ...) and the array of points
 interface LineData {
   tsConfig: TS.TimeSeriesConfig
-  data: { x: Date; y: number }[]
+  data: C.Chunk<{ x: Date; y: number }>
 }
 
 // A chart constists of mutiple lines
@@ -37,38 +37,41 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
 
   // derive a label from a time series key
   const label = (tsKey: TS.TimeSeriesKey) => {
-    const mbSub = MB.map((s) => `-${s}`)(tsKey.subKey)
-    return `${keyAsString(tsKey.key.key)}${MB.getOrElse(() => "")(mbSub)}`
+    const mbSub = Opt.map((s) => `-${s}`)(tsKey.subKey)
+    return `${keyAsString(tsKey.key.key)}${Opt.getOrElse(() => "")(mbSub)}`
   }
 
   // The callback that will handle incoming updates to the graph data
   const updateState = (newData: GDS.GraphData) => {
     setChartData((current) => {
       return HMap.reduceWithIndex(
+        newData,
         HMap.empty(),
-        (s: TSData, k: TS.TimeSeriesKey, v: C.Chunk<TS.TimeSeriesEntry>) => {
+        (s: TSData, v: C.Chunk<TS.TimeSeriesEntry>, k: TS.TimeSeriesKey) => {
           // TODO: Tap into the DashboardConfigService to retrieve the TSConfig
-          const mbConfig = MB.map<LineData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
-            HMap.get<TS.TimeSeriesKey, LineData>(k)(current)
+          const mbConfig = Opt.map<LineData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
+            HMap.get(current, k)
           )
 
-          const cfg = MB.getOrElse(() => new TS.TimeSeriesConfig(k, label(k)))(mbConfig)
+          const cfg = Opt.getOrElse(() => new TS.TimeSeriesConfig(k, label(k)))(
+            mbConfig
+          )
 
           const cData = {
             tsConfig: cfg,
-            data: Coll.toArray(v).map((e) => {
+            data: C.map(v, (e) => {
               return { x: e.when, y: e.value }
-            })
+            }),
           } as LineData
 
           return HMap.set(k, cData)(s)
         }
-      )(newData)
+      )
     })
   }
 
   React.useEffect(() => {
-    const updater = appRt.unsafeRunSync(
+    const updater = RT.runSync(appRt)(
       T.gen(function* ($) {
         const gdm = yield* $(T.service(GDM.GraphDataManager))
         const gds = yield* $(gdm.lookup(props.id))
@@ -94,10 +97,27 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
 
     return () => {
       try {
-        appRt.unsafeRunSync(F.interrupt(updater))
-      } catch {}
+        RT.runSync(appRt)(F.interrupt(updater))
+      } catch {
+        /* ignore */
+      }
     }
   }, [])
+
+  const chartDataSets = (() => {
+    const ds = HMap.values(
+      HMap.map(chartData, (cd) => {
+        return {
+          label: cd.tsConfig.title,
+          data: cd.data,
+          tension: cd.tsConfig.tension,
+          backgroundColor: cd.tsConfig.pointColor.toRgb(),
+          borderColor: cd.tsConfig.lineColor.toRgba(),
+        }
+      })
+    )
+    return Array(...ds)
+  })()
 
   const createChart = (ref: CanvasRenderingContext2D) => {
     return new Chart(ref, {
@@ -110,31 +130,26 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
           x: {
             type: "time",
             time: {
-              unit: "minute"
-            }
-          }
-        }
+              unit: "minute",
+            },
+          },
+        },
       },
       data: {
-        datasets: Coll.toArray(HMap.values(chartData)).map((cd) => {
-          return {
-            label: cd.tsConfig.title,
-            data: cd.data,
-            tension: cd.tsConfig.tension,
-            backgroundColor: cd.tsConfig.pointColor.toRgb(),
-            borderColor: cd.tsConfig.lineColor.toRgba()
-          }
-        })
-      }
+        datasets: chartDataSets,
+      },
     })
   }
 
   React.useEffect(() => {
-    if (chartRef) {
-      const ref = chartRef.current!.getContext("2d")!
-      const chart = createChart(ref)
-      return () => {
-        chart.destroy()
+    const cur = chartRef.current
+    if (cur) {
+      const ref = cur.getContext("2d")
+      if (ref) {
+        const chart = createChart(ref)
+        return () => {
+          chart.destroy()
+        }
       }
     }
   }, [chartData])
