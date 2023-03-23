@@ -1,11 +1,12 @@
 // required import for time based axis
 import { RuntimeContext } from "@components/App"
-import type * as C from "@effect/data/Chunk"
+import * as C from "@effect/data/Chunk"
 import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
 import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
 import * as F from "@effect/io/Fiber"
+import * as RT from "@effect/io/Runtime"
 import * as S from "@effect/stream/Stream"
 import { Chart } from "chart.js/auto"
 import "chartjs-adapter-date-fns"
@@ -20,7 +21,7 @@ import type * as GDS from "@core/metrics/services/GraphDataService"
 // properties of the line (color, line style, ...) and the array of points
 interface LineData {
   tsConfig: TS.TimeSeriesConfig
-  data: { x: Date; y: number }[]
+  data: C.Chunk<{ x: Date; y: number }>
 }
 
 // A chart constists of mutiple lines
@@ -44,30 +45,33 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
   const updateState = (newData: GDS.GraphData) => {
     setChartData((current) => {
       return HMap.reduceWithIndex(
+        newData,
         HMap.empty(),
-        (s: TSData, k: TS.TimeSeriesKey, v: C.Chunk<TS.TimeSeriesEntry>) => {
+        (s: TSData, v: C.Chunk<TS.TimeSeriesEntry>, k: TS.TimeSeriesKey) => {
           // TODO: Tap into the DashboardConfigService to retrieve the TSConfig
           const mbConfig = Opt.map<LineData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
             HMap.get(current, k)
           )
 
-          const cfg = MB.getOrElse(() => new TS.TimeSeriesConfig(k, label(k)))(mbConfig)
+          const cfg = Opt.getOrElse(() => new TS.TimeSeriesConfig(k, label(k)))(
+            mbConfig
+          )
 
           const cData = {
             tsConfig: cfg,
-            data: Coll.toArray(v).map((e) => {
+            data: C.map(v, (e) => {
               return { x: e.when, y: e.value }
             }),
           } as LineData
 
           return HMap.set(k, cData)(s)
         }
-      )(newData)
+      )
     })
   }
 
   React.useEffect(() => {
-    const updater = appRt.unsafeRunSync(
+    const updater = RT.runSync(appRt)(
       T.gen(function* ($) {
         const gdm = yield* $(T.service(GDM.GraphDataManager))
         const gds = yield* $(gdm.lookup(props.id))
@@ -93,7 +97,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
 
     return () => {
       try {
-        appRt.unsafeRunSync(F.interrupt(updater))
+        RT.runSync(appRt)(F.interrupt(updater))
       } catch {
         /* ignore */
       }
