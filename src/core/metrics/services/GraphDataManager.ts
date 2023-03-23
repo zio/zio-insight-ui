@@ -1,8 +1,8 @@
+import * as Ctx from "@effect/data/Context"
+import { pipe } from "@effect/data/Function"
+import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
 import * as L from "@effect/io/Layer"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import * as MB from "@tsplus/stdlib/data/Maybe"
-import { Tag } from "@tsplus/stdlib/service/Tag"
 
 import * as MM from "@core/metrics/services/MetricsManager"
 import * as Log from "@core/services/Logger"
@@ -38,7 +38,7 @@ export interface GraphDataManager {
   deregister: (panelId: string) => T.Effect<never, never, void>
 }
 
-export const GraphDataManager = Tag<GraphDataManager>()
+export const GraphDataManager = Ctx.Tag<GraphDataManager>()
 
 function makeGraphDataManager(
   store: MS.MemoryStore<string, GDS.GraphDataService>,
@@ -48,8 +48,8 @@ function makeGraphDataManager(
   const panelById = (panelId: string) =>
     pipe(
       store.get(panelId),
-      T.map((v) => MB.some(v)),
-      T.catchAll((_) => T.sync(() => MB.none as MB.Maybe<GDS.GraphDataService>))
+      T.map((v) => Opt.some(v)),
+      T.catchAll((_) => T.sync(() => Opt.none() as Opt.Option<GDS.GraphDataService>))
     )
 
   const createGDS = () =>
@@ -86,7 +86,8 @@ export const live: L.Layer<
   Log.LogService | MM.MetricsManager,
   never,
   GraphDataManager
-> = L.fromEffect(GraphDataManager)(
+> = L.effect(
+  GraphDataManager,
   T.gen(function* ($) {
     const log = yield* $(T.service(Log.LogService))
     const mm = yield* $(T.service(MM.MetricsManager))

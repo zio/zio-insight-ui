@@ -1,13 +1,12 @@
 // required import for time based axis
 import { RuntimeContext } from "@components/App"
-import * as T from "@effect/core/io/Effect"
-import * as F from "@effect/core/io/Fiber"
-import * as S from "@effect/core/stream/Stream"
-import type * as C from "@tsplus/stdlib/collections/Chunk"
-import * as Coll from "@tsplus/stdlib/collections/Collection"
-import * as HMap from "@tsplus/stdlib/collections/HashMap"
-import { pipe } from "@tsplus/stdlib/data/Function"
-import * as MB from "@tsplus/stdlib/data/Maybe"
+import type * as C from "@effect/data/Chunk"
+import { pipe } from "@effect/data/Function"
+import * as HMap from "@effect/data/HashMap"
+import * as Opt from "@effect/data/Option"
+import * as T from "@effect/io/Effect"
+import * as F from "@effect/io/Fiber"
+import * as S from "@effect/stream/Stream"
 import { Chart } from "chart.js/auto"
 import "chartjs-adapter-date-fns"
 import * as React from "react"
@@ -37,8 +36,8 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
 
   // derive a label from a time series key
   const label = (tsKey: TS.TimeSeriesKey) => {
-    const mbSub = MB.map((s) => `-${s}`)(tsKey.subKey)
-    return `${keyAsString(tsKey.key.key)}${MB.getOrElse(() => "")(mbSub)}`
+    const mbSub = Opt.map((s) => `-${s}`)(tsKey.subKey)
+    return `${keyAsString(tsKey.key.key)}${Opt.getOrElse(() => "")(mbSub)}`
   }
 
   // The callback that will handle incoming updates to the graph data
@@ -48,8 +47,8 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
         HMap.empty(),
         (s: TSData, k: TS.TimeSeriesKey, v: C.Chunk<TS.TimeSeriesEntry>) => {
           // TODO: Tap into the DashboardConfigService to retrieve the TSConfig
-          const mbConfig = MB.map<LineData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
-            HMap.get<TS.TimeSeriesKey, LineData>(k)(current)
+          const mbConfig = Opt.map<LineData, TS.TimeSeriesConfig>((d) => d.tsConfig)(
+            HMap.get(current, k)
           )
 
           const cfg = MB.getOrElse(() => new TS.TimeSeriesConfig(k, label(k)))(mbConfig)

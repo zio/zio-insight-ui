@@ -1,6 +1,7 @@
 import staticKeys from "@data/keys.json"
 import staticFibers from "@data/sampleFibers.json"
 import staticStates from "@data/state.json"
+import * as C from "@effect/data/Chunk"
 import * as Ctx from "@effect/data/Context"
 import { pipe } from "@effect/data/Function"
 import * as T from "@effect/io/Effect"
@@ -36,10 +37,10 @@ type InsightApiError =
 // As a best practice, do not require services in the individual methods of the interface
 // Rather, use Layer injection into the actual service
 export interface InsightService {
-  getMetricKeys: T.Effect<never, InsightApiError, InsightKey[]>
+  getMetricKeys: T.Effect<never, InsightApiError, C.Chunk<InsightKey>>
   getMetricStates: (
     ids: readonly string[]
-  ) => T.Effect<never, InsightApiError, MetricState[]>
+  ) => T.Effect<never, InsightApiError, C.Chunk<MetricState>>
 
   getFibers: T.Effect<never, InsightApiError, FiberInfo[]>
 }
@@ -47,7 +48,7 @@ export interface InsightService {
 export const InsightService = Ctx.Tag<InsightService>()
 
 interface StateRequest {
-  selection: string[]
+  selection: readonly string[]
 }
 
 // helper function to construct a ZIOMetrics implementation on top of a Log Service
@@ -60,7 +61,7 @@ function makeLiveMetrics(logger: Log.LogService): InsightService {
       T.flatMap(metricKeysFromInsight),
       T.tap((keys) => logger.info(`Got ${keys.length} metric keys from server`))
     ),
-    getMetricStates: (keys: string[]) =>
+    getMetricStates: (keys: readonly string[]) =>
       T.gen(function* ($) {
         const req: StateRequest = { selection: keys }
         const raw = yield* $(
@@ -92,12 +93,12 @@ export const dev: L.Layer<never, never, InsightService> = L.effect(
   InsightService,
   T.succeed({
     getMetricKeys: pipe(T.succeed(staticKeys), T.flatMap(metricKeysFromInsight)),
-    getMetricStates: (keyIds: string[]) =>
+    getMetricStates: (keyIds: readonly string[]) =>
       pipe(
         T.succeed(staticStates),
         T.flatMap(metricStatesFromInsight),
         T.map((states) =>
-          states.filter((s) => keyIds.findIndex((el) => el === s.id) !== -1)
+          C.filter(states, (s) => keyIds.findIndex((el) => el === s.id) !== -1)
         )
       ),
     getFibers: pipe(T.succeed(staticFibers), T.flatMap(fibersFromInsight)),

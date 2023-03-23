@@ -1,11 +1,11 @@
 import * as App from "@components/App"
 import { TableMetricKeys } from "@components/TableMetricKey"
+import { pipe } from "@effect/data/Function"
+import * as HS from "@effect/data/HashSet"
 import * as T from "@effect/io/Effect"
 import * as Ex from "@effect/io/Exit"
 import * as FiberId from "@effect/io/FiberId"
-import * as Coll from "@tsplus/stdlib/collections/Collection"
-import * as HS from "@tsplus/stdlib/collections/HashSet"
-import { pipe } from "@tsplus/stdlib/data/Function"
+import * as RT from "@effect/io/Runtime"
 import * as React from "react"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
@@ -35,24 +35,23 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
   )
 
   const applySelection = () => {
-    appRt
-      .unsafeRunPromise(
-        T.gen(function* ($) {
-          const gdm = yield* $(T.service(GDM.GraphDataManager))
-          yield* $(
-            pipe(
-              gdm.lookup(props.id),
-              T.flatMap((svc) => svc.setMetrics(...selected)),
-              T.catchAll((_) =>
-                T.sync(() => {
-                  /* ignore */
-                })
-              )
+    RT.runPromise(
+      appRt,
+      T.gen(function* ($) {
+        const gdm = yield* $(T.service(GDM.GraphDataManager))
+        yield* $(
+          pipe(
+            gdm.lookup(props.id),
+            T.flatMap((svc) => svc.setMetrics(...selected)),
+            T.catchAll((_) =>
+              T.sync(() => {
+                /* ignore */
+              })
             )
           )
-        })
-      )
-      .then((_) => closeHandler())
+        )
+      })
+    ).then((_) => closeHandler())
   }
 
   const initialSelection = T.gen(function* ($) {
@@ -69,28 +68,25 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
   })
 
   React.useEffect(() => {
-    const run = appRt.unsafeRunWith(
-      pipe(availableKeys, T.zip(initialSelection)),
-      (e) => {
-        if (Ex.isSuccess(e)) {
-          const [allKeys, selection] = e.value
-          setAvailable(allKeys)
-          setSelected(selection)
-        } else {
-          console.log(e.cause)
-        }
+    const run = RT.runSync(pipe(availableKeys, T.zip(initialSelection)), (e) => {
+      if (Ex.isSuccess(e)) {
+        const [allKeys, selection] = e.value
+        setAvailable(allKeys)
+        setSelected(selection)
+      } else {
+        console.log(e.cause)
+      }
 
-        return () => {
-          try {
-            run(FiberId.none)((_) => {
-              /* ignore */
-            })
-          } catch {
+      return () => {
+        try {
+          run(FiberId.none)((_) => {
             /* ignore */
-          }
+          })
+        } catch {
+          /* ignore */
         }
       }
-    )
+    })(appRt)
   }, [props.id])
 
   const updateSelected = (k: InsightKey) =>

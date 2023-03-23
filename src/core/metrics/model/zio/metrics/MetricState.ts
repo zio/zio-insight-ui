@@ -1,4 +1,4 @@
-import * as Cx from "@effect/data/Chunk"
+import * as C from "@effect/data/Chunk"
 import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
 import * as Clk from "@effect/io/Clock"

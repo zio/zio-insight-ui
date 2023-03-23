@@ -195,7 +195,7 @@ export const tsEntriesFromState = (s: State.MetricState) => {
     }
     case "Frequency": {
       const freq = s.state as State.FrequencyState
-      HMap.forEachWithIndex<string, number>((k, v) =>
+      HMap.forEachWithIndex<number, string>((v, k) =>
         res.push(
           new TimeSeriesEntry({ key: s.insightKey(), subKey: Opt.some(`${k}`) }, ts, v)
         )
