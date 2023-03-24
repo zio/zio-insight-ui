@@ -1,5 +1,6 @@
 import type * as C from "@effect/data/Chunk"
 import * as Ctx from "@effect/data/Context"
+import * as D from "@effect/data/Duration"
 import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
 import * as HSet from "@effect/data/HashSet"
@@ -12,7 +13,6 @@ import * as S from "@effect/stream/Stream"
 import * as TS from "@core/metrics/model/insight/TimeSeries"
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
 
 import type { MetricState } from "../model/zio/metrics/MetricState"
 
@@ -46,7 +46,6 @@ export const GraphDataService = Ctx.Tag<GraphDataService>()
 export const defaultMaxEntries = 10
 
 function makeGraphDataService(
-  log: Log.LogService,
   mm: MM.MetricsManager,
   subscriptionId: string,
   timeseries: Ref.Ref<HMap.HashMap<TS.TimeSeriesKey, TS.TimeSeries>>,
@@ -59,8 +58,8 @@ function makeGraphDataService(
   const createTS = (id: TS.TimeSeriesKey) =>
     T.gen(function* ($) {
       const max = yield* $(Ref.get(currMaxEntries))
-      yield* $(log.debug(`creating new Timeseries`))
-      return yield* $(TS.makeTimeSeries(id, max)(log))
+      yield* $(T.logDebug(`creating new Timeseries`))
+      return yield* $(TS.makeTimeSeries(id, max))
     })
 
   const getOrCreateTS = (id: TS.TimeSeriesKey) =>
@@ -117,7 +116,7 @@ function makeGraphDataService(
       const handleMetricState = (ms: MetricState) =>
         T.gen(function* ($) {
           yield* $(
-            log.debug(
+            T.logDebug(
               `GDS <${subscriptionId}> - received state update ${JSON.stringify(ms)}`
             )
           )
@@ -155,7 +154,7 @@ function makeGraphDataService(
         S.runForEach(handleMetricState)
       )
 
-      return yield* $(T.forkDaemon(runner))
+      return yield* $(T.delay(D.millis(10))(T.forkDaemon(runner)))
     })
 
   const setMetrics = (keys: HSet.HashSet<InsightKey>) =>
@@ -183,7 +182,7 @@ function makeGraphDataService(
         })
       )
 
-      yield* $(log.debug(`GraphData Services now observes <${HSet.size(keys)}> keys`))
+      yield* $(T.logDebug(`GraphData Services now observes <${HSet.size(keys)}> keys`))
       yield* $(Ref.set(observed, keys))
     })
 
@@ -227,7 +226,6 @@ function makeGraphDataService(
 export function createGraphDataService() {
   // TODO: Review Hub settings
   return T.gen(function* ($) {
-    const log = yield* $(T.service(Log.LogService))
     const mm = yield* $(T.service(MM.MetricsManager))
     const observed = yield* $(Ref.make(HSet.empty()))
     const maxEntries = yield* $(Ref.make(defaultMaxEntries))
@@ -237,7 +235,6 @@ export function createGraphDataService() {
     const dataHub = yield* $(Hub.sliding<GraphData>(128))
     return yield* $(
       makeGraphDataService(
-        log,
         mm,
         subId,
         timeSeries,

@@ -9,7 +9,6 @@ import * as Ref from "@effect/io/Ref"
 import * as Color from "@core/Color"
 import type * as MK from "@core/metrics/model/zio/metrics/MetricKey"
 import type * as State from "@core/metrics/model/zio/metrics/MetricState"
-import type * as Log from "@core/services/Logger"
 import { formatDate } from "@core/utils"
 
 // A time series key uniquely defines a single measured piece of data over a
@@ -67,66 +66,65 @@ export interface TimeSeries {
   readonly entries: () => T.Effect<never, never, C.Chunk<TimeSeriesEntry>>
 }
 
-export const makeTimeSeries =
-  (id: TimeSeriesKey, maxEntries: number) => (log: Log.LogService) => {
-    return T.gen(function* ($) {
-      const maxRef = yield* $(Ref.make(() => maxEntries))
-      const entriesRef = yield* $(Ref.make(() => C.empty<TimeSeriesEntry>()))
+export const makeTimeSeries = (id: TimeSeriesKey, maxEntries: number) => {
+  return T.gen(function* ($) {
+    const maxRef = yield* $(Ref.make(() => maxEntries))
+    const entriesRef = yield* $(Ref.make(() => C.empty<TimeSeriesEntry>()))
 
-      const logPrefix = `TS <${id.key.id}-${Opt.getOrElse(() => "")(id.subKey)}> --`
+    const logPrefix = `TS <${id.key.id}-${Opt.getOrElse(() => "")(id.subKey)}> --`
 
-      const restrictEntries = (entries: C.Chunk<TimeSeriesEntry>, max: number) => {
-        if (max > 0) {
-          if (C.size(entries) <= max) {
-            return entries
-          } else {
-            return C.sort(OrdTimeSeriesEntry)(C.takeRight(max)(entries))
-          }
+    const restrictEntries = (entries: C.Chunk<TimeSeriesEntry>, max: number) => {
+      if (max > 0) {
+        if (C.size(entries) <= max) {
+          return entries
         } else {
-          return C.empty<TimeSeriesEntry>()
+          return C.sort(OrdTimeSeriesEntry)(C.takeRight(max)(entries))
         }
+      } else {
+        return C.empty<TimeSeriesEntry>()
       }
+    }
 
-      return {
-        id,
-        maxEntries: () => Ref.get(maxRef),
-        updateMaxEntries: (newMax: number) =>
-          pipe(
-            Ref.set(maxRef, () => newMax),
-            T.flatMap((_) =>
-              Ref.updateAndGet(
-                entriesRef,
-                (curr) => () => restrictEntries(curr(), newMax)
-              )
-            ),
-            T.flatMap((entries) =>
-              log.debug(`${logPrefix} has now <${C.size(entries())}> entries`)
+    return {
+      id,
+      maxEntries: () => Ref.get(maxRef),
+      updateMaxEntries: (newMax: number) =>
+        pipe(
+          Ref.set(maxRef, () => newMax),
+          T.flatMap((_) =>
+            Ref.updateAndGet(
+              entriesRef,
+              (curr) => () => restrictEntries(curr(), newMax)
             )
           ),
-        record: (e: TimeSeriesEntry) =>
-          T.gen(function* ($) {
-            if (JSON.stringify(id) === JSON.stringify(e.id)) {
-              const max = yield* $(Ref.get(maxRef))
-              const curr = yield* $(Ref.get(entriesRef))
-              const newEntries = () => restrictEntries(C.append(e)(curr()), max())
-              yield* $(
-                pipe(
-                  Ref.updateAndGet(entriesRef, (_) => newEntries),
-                  T.flatMap((entries) =>
-                    log.debug(`${logPrefix} has now <${C.size(entries())}> entries`)
-                  )
+          T.flatMap((entries) =>
+            T.logDebug(`${logPrefix} has now <${C.size(entries())}> entries`)
+          )
+        ),
+      record: (e: TimeSeriesEntry) =>
+        T.gen(function* ($) {
+          if (JSON.stringify(id) === JSON.stringify(e.id)) {
+            const max = yield* $(Ref.get(maxRef))
+            const curr = yield* $(Ref.get(entriesRef))
+            const newEntries = () => restrictEntries(C.append(e)(curr()), max())
+            yield* $(
+              pipe(
+                Ref.updateAndGet(entriesRef, (_) => newEntries),
+                T.flatMap((entries) =>
+                  T.logDebug(`${logPrefix} has now <${C.size(entries())}> entries`)
                 )
               )
-            }
-          }),
-        entries: () =>
-          pipe(
-            Ref.get(entriesRef),
-            T.map((e) => e())
-          ),
-      } as TimeSeries
-    })
-  }
+            )
+          }
+        }),
+      entries: () =>
+        pipe(
+          Ref.get(entriesRef),
+          T.map((e) => e())
+        ),
+    } as TimeSeries
+  })
+}
 
 export const tsEntriesFromState = (s: State.MetricState) => {
   const ts = new Date(s.retrieved)

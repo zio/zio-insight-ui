@@ -3,9 +3,8 @@ import * as RT from "@effect/io/Runtime"
 
 import * as AL from "@core/AppLayer"
 import * as Api from "@core/metrics/services/InsightService"
-import * as Log from "@core/services/Logger"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.All)).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
 describe("Request", () => {
   it("should be able to get the metric keys", async () => {

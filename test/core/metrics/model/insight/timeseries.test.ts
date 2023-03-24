@@ -9,7 +9,6 @@ import * as AL from "@core/AppLayer"
 import * as TS from "@core/metrics/model/insight/TimeSeries"
 import * as Insight from "@core/metrics/model/zio/metrics/MetricState"
 import type * as MT from "@core/metrics/model/zio/metrics/MetricType"
-import * as Log from "@core/services/Logger"
 
 import {
   counterId,
@@ -19,7 +18,7 @@ import {
   summaryId,
 } from "../../../../../src/data/testkeys"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
 const makeKey = (name: string, metricType: MT.MetricType) => {
   return {
@@ -51,8 +50,7 @@ describe("TimeSeries", () => {
   it("should start with an empty chunk of entries", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const log = yield* $(T.service(Log.LogService))
-        const ts = yield* $(TS.makeTimeSeries(makeKey("foo", "Counter"), 2)(log))
+        const ts = yield* $(TS.makeTimeSeries(makeKey("foo", "Counter"), 2))
         return yield* $(ts.entries())
       })
     )
@@ -63,9 +61,8 @@ describe("TimeSeries", () => {
   it("should allow to record a time entry with a matching id", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const log = yield* $(T.service(Log.LogService))
         const key = makeKey("foo", "Counter")
-        const ts = yield* $(TS.makeTimeSeries(key, 2)(log))
+        const ts = yield* $(TS.makeTimeSeries(key, 2))
         const e = {
           id: key,
           when: new Date(),
@@ -82,8 +79,7 @@ describe("TimeSeries", () => {
   it("should not record a time entry with a non-matching id", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const log = yield* $(T.service(Log.LogService))
-        const ts = yield* $(TS.makeTimeSeries(makeKey("foo", "Counter"), 2)(log))
+        const ts = yield* $(TS.makeTimeSeries(makeKey("foo", "Counter"), 2))
         const e = {
           id: makeKey("bar", "Counter"),
           when: new Date(),
@@ -112,8 +108,7 @@ describe("TimeSeries", () => {
 
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const log = yield* $(T.service(Log.LogService))
-        const ts = yield* $(TS.makeTimeSeries(key, 2)(log))
+        const ts = yield* $(TS.makeTimeSeries(key, 2))
         yield* $(T.forEach(entries, (e) => ts.record(e)))
         return yield* $(ts.entries())
       })

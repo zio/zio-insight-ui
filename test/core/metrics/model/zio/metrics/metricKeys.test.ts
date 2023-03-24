@@ -4,9 +4,8 @@ import * as RT from "@effect/io/Runtime"
 
 import * as AL from "@core/AppLayer"
 import * as Insight from "@core/metrics/services/InsightService"
-import * as Log from "@core/services/Logger"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
 describe("MetricKeys Parser", () => {
   it("should parse the metric keys from the server", async () => {

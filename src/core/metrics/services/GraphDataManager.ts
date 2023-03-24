@@ -5,7 +5,6 @@ import * as T from "@effect/io/Effect"
 import * as L from "@effect/io/Layer"
 
 import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
 import * as MS from "@core/services/MemoryStore"
 
 import * as GDS from "./GraphDataService"
@@ -42,8 +41,7 @@ export const GraphDataManager = Ctx.Tag<GraphDataManager>()
 
 function makeGraphDataManager(
   store: MS.MemoryStore<string, GDS.GraphDataService>,
-  mm: MM.MetricsManager,
-  log: Log.LogService
+  mm: MM.MetricsManager
 ) {
   const panelById = (panelId: string) =>
     pipe(
@@ -53,11 +51,7 @@ function makeGraphDataManager(
     )
 
   const createGDS = () =>
-    pipe(
-      GDS.createGraphDataService(),
-      T.provideService(Log.LogService, log),
-      T.provideService(MM.MetricsManager, mm)
-    )
+    pipe(GDS.createGraphDataService(), T.provideService(MM.MetricsManager, mm))
 
   const lookupPanel = (panelId: string) => store.get(panelId)
 
@@ -82,16 +76,11 @@ function makeGraphDataManager(
   } as GraphDataManager
 }
 
-export const live: L.Layer<
-  Log.LogService | MM.MetricsManager,
-  never,
-  GraphDataManager
-> = L.effect(
+export const live: L.Layer<MM.MetricsManager, never, GraphDataManager> = L.effect(
   GraphDataManager,
   T.gen(function* ($) {
-    const log = yield* $(T.service(Log.LogService))
     const mm = yield* $(T.service(MM.MetricsManager))
     const store = yield* $(MS.createMemoryStore<string, GDS.GraphDataService>())
-    return makeGraphDataManager(store, mm, log)
+    return makeGraphDataManager(store, mm)
   })
 )

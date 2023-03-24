@@ -11,9 +11,8 @@ import * as AL from "@core/AppLayer"
 import type * as Model from "@core/metrics/model/zio/metrics/MetricKey"
 import * as Insight from "@core/metrics/services/InsightService"
 import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Debug)).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
 const newKeys = HS.make({
   id: "1234-5678",

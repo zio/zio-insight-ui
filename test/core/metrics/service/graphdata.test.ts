@@ -11,11 +11,10 @@ import * as S from "@effect/stream/Stream"
 import * as AL from "@core/AppLayer"
 import * as GDS from "@core/metrics/services/GraphDataService"
 import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
 
 import * as TK from "../../../../src/data/testkeys"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Debug)).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
 const gds = GDS.createGraphDataService()
 
@@ -67,12 +66,12 @@ describe("GraphDataService", () => {
         const mm = yield* $(T.service(MM.MetricsManager))
         const svc = yield* $(gds)
         const counterKey = yield* $(TK.counterKey)
-        yield* $(Log.debug("Waiting for data...1"))
+        yield* $(T.logDebug("Waiting for data...1"))
 
         const data = yield* $(svc.data())
         yield* $(svc.setMetrics(HSet.make(counterKey)))
 
-        yield* $(Log.debug("Waiting for data...2"))
+        yield* $(T.logDebug("Waiting for data...2"))
         const f = yield* $(pipe(S.take(1)(data), S.runCollect, T.fork))
 
         yield* $(T.delay(D.millis(10))(mm.poll()))

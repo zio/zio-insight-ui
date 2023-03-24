@@ -23,7 +23,6 @@ import type {
   MetricState,
 } from "@core/metrics/model/zio/metrics/MetricState"
 import { metricStatesFromInsight } from "@core/metrics/model/zio/metrics/MetricState"
-import * as Log from "@core/services/Logger"
 import * as Req from "@core/services/Request"
 
 const baseUrl = "http://127.0.0.1:8080/insight"
@@ -54,13 +53,13 @@ interface StateRequest {
 
 // helper function to construct a ZIOMetrics implementation on top of a Log Service
 // instance
-function makeLiveMetrics(logger: Log.LogService): InsightService {
+function makeLiveMetrics(): InsightService {
   return {
     getMetricKeys: pipe(
       Req.request(`${baseUrl}/metrics/keys`),
       T.flatMap(Req.jsonFromResponse),
       T.flatMap(metricKeysFromInsight),
-      T.tap((keys) => logger.info(`Got ${HS.size(keys)} metric keys from server`))
+      T.tap((keys) => T.logInfo(`Got ${HS.size(keys)} metric keys from server`))
     ),
     getMetricStates: (keys: readonly string[]) =>
       T.gen(function* ($) {
@@ -79,15 +78,15 @@ function makeLiveMetrics(logger: Log.LogService): InsightService {
       Req.request(`${baseUrl}/fibers/fibers`),
       T.flatMap(Req.jsonFromResponse),
       T.flatMap(fibersFromInsight),
-      T.tap((fibers) => logger.info(`Got ${fibers.length} fiber infos from server`))
+      T.tap((fibers) => T.logInfo(`Got ${fibers.length} fiber infos from server`))
     ),
   }
 }
 
 // Define a Layer with Dependency on a Log Service
-export const live: L.Layer<Log.LogService, never, InsightService> = L.effect(
+export const live: L.Layer<never, never, InsightService> = L.effect(
   InsightService,
-  pipe(T.service(Log.LogService), T.map(makeLiveMetrics))
+  T.succeed(makeLiveMetrics())
 )
 
 export const dev: L.Layer<never, never, InsightService> = L.effect(
