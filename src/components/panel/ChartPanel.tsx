@@ -71,7 +71,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
   }
 
   React.useEffect(() => {
-    const updater = RT.runSync(appRt)(
+    const updater = RT.runFork(appRt)(
       T.gen(function* ($) {
         const gdm = yield* $(T.service(GDM.GraphDataManager))
         const gds = yield* $(gdm.lookup(props.id))
@@ -109,7 +109,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
       HMap.map(chartData, (cd) => {
         return {
           label: cd.tsConfig.title,
-          data: cd.data,
+          data: [...cd.data],
           tension: cd.tsConfig.tension,
           backgroundColor: cd.tsConfig.pointColor.toRgb(),
           borderColor: cd.tsConfig.lineColor.toRgba(),
