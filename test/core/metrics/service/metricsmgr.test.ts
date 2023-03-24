@@ -103,14 +103,9 @@ describe("MetricsManager", () => {
         // Make sure we are already consuming from the stream before we manually kick off
         // the polling
         const f = yield* $(pipe(S.take(states, 10), S.runCollect, T.fork))
-
-        yield* $(T.delay(D.millis(10))(mm.poll()))
-
-        // Now the fiber should be done and have the first 10 elements from the state
-        // updates
         const res = yield* $(F.join(f))
-        yield* $(mm.removeSubscription(sub))
 
+        yield* $(mm.removeSubscription(sub))
         return res
       })
     )

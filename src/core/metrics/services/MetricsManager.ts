@@ -6,10 +6,12 @@ import * as HMap from "@effect/data/HashMap"
 import * as HS from "@effect/data/HashSet"
 import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
+import * as FiberRef from "@effect/io/FiberRef"
 import * as Hub from "@effect/io/Hub"
 import * as L from "@effect/io/Layer"
 import * as Ref from "@effect/io/Ref"
 import * as Sch from "@effect/io/Schedule"
+import * as Scheduler from "@effect/io/Scheduler"
 import * as S from "@effect/stream/Stream"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
@@ -46,7 +48,7 @@ export interface MetricsManager {
   readonly updates: () => T.Effect<never, never, S.Stream<never, never, MetricState>>
   // Manually trigger a poll, the poll will cause an update to all connected
   // subscribers for metric data
-  readonly poll: () => T.Effect<never, never, void>
+  readonly poll: () => T.Effect<never, never, number>
   // Reset all subscriptions within the MetricsManager
   readonly reset: () => T.Effect<never, never, void>
 }
@@ -92,7 +94,7 @@ function makeMetricsManager(
       const oldKeys = Opt.getOrElse(HMap.get(id)(subs), HS.empty<InsightKey>)
       const newKeys = f(oldKeys)
       yield $(T.logDebug(`Subscription <${id}> has now <${HS.size(newKeys)}> keys`))
-      yield* $(Ref.set(subscriptions, HMap.set(id, newKeys)(subs)))
+      yield* $(Ref.set(subscriptions, HMap.set(subs, id, newKeys)))
     })
 
   const registeredKeys = () =>
@@ -148,6 +150,9 @@ function makeMetricsManager(
             `published <${states.length}> metric states to metrics hub : ${published}`
           )
         )
+        return states.length
+      } else {
+        return 0
       }
     })
 
@@ -162,7 +167,12 @@ function makeMetricsManager(
   } as MetricsManager
 }
 
-export const live = L.scoped(
+const withDefaultScheduler = FiberRef.locally(
+  FiberRef.currentScheduler,
+  Scheduler.defaultScheduler
+)
+
+export const live = L.effect(
   MetricsManager,
   T.gen(function* ($) {
     // TODO: Review the Hub configuration
@@ -173,11 +183,15 @@ export const live = L.scoped(
       Ref.make(HMap.empty<string, HS.HashSet<InsightKey>>())
     )
 
-    const dummy = T.logDebug("foo")
-
     const mm = makeMetricsManager(idSvc, insight, hub, subscriptions)
-    const xx = pipe(T.schedule(Sch.spaced(D.seconds(5)))(dummy), T.forkScoped)
-    yield* $(xx)
+
+    // working
+    yield* $(
+      withDefaultScheduler(
+        T.forkDaemon(T.repeat(Sch.spaced(D.millis(2000)))(mm.poll()))
+      )
+    )
+
     yield* $(T.logDebug(`Started MetricsManager`))
     return mm
   })

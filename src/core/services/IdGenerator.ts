@@ -34,11 +34,9 @@ function make(sem: T.Semaphore, lastTS: Ref.Ref<number>, cnt: Ref.Ref<number>) {
       })
     )
 
-  return T.sync(() => {
-    return {
-      nextId: (prefix: string) => update(prefix),
-    } as IdGenerator
-  })
+  return T.succeed({
+    nextId: (prefix: string) => update(prefix),
+  } as IdGenerator)
 }
 
 export const live = L.effect(

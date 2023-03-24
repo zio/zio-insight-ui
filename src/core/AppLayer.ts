@@ -2,6 +2,8 @@ import { pipe } from "@effect/data/Function"
 import * as T from "@effect/io/Effect"
 import * as E from "@effect/io/Exit"
 import * as L from "@effect/io/Layer"
+import * as Log from "@effect/io/Logger"
+import * as LogLevel from "@effect/io/Logger/Level"
 import * as S from "@effect/io/Scope"
 
 import * as GDM from "@core/metrics/services/GraphDataManager"
@@ -18,6 +20,7 @@ export type AppLayer =
 
 export const appLayerLive = pipe(
   IdSvc.live,
+  L.provideMerge(Log.minimumLogLevel(LogLevel.Debug)),
   L.provideMerge(Insight.live),
   L.provideMerge(MM.live),
   L.provideMerge(GDM.live)
@@ -25,6 +28,7 @@ export const appLayerLive = pipe(
 
 export const appLayerStatic = pipe(
   IdSvc.live,
+  L.provideMerge(Log.minimumLogLevel(LogLevel.Debug)),
   L.provideMerge(Insight.dev),
   L.provideMerge(MM.live),
   L.provideMerge(GDM.live)
