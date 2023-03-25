@@ -1,6 +1,5 @@
 import type * as C from "@effect/data/Chunk"
 import * as Ctx from "@effect/data/Context"
-import * as D from "@effect/data/Duration"
 import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
 import * as HSet from "@effect/data/HashSet"
@@ -111,14 +110,13 @@ function makeGraphDataService(
   const subscriber = () =>
     T.gen(function* ($) {
       const strState = yield* $(mm.updates())
+      const logPrefix = `GDS <${subscriptionId}> - `
 
       // Handle a single metric state update
       const handleMetricState = (ms: MetricState) =>
         T.gen(function* ($) {
           yield* $(
-            T.logDebug(
-              `GDS <${subscriptionId}> - received state update ${JSON.stringify(ms)}`
-            )
+            T.logDebug(`<${logPrefix}> - received state update ${JSON.stringify(ms)}`)
           )
 
           const contains = yield* $(
@@ -143,7 +141,12 @@ function makeGraphDataService(
             yield* $(
               pipe(
                 current(),
-                T.flatMap((d) => dataHub.offer(d))
+                T.flatMap((d) => dataHub.offer(d)),
+                T.flatMap((b) =>
+                  T.logDebug(
+                    `GDS <${subscriptionId}> - published timeseries to hub : ${b}`
+                  )
+                )
               )
             )
           }
@@ -154,7 +157,7 @@ function makeGraphDataService(
         S.runForEach(handleMetricState)
       )
 
-      return yield* $(T.delay(D.millis(10))(T.forkDaemon(runner)))
+      return yield* $(T.forkDaemon(runner))
     })
 
   const setMetrics = (keys: HSet.HashSet<InsightKey>) =>
@@ -197,7 +200,7 @@ function makeGraphDataService(
 
   const maxEntries = () => Ref.get(currMaxEntries)
 
-  const data = () => T.sync(() => S.fromHub(dataHub))
+  const data = () => T.succeed(S.fromHub(dataHub))
 
   return pipe(
     subscriber(),

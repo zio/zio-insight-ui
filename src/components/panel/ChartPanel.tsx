@@ -82,11 +82,9 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
 
         const updater = yield* $(
           pipe(
-            S.runForEach((e: GDS.GraphData) =>
-              T.sync(() => {
-                updateState(e)
-              })
-            )(updates),
+            S.runForEach((e: GDS.GraphData) => T.attempt(() => updateState(e)))(
+              updates
+            ),
             T.forkDaemon
           )
         )
@@ -97,7 +95,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
 
     return () => {
       try {
-        RT.runSync(appRt)(F.interrupt(updater))
+        RT.runFork(appRt)(F.interrupt(updater))
       } catch {
         /* ignore */
       }

@@ -1,5 +1,7 @@
 import * as C from "@effect/data/Chunk"
+import * as Eq from "@effect/data/Equal"
 import { pipe } from "@effect/data/Function"
+import * as Hash from "@effect/data/Hash"
 import * as HMap from "@effect/data/HashMap"
 import * as Opt from "@effect/data/Option"
 import type { Order } from "@effect/data/typeclass/Order"
@@ -9,12 +11,35 @@ import * as Ref from "@effect/io/Ref"
 import * as Color from "@core/Color"
 import type * as MK from "@core/metrics/model/zio/metrics/MetricKey"
 import type * as State from "@core/metrics/model/zio/metrics/MetricState"
-import { formatDate } from "@core/utils"
+import * as Utils from "@core/utils"
 
 // A time series key uniquely defines a single measured piece of data over a
 // period of time
-export class TimeSeriesKey {
+export class TimeSeriesKey implements Eq.Equal {
   constructor(readonly key: MK.InsightKey, readonly subKey: Opt.Option<string>) {}
+
+  asString(): string {
+    const sKey = Opt.isSome(this.subKey) ? ` -- ${this.subKey.value}` : ""
+    return `${this.key.id}${sKey}`
+  }
+
+  [Eq.symbol](that: Eq.Equal): boolean {
+    if (that instanceof TimeSeriesKey) {
+      return (
+        this.key.id === that.key.id &&
+        ((Opt.isSome(this.subKey) &&
+          Opt.isSome(that.subKey) &&
+          this.subKey.value == that.subKey.value) ||
+          (Opt.isNone(this.subKey) && Opt.isNone(that.subKey)))
+      )
+    } else {
+      return false
+    }
+  }
+
+  [Hash.symbol](): number {
+    return Utils.hashCode(this.asString())
+  }
 }
 
 // The basic rendering config for a TimeSeries
@@ -44,7 +69,7 @@ export class TimeSeriesEntry {
   ) {}
 
   asString(): string {
-    return `TimeSeriesEntry(${this.id}, ${formatDate(this.when)}, ${this.value})`
+    return `TimeSeriesEntry(${this.id}, ${Utils.formatDate(this.when)}, ${this.value})`
   }
 }
 
@@ -135,7 +160,7 @@ export const tsEntriesFromState = (s: State.MetricState) => {
       const counter = s.state as State.CounterState
       res.push(
         new TimeSeriesEntry(
-          { key: s.insightKey(), subKey: Opt.none() },
+          new TimeSeriesKey(s.insightKey(), Opt.none()),
           ts,
           counter.count
         )
@@ -146,7 +171,7 @@ export const tsEntriesFromState = (s: State.MetricState) => {
       const gauge = s.state as State.GaugeState
       res.push(
         new TimeSeriesEntry(
-          { key: s.insightKey(), subKey: Opt.none() },
+          new TimeSeriesKey(s.insightKey(), Opt.none()),
           ts,
           gauge.value
         )
@@ -157,13 +182,17 @@ export const tsEntriesFromState = (s: State.MetricState) => {
       const hist = s.state as State.HistogramState
       hist.buckets.forEach(([k, v]) =>
         res.push(
-          new TimeSeriesEntry({ key: s.insightKey(), subKey: Opt.some(`${k}`) }, ts, v)
+          new TimeSeriesEntry(
+            new TimeSeriesKey(s.insightKey(), Opt.some(`${k}`)),
+            ts,
+            v
+          )
         )
       )
       if (hist.count > 0) {
         res.push(
           new TimeSeriesEntry(
-            { key: s.insightKey(), subKey: Opt.some("avg") },
+            new TimeSeriesKey(s.insightKey(), Opt.some("avg")),
             ts,
             hist.sum / hist.count
           )
@@ -175,14 +204,18 @@ export const tsEntriesFromState = (s: State.MetricState) => {
       const summ = s.state as State.SummaryState
       summ.quantiles.forEach(([q, v]) =>
         res.push(
-          new TimeSeriesEntry({ key: s.insightKey(), subKey: Opt.some(`${q}`) }, ts, v)
+          new TimeSeriesEntry(
+            new TimeSeriesKey(s.insightKey(), Opt.some(`${q}`)),
+            ts,
+            v
+          )
         )
       )
 
       if (summ.count > 0) {
         res.push(
           new TimeSeriesEntry(
-            { key: s.insightKey(), subKey: Opt.some("avg") },
+            new TimeSeriesKey(s.insightKey(), Opt.some("avg")),
             ts,
             summ.sum / summ.count
           )
@@ -195,7 +228,11 @@ export const tsEntriesFromState = (s: State.MetricState) => {
       const freq = s.state as State.FrequencyState
       HMap.forEachWithIndex<number, string>((v, k) =>
         res.push(
-          new TimeSeriesEntry({ key: s.insightKey(), subKey: Opt.some(`${k}`) }, ts, v)
+          new TimeSeriesEntry(
+            new TimeSeriesKey(s.insightKey(), Opt.some(`${k}`)),
+            ts,
+            v
+          )
         )
       )(freq.occurrences)
       break
