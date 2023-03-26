@@ -1,4 +1,12 @@
-// required import for time based axis
+/* A ChartPanel renders group of lines in a line chart. The data for the lines
+ * is provided by an instance of GraphDataService. Each panel uses irs own instance
+ * of GraphDataService, hence all ChartPanels are isolated from each other.
+ * The GraphDataService survives mounting / unmounting the panel inside the UI, so the
+ * chart data is preserved as well.
+ *
+ * The panel consumes changes from the GraphDataService and updates the chart accordingly.
+ *
+ */
 import { RuntimeContext } from "@components/App"
 import * as C from "@effect/data/Chunk"
 import * as HMap from "@effect/data/HashMap"
