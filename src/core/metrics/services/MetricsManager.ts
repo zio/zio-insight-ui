@@ -6,17 +6,16 @@ import * as HMap from "@effect/data/HashMap"
 import * as HS from "@effect/data/HashSet"
 import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
-import * as FiberRef from "@effect/io/FiberRef"
 import * as Hub from "@effect/io/Hub"
 import * as L from "@effect/io/Layer"
 import * as Ref from "@effect/io/Ref"
 import * as Sch from "@effect/io/Schedule"
-import * as Scheduler from "@effect/io/Scheduler"
 import * as S from "@effect/stream/Stream"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import type { MetricState } from "@core/metrics/model/zio/metrics/MetricState"
 import * as IdSvc from "@core/services/IdGenerator"
+import * as Utils from "@core/utils"
 
 import * as Insight from "./InsightService"
 
@@ -167,11 +166,6 @@ function makeMetricsManager(
   } as MetricsManager
 }
 
-const withDefaultScheduler = FiberRef.locally(
-  FiberRef.currentScheduler,
-  Scheduler.defaultScheduler
-)
-
 export const live = L.effect(
   MetricsManager,
   T.gen(function* ($) {
@@ -185,9 +179,8 @@ export const live = L.effect(
 
     const mm = makeMetricsManager(idSvc, insight, hub, subscriptions)
 
-    // working
     yield* $(
-      withDefaultScheduler(
+      Utils.withDefaultScheduler(
         T.forkDaemon(T.repeat(Sch.spaced(D.millis(2000)))(mm.poll()))
       )
     )

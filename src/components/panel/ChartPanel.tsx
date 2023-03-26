@@ -1,7 +1,6 @@
 // required import for time based axis
 import { RuntimeContext } from "@components/App"
 import * as C from "@effect/data/Chunk"
-import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
 import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
@@ -71,34 +70,29 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
   }
 
   React.useEffect(() => {
-    const updater = RT.runFork(appRt)(
-      T.gen(function* ($) {
-        const gdm = yield* $(T.service(GDM.GraphDataManager))
-        const gds = yield* $(gdm.lookup(props.id))
-        const data = yield* $(gds.current())
-        updateState(data)
+    const createUpdater = T.gen(function* ($) {
+      const gdm = yield* $(T.service(GDM.GraphDataManager))
+      const gds = yield* $(gdm.lookup(props.id))
+      const data = yield* $(gds.current())
+      updateState(data)
 
-        const updates = yield* $(gds.data())
+      const updates = yield* $(gds.data())
 
-        const updater = yield* $(
-          pipe(
-            S.runForEach((e: GDS.GraphData) => T.attempt(() => updateState(e)))(
-              updates
-            ),
-            T.forkDaemon
-          )
+      const updater = yield* $(
+        T.forkDaemon(
+          S.runForEach((e: GDS.GraphData) => T.attempt(() => updateState(e)))(updates)
         )
+      )
 
-        return updater
-      })
-    )
+      return updater
+    })
+
+    const f = RT.runSync(appRt)(createUpdater)
 
     return () => {
-      try {
-        RT.runFork(appRt)(F.interrupt(updater))
-      } catch {
-        /* ignore */
-      }
+      RT.runPromise(appRt)(F.interrupt(f)).then((_) => {
+        // ignore
+      })
     }
   }, [])
 
