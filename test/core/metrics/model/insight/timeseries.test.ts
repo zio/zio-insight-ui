@@ -21,8 +21,8 @@ import {
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
 const makeKey = (name: string, metricType: MT.MetricType) => {
-  return {
-    key: {
+  return new TS.TimeSeriesKey(
+    {
       id: name,
       key: {
         name: "foo",
@@ -30,8 +30,8 @@ const makeKey = (name: string, metricType: MT.MetricType) => {
         metricType,
       },
     },
-    subKey: Opt.none(),
-  } as TS.TimeSeriesKey
+    Opt.none()
+  )
 }
 
 // just a helper to get time series entries from a state id
