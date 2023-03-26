@@ -112,3 +112,5 @@ export const getMetricKeys = T.serviceWithEffect(
 
 export const getMetricStates = (keyIds: string[]) =>
   T.serviceWithEffect(InsightService, (api) => api.getMetricStates(keyIds))
+
+export const getFibers = T.serviceWithEffect(InsightService, (api) => api.getFibers)
