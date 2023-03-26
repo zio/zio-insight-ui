@@ -181,7 +181,7 @@ export const live = L.effect(
 
     yield* $(
       Utils.withDefaultScheduler(
-        T.forkDaemon(T.repeat(Sch.spaced(D.millis(2000)))(mm.poll()))
+        T.forkDaemon(T.repeat(Sch.spaced(D.millis(3000)))(mm.poll()))
       )
     )
 

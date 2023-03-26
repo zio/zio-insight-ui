@@ -42,7 +42,7 @@ export interface GraphDataService {
 
 export const GraphDataService = Ctx.Tag<GraphDataService>()
 
-export const defaultMaxEntries = 10
+export const defaultMaxEntries = 20
 
 function makeGraphDataService(
   mm: MM.MetricsManager,
