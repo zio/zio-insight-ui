@@ -398,20 +398,32 @@
   resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.5.0.tgz#2dd88d6b0166de6b37953b9c6faee8ba65608afc"
   integrity sha512-9yuEyx19MCt4cCUlqJMgtiDxuAVlm9oA14IS4AtsG7Xip/8uKcmxSfynKfiDuPWJukA2QHR54blUzewqBxupvQ==
 
-"@effect/io@^0.10.0", "@effect/io@~0.10.0":
+"@effect/data@~0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.7.1.tgz#07b76b40d18ace129783fd88bf83fd71be409eac"
+  integrity sha512-nIovYR9vSX0s+YKsMfvYDlFvkdGhUGYFoll/zRbbLVTwZ0S0h9zlsKgSyyQKRcar4fd/H01xuiS39MzmY1+uyA==
+
+"@effect/io@^0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.10.0.tgz#5a2c2f6671b75399d34b9c245c579f9f5595cbd6"
   integrity sha512-zNST2PjJlbpzle/zCUpui3Ttp8By8Z9gDfRpy6o//ejgL2CCd0G4VflZ74Hy3L8w/GLCVUXput52DfB5bxEsqA==
   dependencies:
     "@effect/data" "~0.5.0"
 
-"@effect/stream@^0.12.1":
-  version "0.12.1"
-  resolved "https://registry.yarnpkg.com/@effect/stream/-/stream-0.12.1.tgz#9118cde8906ae02452ab7ee81978a436a9f09aec"
-  integrity sha512-Y5CkZXv1M6EAbuqa1tQxL6qeeDlxRchUZq+XHc7kb/sko9Za+G/WyRqoEWm0VmIcyWh6RCzpEsN6m3izXqIT0w==
+"@effect/io@~0.14.1":
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.14.1.tgz#1976bc76b4804cfec34b111bdf1abc3e510e7cc1"
+  integrity sha512-NcSUhyyt/n0bJVPJuIgOQPawOc54Oq3O6whwN7rI0PuJJbF95t1OmJwBmeXte4QfAR9C6GEnHaLgPwhsYDEkSA==
   dependencies:
-    "@effect/data" "~0.5.0"
-    "@effect/io" "~0.10.0"
+    "@effect/data" "~0.7.1"
+
+"@effect/stream@^0.13.0":
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/@effect/stream/-/stream-0.13.0.tgz#255f5ee147d8893cbeefd522d84e365379137fb5"
+  integrity sha512-OkUJNkKmcP9oy/hmMmklLBJJnkRuWwwO3L1XKL5792BdF0LJOSnDbGXjM8dvygIAd1Sluez8S5A5Zr5o2Osvkw==
+  dependencies:
+    "@effect/data" "~0.7.1"
+    "@effect/io" "~0.14.1"
 
 "@esbuild/android-arm64@0.17.12":
   version "0.17.12"
