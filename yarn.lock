@@ -398,7 +398,19 @@
   resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.5.0.tgz#2dd88d6b0166de6b37953b9c6faee8ba65608afc"
   integrity sha512-9yuEyx19MCt4cCUlqJMgtiDxuAVlm9oA14IS4AtsG7Xip/8uKcmxSfynKfiDuPWJukA2QHR54blUzewqBxupvQ==
 
-"@effect/io@^0.10.0", "@effect/io@~0.10.0":
+"@effect/data@~0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.7.1.tgz#07b76b40d18ace129783fd88bf83fd71be409eac"
+  integrity sha512-nIovYR9vSX0s+YKsMfvYDlFvkdGhUGYFoll/zRbbLVTwZ0S0h9zlsKgSyyQKRcar4fd/H01xuiS39MzmY1+uyA==
+
+"@effect/io@^0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.14.0.tgz#b98dc71990c9fa1ac33962e6e69800dbb7ed5db9"
+  integrity sha512-oM/3NrygCxyI6H2R9eCzGCi9j/5zPx+NyJlxnD1Cvl78mmXj0eA5Z2Z4h8vY3qAjmoOJqb8hoUTXubmeX+j5nw==
+  dependencies:
+    "@effect/data" "~0.7.1"
+
+"@effect/io@~0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.10.0.tgz#5a2c2f6671b75399d34b9c245c579f9f5595cbd6"
   integrity sha512-zNST2PjJlbpzle/zCUpui3Ttp8By8Z9gDfRpy6o//ejgL2CCd0G4VflZ74Hy3L8w/GLCVUXput52DfB5bxEsqA==
