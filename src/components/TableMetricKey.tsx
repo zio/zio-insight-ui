@@ -1,21 +1,23 @@
 import * as HS from "@effect/data/HashSet"
 import React from "react"
 
-import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
+import * as MK from "@core/metrics/model/zio/metrics/MetricKey"
 
 /**
  * A component for rendering available metric keys in a table. Effectively this
  */
 interface TableMetricKeysProps {
-  available: HS.HashSet<InsightKey>
+  available: HS.HashSet<MK.InsightKey>
   // The initially selected keys
-  selection: HS.HashSet<InsightKey>
+  selection: HS.HashSet<MK.InsightKey>
   // a Callback that can be used to change the selection state
-  onSelect: (key: InsightKey) => void
+  onSelect: (key: MK.InsightKey) => void
 }
 
 export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
-  const isSelected = (k: InsightKey) => (selection: HS.HashSet<InsightKey>) => {
+  const sorted = [...props.available].sort((a, b) => MK.OrdInsightKey.compare(a, b))
+
+  const isSelected = (k: MK.InsightKey) => (selection: HS.HashSet<MK.InsightKey>) => {
     return HS.some(selection, (e) => e.id == k.id)
   }
 
@@ -31,7 +33,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
           </tr>
         </thead>
         <tbody>
-          {HS.map(props.available, (k) => (
+          {sorted.map((k) => (
             <RowMetricKey
               key={k.id}
               metricKey={k}
@@ -46,9 +48,9 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
 }
 
 interface RowMetricKeyProps {
-  metricKey: InsightKey
+  metricKey: MK.InsightKey
   checked: boolean
-  toggled: (k: InsightKey) => void
+  toggled: (k: MK.InsightKey) => void
 }
 
 const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
