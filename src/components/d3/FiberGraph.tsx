@@ -76,10 +76,7 @@ export const FiberGraph: React.FC<{}> = (props) => {
           .forceCollide()
           .radius((f: d3.SimulationNodeDatum) => (f as FiberNode).data.radius)
       )
-      .force(
-        "charge",
-        d3.forceManyBody().strength((d) => (d as FiberNode).data.radius * 3)
-      )
+      .force("charge", d3.forceManyBody().strength(-5))
       .force("center", d3.forceCenter(geom.svgWidth / 2, geom.svgHeight / 2))
 
     const node = canvas
