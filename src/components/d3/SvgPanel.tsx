@@ -2,29 +2,17 @@ import * as React from "react"
 
 import * as D3Utils from "./Utils"
 
+export const SVGDimensions = React.createContext<D3Utils.Dimensions>(
+  D3Utils.emptyDimensions
+)
+
 export const SVGPanel: React.FC<React.PropsWithChildren<{}>> = (props) => {
   const [ref, dimensions] = D3Utils.useDimensions<HTMLDivElement>()
 
   const createSvg = () => {
     return (
-      <svg width={dimensions.width} height={dimensions.height}>
-        <rect
-          width={dimensions.width}
-          height={dimensions.height}
-          fill="cornflowerblue"
-        />
-
-        {(([w, h]: [number, number]) => {
-          return (
-            <rect
-              width={w}
-              height={h}
-              x={dimensions.margins.left || 0}
-              y={dimensions.margins.top || 0}
-              fill="orange"
-            />
-          )
-        })(D3Utils.boundedDimensions(dimensions))}
+      <svg id="FiberGraph" width={dimensions.width} height={dimensions.height}>
+        {props.children}
       </svg>
     )
   }
@@ -35,7 +23,7 @@ export const SVGPanel: React.FC<React.PropsWithChildren<{}>> = (props) => {
 
   return (
     <div ref={ref} className="grow flex relative">
-      {createSvg()}
+      <SVGDimensions.Provider value={dimensions}>{createSvg()}</SVGDimensions.Provider>
     </div>
   )
 }

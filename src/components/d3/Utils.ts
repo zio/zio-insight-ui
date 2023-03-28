@@ -38,6 +38,12 @@ const combineChartDimensions = (d: Dimensions) => {
   } as Dimensions
 }
 
+export const emptyDimensions = combineChartDimensions({
+  width: 0,
+  height: 0,
+  margins: {},
+})
+
 export function useDimensions<T extends Element>(
   w?: number,
   h?: number,
