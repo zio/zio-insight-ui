@@ -24,6 +24,10 @@ const xAccessor = (f: FiberNode) => (dms: Dimensions) =>
   f.x || Math.random() * dms.width
 const yAccessor = (f: FiberNode) => (dms: Dimensions) =>
   f.y || Math.random() * dms.height
+const stateAccessor = (f: FiberNode) => {
+  const keys = Object.keys(f.data.fiber.status)
+  return keys.length > 0 ? keys[0] : "Unknown"
+}
 
 export const FiberGraph: React.FC<{}> = (props) => {
   const appRt = React.useContext(App.RuntimeContext)
@@ -31,6 +35,11 @@ export const FiberGraph: React.FC<{}> = (props) => {
   const [fibers, setFibers] = React.useState<FiberNode[]>([])
 
   const sim = (dms: Dimensions, data: FiberNode[]) => {
+    const colorScale = d3
+      .scaleOrdinal<string>()
+      .domain(["Succeeded", "Errored", "Running", "Suspended", "Unknown"])
+      .range(["green", "red", "cornflowerblue", "gold", "gray"])
+
     d3.select("#FiberGraph").selectAll("*").remove()
 
     const group = d3.select("#FiberGraph").append("g")
@@ -50,14 +59,15 @@ export const FiberGraph: React.FC<{}> = (props) => {
         })
         .attr("cx", (d) => xAccessor(d)(dms))
         .attr("cy", (d) => yAccessor(d)(dms))
-        .attr("stroke", "black")
+        .attr("stroke", "cyan")
         .attr("stroke-width", 2)
-        .attr("fill", "red")
+        .attr("fill", (d) => colorScale(stateAccessor(d)))
 
       nodes
         .merge(nodes)
         .attr("cx", (d) => xAccessor(d)(dms))
         .attr("cy", (d) => yAccessor(d)(dms))
+        .attr("fill", (d) => colorScale(stateAccessor(d)))
 
       nodes.exit().remove()
     }
@@ -69,7 +79,7 @@ export const FiberGraph: React.FC<{}> = (props) => {
           .forceCollide()
           .radius((f: d3.SimulationNodeDatum) => radiusAccessor(f as FiberNode))
       )
-      .force("charge", d3.forceManyBody().strength(-1))
+      .force("charge", d3.forceManyBody().strength(0))
       .force("center", d3.forceCenter(dms.width / 2, dms.height / 2))
       .on("tick", ticked)
   }
@@ -87,7 +97,7 @@ export const FiberGraph: React.FC<{}> = (props) => {
         return {
           data: {
             fiber: f,
-            radius: Math.random() * 15 + 5,
+            radius: Math.random() * 25 + 8,
           },
         }
       })
