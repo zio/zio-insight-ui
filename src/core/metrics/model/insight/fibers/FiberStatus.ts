@@ -1,6 +1,6 @@
 import * as Z from "zod"
 
-import { locationSchema, fiberIdSchema } from "./FiberId"
+import { fiberIdSchema, locationSchema } from "./FiberId"
 
 const successSchema = Z.object({
   Succeeded: Z.object({

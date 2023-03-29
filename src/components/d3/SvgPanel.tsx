@@ -11,7 +11,7 @@ export const SVGPanel: React.FC<React.PropsWithChildren<{}>> = (props) => {
 
   const createSvg = () => {
     return (
-      <svg id="FiberGraph" width={dimensions.width} height={dimensions.height}>
+      <svg id="FiberGraph" width="100%" height="100%">
         {props.children}
       </svg>
     )

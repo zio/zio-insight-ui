@@ -51,7 +51,6 @@ export function useDimensions<T extends Element>(
 ): [React.MutableRefObject<T | null>, Dimensions] {
   const ref = React.useRef<T>(null)
   const element = ref.current
-  console.log("foo", element)
 
   const [observedWidth, changeWidth] = React.useState(0)
   const [observedHeight, changeHeight] = React.useState(0)
@@ -75,9 +74,6 @@ export function useDimensions<T extends Element>(
 
     return () => resizeObserver.disconnect()
   }, [w, h, margins])
-
-  if (w == undefined || h == undefined) {
-  }
 
   return [
     ref,
