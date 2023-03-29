@@ -63,7 +63,7 @@ describe("GraphDataService", () => {
   it("should push updates to relevant timeseries", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const mm = yield* $(T.service(MM.MetricsManager))
+        const mm = yield* $(MM.MetricsManager)
         const svc = yield* $(gds)
         const counterKey = yield* $(TK.counterKey)
         yield* $(T.logDebug("Waiting for data...1"))
@@ -88,7 +88,7 @@ describe("GraphDataService", () => {
   it("should drop timeseries when the corresponding metric key has been removed", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const mm = yield* $(T.service(MM.MetricsManager))
+        const mm = yield* $(MM.MetricsManager)
         const svc = yield* $(gds)
 
         const ck = yield* $(TK.counterKey)

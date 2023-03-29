@@ -10,7 +10,7 @@ describe("FiberInfos Parser", () => {
   it("should parse the fiber infos from the server", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const svc = yield* $(T.service(Insight.InsightService))
+        const svc = yield* $(Insight.InsightService)
         return yield* $(svc.getFibers)
       })
     )

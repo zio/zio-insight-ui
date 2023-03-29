@@ -11,7 +11,7 @@ describe("MetricKeys Parser", () => {
   it("should parse the metric keys from the server", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const svc = yield* $(T.service(Insight.InsightService))
+        const svc = yield* $(Insight.InsightService)
         return yield* $(svc.getMetricKeys)
       })
     )
