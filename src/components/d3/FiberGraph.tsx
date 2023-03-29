@@ -14,13 +14,14 @@ import * as SVGPanel from "./SvgPanel"
 import * as D3Utils from "./Utils"
 
 interface FiberNode extends d3.SimulationNodeDatum {
+  id: number
   data: {
     fiber: F.FiberInfo
     radius: number
   }
 }
 
-const idAccessor = (f: FiberNode) => f.data.fiber.id.id
+const idAccessor = (f: FiberNode) => f.id
 const radiusAccessor = (f: FiberNode) => f.data.radius
 const xAccessor = (f: FiberNode) => (dms: D3Utils.Dimensions) =>
   f.x ? f.x : Math.random() * dms.width
@@ -35,7 +36,7 @@ export const FiberGraph: React.FC<{}> = (props) => {
   const appRt = React.useContext(App.RuntimeContext)
   const [dimensions, setDimensions] = React.useState<D3Utils.Dimensions>({
     width: 2000,
-    height: 1200,
+    height: 2000,
     margins: {},
   })
 
@@ -50,13 +51,16 @@ export const FiberGraph: React.FC<{}> = (props) => {
       "collide",
       d3
         .forceCollide()
-        .radius((f: d3.SimulationNodeDatum) => radiusAccessor(f as FiberNode) * 2)
+        .radius((f: d3.SimulationNodeDatum) => radiusAccessor(f as FiberNode))
     )
     .force("charge", d3.forceManyBody().strength(-2))
-    .force("center", d3.forceCenter(dimensions.width / 2, dimensions.height / 2))
+    .force(
+      "center",
+      d3.forceCenter(dimensions.width / 2, dimensions.height / 2).strength(0.3)
+    )
     .alphaTarget(0.2)
-    //.force("x", d3.forceX())
-    //.force("y", d3.forceY())
+    .force("x", d3.forceX(dimensions.width / 2).strength(0.003))
+    .force("y", d3.forceY(dimensions.height / 2).strength(0.003))
     .on("tick", ticked)
 
   const group = () => d3.select("#FiberGraph").select("g")
@@ -92,34 +96,18 @@ export const FiberGraph: React.FC<{}> = (props) => {
       )
 
       return newStates.map((f) => {
-        const getPos = () => {
-          const cur = HMap.get(curNodes, f.id.id)
-          console.log(cur)
-          const res: [number, number, number | undefined, number | undefined] =
-            Opt.isNone(cur)
-              ? [0, 0, undefined, undefined]
-              : [
-                  xAccessor(cur.value)(dimensions),
-                  yAccessor(cur.value)(dimensions),
-                  cur.value.vx,
-                  cur.value.vy,
-                ]
-
-          return res
-        }
-
-        const [newX, newY, vx, vy] = getPos()
-
-        return {
-          data: {
-            fiber: f,
-            radius: Math.random() * 10 + 8,
-            x: newX,
-            y: newY,
-            vx: vx,
-            vy: vy,
-          },
-        } as FiberNode
+        const cur = HMap.get(curNodes, f.id.id)
+        return Opt.isSome(cur)
+          ? cur.value
+          : ({
+              id: f.id.id,
+              x: dimensions.width / 2,
+              y: dimensions.height / 2,
+              data: {
+                fiber: f,
+                radius: Math.random() * 10 + 10,
+              },
+            } as FiberNode)
       })
     })
   }
@@ -127,14 +115,19 @@ export const FiberGraph: React.FC<{}> = (props) => {
   React.useEffect(() => {
     const s = setInterval(() => {
       RT.runPromise(appRt)(fetchFibers()).then((newFibers) => {
-        const change = node().data(newFibers, idAccessor)
-        console.log(change)
+        const nodes = node()
 
         simulation.nodes(newFibers)
-        simulation.alphaTarget(0.3)
+        simulation.alphaTarget(1).restart()
 
-        change.enter().append("circle")
-        change.exit().remove()
+        nodes.data(newFibers).join(
+          "circle",
+          (e) =>
+            e
+              .attr("cx", (d) => xAccessor(d)(dimensions))
+              .attr("cy", (d) => yAccessor(d)(dimensions)),
+          (e) => e.remove()
+        )
       })
     }, 5000)
 
