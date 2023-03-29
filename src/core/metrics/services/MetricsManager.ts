@@ -179,6 +179,7 @@ export const live = L.effect(
 
     const mm = makeMetricsManager(idSvc, insight, hub, subscriptions)
 
+    // TODO: Make the polling interval configurable
     yield* $(
       Utils.withDefaultScheduler(
         T.forkDaemon(T.repeat(Sch.spaced(D.millis(3000)))(mm.poll()))
