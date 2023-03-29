@@ -105,12 +105,9 @@ export const dev: L.Layer<never, never, InsightService> = L.effect(
   })
 )
 
-export const getMetricKeys = T.serviceWithEffect(
-  InsightService,
-  (api) => api.getMetricKeys
-)
+export const getMetricKeys = T.flatMap(InsightService, (api) => api.getMetricKeys)
 
 export const getMetricStates = (keyIds: string[]) =>
-  T.serviceWithEffect(InsightService, (api) => api.getMetricStates(keyIds))
+  T.flatMap(InsightService, (api) => api.getMetricStates(keyIds))
 
-export const getFibers = T.serviceWithEffect(InsightService, (api) => api.getFibers)
+export const getFibers = T.flatMap(InsightService, (api) => api.getFibers)

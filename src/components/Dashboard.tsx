@@ -109,9 +109,9 @@ export function InsightGridLayout() {
   // TODO: This must be replaced with a proper config page. For now we are randomly choosing
   // an existing metric to actually see some graph being rendered
   const randomKey = T.gen(function* ($) {
-    const gdm = yield* $(T.service(GDM.GraphDataManager))
-    const app = yield* $(T.service(InsightSvc.InsightService))
-    const idSvc = yield* $(T.service(IdSvc.IdGenerator))
+    const gdm = yield* $(GDM.GraphDataManager)
+    const app = yield* $(InsightSvc.InsightService)
+    const idSvc = yield* $(IdSvc.IdGenerator)
     const panelId = yield* $(idSvc.nextId("panel"))
     const keys = C.fromIterable(yield* $(app.getMetricKeys))
     const idx = Math.floor(Math.random() * C.size(keys))
@@ -132,7 +132,7 @@ export function InsightGridLayout() {
 
     RT.runPromise(appRt)(
       T.gen(function* ($) {
-        const gdm = yield* $(T.service(GDM.GraphDataManager))
+        const gdm = yield* $(GDM.GraphDataManager)
         yield* $(gdm.deregister(panelId))
       })
     ).then(() =>

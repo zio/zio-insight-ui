@@ -79,7 +79,7 @@ function makeGraphDataManager(
 export const live: L.Layer<MM.MetricsManager, never, GraphDataManager> = L.effect(
   GraphDataManager,
   T.gen(function* ($) {
-    const mm = yield* $(T.service(MM.MetricsManager))
+    const mm = yield* $(MM.MetricsManager)
     const store = yield* $(MS.createMemoryStore<string, GDS.GraphDataService>())
     return makeGraphDataManager(store, mm)
   })

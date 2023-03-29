@@ -36,7 +36,7 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
   const applySelection = () => {
     RT.runPromise(appRt)(
       T.gen(function* ($) {
-        const gdm = yield* $(T.service(GDM.GraphDataManager))
+        const gdm = yield* $(GDM.GraphDataManager)
         yield* $(
           pipe(
             gdm.lookup(props.id),
@@ -53,7 +53,7 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
   }
 
   const initialSelection = T.gen(function* ($) {
-    const gdm = yield* $(T.service(GDM.GraphDataManager))
+    const gdm = yield* $(GDM.GraphDataManager)
     const keys = yield* $(
       pipe(
         gdm.lookup(props.id),

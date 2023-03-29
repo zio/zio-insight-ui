@@ -1,5 +1,4 @@
 import * as App from "@components/App"
-import * as T from "@effect/io/Effect"
 import * as RT from "@effect/io/Runtime"
 import * as React from "react"
 
@@ -12,13 +11,7 @@ export const Fibers: React.FC<{}> = () => {
   const [fibers, setFibers] = React.useState<FiberInfo[]>([])
 
   React.useEffect(() => {
-    RT.runPromise(appRt)(
-      T.gen(function* ($) {
-        const insight = yield* $(T.service(Insight.InsightService))
-        const fibers = yield* $(insight.getFibers)
-        return fibers
-      })
-    ).then((fibers) => setFibers(fibers))
+    RT.runPromise(appRt)(Insight.getFibers).then((fibers) => setFibers(fibers))
   }, [])
 
   return <h1>{fibers.length}</h1>
