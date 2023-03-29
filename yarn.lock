@@ -1210,13 +1210,22 @@
     "@types/react" "*"
 
 "@types/react-resizable@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@types/react-resizable/-/react-resizable-3.0.3.tgz#76952da74820fae0dbd9669861514c836d5f1e83"
-  integrity sha512-W/QsUOZoXBAIBQNhNm95A5ohoaiUA874lWQytO2UP9dOjp5JHO9+a0cwYNabea7sA12ZDJnGVUFZxcNaNksAWA==
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@types/react-resizable/-/react-resizable-3.0.4.tgz#2f5a1b6c79dd0b8729959deefc8628ab484724cc"
+  integrity sha512-+QguN9CDfC1lthq+4noG1fkxh8cqkV2Fv/Mu3mdknCCBiwwNLecnBdk1MmNNN7uJpT23Nx/aVkYsbt5NuWouFw==
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^18.0.22":
+"@types/react@*":
+  version "18.0.30"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.30.tgz#83944e679fc7aeab3f042b76d63c4d755b56b7c4"
+  integrity sha512-AnME2cHDH11Pxt/yYX6r0w448BfTwQOLEhQEjCdwB7QskEI7EKtxhGUsExTQe/MsY3D9D5rMtu62WRocw9A8FA==
+  dependencies:
+    "@types/prop-types" "*"
+    "@types/scheduler" "*"
+    csstype "^3.0.2"
+
+"@types/react@^18.0.22":
   version "18.0.29"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.29.tgz#4cead505172c0020c5b51940199e31fc6ff2f63a"
   integrity sha512-wXHktgUABxplw1+UnljseDq4+uztQyp2tlWZRIxHlpchsCFqiYkvaDS8JR7eKOQm8wziTH/el5qL7D6gYNkYcw==
