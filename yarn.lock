@@ -394,9 +394,9 @@
     "@jridgewell/trace-mapping" "0.3.9"
 
 "@effect/data@^0.7.0", "@effect/data@~0.7.1":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.7.1.tgz#07b76b40d18ace129783fd88bf83fd71be409eac"
-  integrity sha512-nIovYR9vSX0s+YKsMfvYDlFvkdGhUGYFoll/zRbbLVTwZ0S0h9zlsKgSyyQKRcar4fd/H01xuiS39MzmY1+uyA==
+  version "0.7.4"
+  resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.7.4.tgz#53d6006f66e048b7eaa208c3a4de8b1d058a59bd"
+  integrity sha512-vHDyTq66H5JIFMysp11KawygR7ikc2do5FdRdvruLN4H6hFW7u404Bl/UVOu4MiKugHvV1MUaV2fy/dzOlwY7w==
 
 "@effect/io@^0.14.0", "@effect/io@~0.14.1":
   version "0.14.1"
