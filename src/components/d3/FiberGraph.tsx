@@ -11,7 +11,7 @@ import type * as F from "@core/metrics/model/insight/fibers/FiberInfo"
 import * as Insight from "@core/metrics/services/InsightService"
 
 import * as SVGPanel from "./SvgPanel"
-import * as D3Utils from "./Utils"
+import type * as D3Utils from "./Utils"
 
 interface FiberNode extends d3.SimulationNodeDatum {
   id: number
@@ -34,7 +34,7 @@ const stateAccessor = (f: FiberNode) => {
 
 export const FiberGraph: React.FC<{}> = (props) => {
   const appRt = React.useContext(App.RuntimeContext)
-  const [dimensions, setDimensions] = React.useState<D3Utils.Dimensions>({
+  const [dimensions] = React.useState<D3Utils.Dimensions>({
     width: 2000,
     height: 2000,
     margins: {},
