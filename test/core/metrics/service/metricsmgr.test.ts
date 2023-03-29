@@ -1,5 +1,4 @@
 import * as C from "@effect/data/Chunk"
-import * as D from "@effect/data/Duration"
 import { pipe } from "@effect/data/Function"
 import * as HS from "@effect/data/HashSet"
 import * as T from "@effect/io/Effect"
@@ -11,9 +10,8 @@ import * as AL from "@core/AppLayer"
 import type * as Model from "@core/metrics/model/zio/metrics/MetricKey"
 import * as Insight from "@core/metrics/services/InsightService"
 import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Debug)).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
 const newKeys = HS.make({
   id: "1234-5678",
@@ -104,14 +102,9 @@ describe("MetricsManager", () => {
         // Make sure we are already consuming from the stream before we manually kick off
         // the polling
         const f = yield* $(pipe(S.take(states, 10), S.runCollect, T.fork))
-
-        yield* $(T.delay(D.millis(10))(mm.poll()))
-
-        // Now the fiber should be done and have the first 10 elements from the state
-        // updates
         const res = yield* $(F.join(f))
-        yield* $(mm.removeSubscription(sub))
 
+        yield* $(mm.removeSubscription(sub))
         return res
       })
     )

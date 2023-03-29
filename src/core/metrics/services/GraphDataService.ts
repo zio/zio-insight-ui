@@ -12,7 +12,6 @@ import * as S from "@effect/stream/Stream"
 import * as TS from "@core/metrics/model/insight/TimeSeries"
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import * as MM from "@core/metrics/services/MetricsManager"
-import * as Log from "@core/services/Logger"
 
 import type { MetricState } from "../model/zio/metrics/MetricState"
 
@@ -43,10 +42,9 @@ export interface GraphDataService {
 
 export const GraphDataService = Ctx.Tag<GraphDataService>()
 
-export const defaultMaxEntries = 10
+export const defaultMaxEntries = 20
 
 function makeGraphDataService(
-  log: Log.LogService,
   mm: MM.MetricsManager,
   subscriptionId: string,
   timeseries: Ref.Ref<HMap.HashMap<TS.TimeSeriesKey, TS.TimeSeries>>,
@@ -59,8 +57,8 @@ function makeGraphDataService(
   const createTS = (id: TS.TimeSeriesKey) =>
     T.gen(function* ($) {
       const max = yield* $(Ref.get(currMaxEntries))
-      yield* $(log.debug(`creating new Timeseries`))
-      return yield* $(TS.makeTimeSeries(id, max)(log))
+      yield* $(T.logDebug(`creating new Timeseries`))
+      return yield* $(TS.makeTimeSeries(id, max))
     })
 
   const getOrCreateTS = (id: TS.TimeSeriesKey) =>
@@ -112,14 +110,13 @@ function makeGraphDataService(
   const subscriber = () =>
     T.gen(function* ($) {
       const strState = yield* $(mm.updates())
+      const logPrefix = `GDS <${subscriptionId}> - `
 
       // Handle a single metric state update
       const handleMetricState = (ms: MetricState) =>
         T.gen(function* ($) {
           yield* $(
-            log.debug(
-              `GDS <${subscriptionId}> - received state update ${JSON.stringify(ms)}`
-            )
+            T.logDebug(`<${logPrefix}> - received state update ${JSON.stringify(ms)}`)
           )
 
           const contains = yield* $(
@@ -144,7 +141,12 @@ function makeGraphDataService(
             yield* $(
               pipe(
                 current(),
-                T.flatMap((d) => dataHub.offer(d))
+                T.flatMap((d) => dataHub.offer(d)),
+                T.flatMap((b) =>
+                  T.logDebug(
+                    `GDS <${subscriptionId}> - published timeseries to hub : ${b}`
+                  )
+                )
               )
             )
           }
@@ -183,7 +185,7 @@ function makeGraphDataService(
         })
       )
 
-      yield* $(log.debug(`GraphData Services now observes <${HSet.size(keys)}> keys`))
+      yield* $(T.logDebug(`GraphData Services now observes <${HSet.size(keys)}> keys`))
       yield* $(Ref.set(observed, keys))
     })
 
@@ -198,7 +200,7 @@ function makeGraphDataService(
 
   const maxEntries = () => Ref.get(currMaxEntries)
 
-  const data = () => T.sync(() => S.fromHub(dataHub))
+  const data = () => T.succeed(S.fromHub(dataHub))
 
   return pipe(
     subscriber(),
@@ -227,7 +229,6 @@ function makeGraphDataService(
 export function createGraphDataService() {
   // TODO: Review Hub settings
   return T.gen(function* ($) {
-    const log = yield* $(T.service(Log.LogService))
     const mm = yield* $(T.service(MM.MetricsManager))
     const observed = yield* $(Ref.make(HSet.empty()))
     const maxEntries = yield* $(Ref.make(defaultMaxEntries))
@@ -237,7 +238,6 @@ export function createGraphDataService() {
     const dataHub = yield* $(Hub.sliding<GraphData>(128))
     return yield* $(
       makeGraphDataService(
-        log,
         mm,
         subId,
         timeSeries,

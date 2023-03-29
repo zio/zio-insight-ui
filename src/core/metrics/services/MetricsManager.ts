@@ -15,7 +15,7 @@ import * as S from "@effect/stream/Stream"
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import type { MetricState } from "@core/metrics/model/zio/metrics/MetricState"
 import * as IdSvc from "@core/services/IdGenerator"
-import * as Log from "@core/services/Logger"
+import * as Utils from "@core/utils"
 
 import * as Insight from "./InsightService"
 
@@ -47,7 +47,7 @@ export interface MetricsManager {
   readonly updates: () => T.Effect<never, never, S.Stream<never, never, MetricState>>
   // Manually trigger a poll, the poll will cause an update to all connected
   // subscribers for metric data
-  readonly poll: () => T.Effect<never, never, void>
+  readonly poll: () => T.Effect<never, never, number>
   // Reset all subscriptions within the MetricsManager
   readonly reset: () => T.Effect<never, never, void>
 }
@@ -55,7 +55,6 @@ export interface MetricsManager {
 export const MetricsManager = Ctx.Tag<MetricsManager>()
 
 function makeMetricsManager(
-  log: Log.LogService,
   idSvc: IdSvc.IdGenerator,
   insight: Insight.InsightService,
   metricsHub: Hub.Hub<MetricState>,
@@ -68,7 +67,7 @@ function makeMetricsManager(
       idSvc.nextId("mm"),
       T.flatMap((id) =>
         pipe(
-          log.debug(
+          T.logDebug(
             `Adding subscription <${id}> with <${HS.size(keys)}> keys to MetricsManager`
           ),
           T.flatMap((_) => Ref.update(subscriptions, HMap.set(id, keys))),
@@ -80,7 +79,7 @@ function makeMetricsManager(
   // remove the subscription with the given subscription id
   const removeSubscription = (id: string) =>
     pipe(
-      log.debug(`Removing subscription <${id}> from MetricsManager`),
+      T.logDebug(`Removing subscription <${id}> from MetricsManager`),
       T.flatMap((_) => Ref.update(subscriptions, HMap.remove(id)))
     )
 
@@ -89,26 +88,26 @@ function makeMetricsManager(
     f: (_: HS.HashSet<InsightKey>) => HS.HashSet<InsightKey>
   ) =>
     T.gen(function* ($) {
-      yield* $(log.debug(`Modifying subscription <${id}> in MetricsManager`))
+      yield* $(T.logDebug(`Modifying subscription <${id}> in MetricsManager`))
       const subs = yield* $(Ref.get(subscriptions))
       const oldKeys = Opt.getOrElse(HMap.get(id)(subs), HS.empty<InsightKey>)
       const newKeys = f(oldKeys)
-      yield $(log.debug(`Subscription <${id}> has now <${HS.size(newKeys)}> keys`))
-      yield* $(Ref.set(subscriptions, HMap.set(id, newKeys)(subs)))
+      yield $(T.logDebug(`Subscription <${id}> has now <${HS.size(newKeys)}> keys`))
+      yield* $(Ref.set(subscriptions, HMap.set(subs, id, newKeys)))
     })
 
   const registeredKeys = () =>
     T.gen(function* ($) {
       const subs = yield* $(Ref.get(subscriptions))
       const keys = HMap.reduce(subs, HS.empty<InsightKey>(), (z, v) => HS.union(z, v))
-      yield $(log.debug(`Found <${HS.size(keys)}> metric keys over all registrations`))
+      yield $(T.logDebug(`Found <${HS.size(keys)}> metric keys over all registrations`))
       return keys
     })
 
   const updates = () =>
     T.gen(function* ($) {
       const stream = S.fromHub(metricsHub)
-      yield* $(log.debug(`Created stream for metric updates`))
+      yield* $(T.logDebug(`Created stream for metric updates`))
       return stream
     })
 
@@ -120,45 +119,51 @@ function makeMetricsManager(
       insight.getMetricStates(keys),
       T.catchAll((err) =>
         pipe(
-          log.warn(`Error getting metric states from server: <${JSON.stringify(err)}>`),
+          T.logWarning(
+            `Error getting metric states from server: <${JSON.stringify(err)}>`
+          ),
           T.flatMap((_) => T.succeed(C.empty<MetricState>()))
         )
       ),
-      T.tap((res) => log.debug(`Got <${res.length}> metric states from Application`))
+      T.tap((res) => T.logDebug(`Got <${res.length}> metric states from Application`))
     )
 
   const pollMetrics = () =>
     T.gen(function* ($) {
       const keys = yield* $(pipe(registeredKeys(), T.map(HS.map((k) => k.id))))
 
+      yield* $(
+        T.logDebug(
+          `MM: Found <${HS.size(keys)}> registered keys over all subscriptions`
+        )
+      )
+
       if (HS.size(keys) > 0) {
         // TODO: Most likely it is better to use Chunk in the API rather than arrays
         const keyArr = [...keys]
-        yield* $(log.info(`polling metrics for <${keyArr.length}> keys`))
+        yield* $(T.logInfo(`polling metrics for <${keyArr.length}> keys`))
         const states = yield* $(getStates(keyArr))
         const published = yield* $(metricsHub.publishAll(states))
         yield* $(
-          log.debug(
+          T.logDebug(
             `published <${states.length}> metric states to metrics hub : ${published}`
           )
         )
+        return states.length
+      } else {
+        return 0
       }
     })
 
-  return pipe(
-    T.forkDaemon(T.schedule(Sch.fixed(D.seconds(5)))(pollMetrics())),
-    T.map(() => {
-      return {
-        createSubscription,
-        removeSubscription,
-        modifySubscription,
-        registeredKeys,
-        updates,
-        reset,
-        poll: pollMetrics,
-      } as MetricsManager
-    })
-  )
+  return {
+    createSubscription,
+    removeSubscription,
+    modifySubscription,
+    registeredKeys,
+    updates,
+    reset,
+    poll: pollMetrics,
+  } as MetricsManager
 }
 
 export const live = L.effect(
@@ -168,11 +173,19 @@ export const live = L.effect(
     const hub = yield* $(Hub.unbounded<MetricState>())
     const insight = yield* $(T.service(Insight.InsightService))
     const idSvc = yield* $(T.service(IdSvc.IdGenerator))
-    const log = yield* $(T.service(Log.LogService))
     const subscriptions = yield* $(
       Ref.make(HMap.empty<string, HS.HashSet<InsightKey>>())
     )
 
-    return yield* $(makeMetricsManager(log, idSvc, insight, hub, subscriptions))
+    const mm = makeMetricsManager(idSvc, insight, hub, subscriptions)
+
+    yield* $(
+      Utils.withDefaultScheduler(
+        T.forkDaemon(T.repeat(Sch.spaced(D.millis(3000)))(mm.poll()))
+      )
+    )
+
+    yield* $(T.logDebug(`Started MetricsManager`))
+    return mm
   })
 )

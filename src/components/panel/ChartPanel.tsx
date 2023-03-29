@@ -1,7 +1,14 @@
-// required import for time based axis
+/* A ChartPanel renders group of lines in a line chart. The data for the lines
+ * is provided by an instance of GraphDataService. Each panel uses irs own instance
+ * of GraphDataService, hence all ChartPanels are isolated from each other.
+ * The GraphDataService survives mounting / unmounting the panel inside the UI, so the
+ * chart data is preserved as well.
+ *
+ * The panel consumes changes from the GraphDataService and updates the chart accordingly.
+ *
+ */
 import { RuntimeContext } from "@components/App"
 import * as C from "@effect/data/Chunk"
-import { pipe } from "@effect/data/Function"
 import * as HMap from "@effect/data/HashMap"
 import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
@@ -71,36 +78,29 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
   }
 
   React.useEffect(() => {
-    const updater = RT.runSync(appRt)(
-      T.gen(function* ($) {
-        const gdm = yield* $(T.service(GDM.GraphDataManager))
-        const gds = yield* $(gdm.lookup(props.id))
-        const data = yield* $(gds.current())
-        updateState(data)
+    const createUpdater = T.gen(function* ($) {
+      const gdm = yield* $(T.service(GDM.GraphDataManager))
+      const gds = yield* $(gdm.lookup(props.id))
+      const data = yield* $(gds.current())
+      updateState(data)
 
-        const updates = yield* $(gds.data())
+      const updates = yield* $(gds.data())
 
-        const updater = yield* $(
-          pipe(
-            S.runForEach((e: GDS.GraphData) =>
-              T.sync(() => {
-                updateState(e)
-              })
-            )(updates),
-            T.forkDaemon
-          )
+      const updater = yield* $(
+        T.forkDaemon(
+          S.runForEach((e: GDS.GraphData) => T.attempt(() => updateState(e)))(updates)
         )
+      )
 
-        return updater
-      })
-    )
+      return updater
+    })
+
+    const f = RT.runSync(appRt)(createUpdater)
 
     return () => {
-      try {
-        RT.runSync(appRt)(F.interrupt(updater))
-      } catch {
-        /* ignore */
-      }
+      RT.runPromise(appRt)(F.interrupt(f)).then((_) => {
+        // ignore
+      })
     }
   }, [])
 
@@ -109,7 +109,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
       HMap.map(chartData, (cd) => {
         return {
           label: cd.tsConfig.title,
-          data: cd.data,
+          data: [...cd.data],
           tension: cd.tsConfig.tension,
           backgroundColor: cd.tsConfig.pointColor.toRgb(),
           borderColor: cd.tsConfig.lineColor.toRgba(),

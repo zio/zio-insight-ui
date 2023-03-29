@@ -3,9 +3,8 @@ import * as RT from "@effect/io/Runtime"
 
 import * as AL from "@core/AppLayer"
 import * as Insight from "@core/metrics/services/InsightService"
-import * as Log from "@core/services/Logger"
 
-const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic(Log.Off)).runtime
+const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 
 describe("FiberInfos Parser", () => {
   it("should parse the fiber infos from the server", async () => {

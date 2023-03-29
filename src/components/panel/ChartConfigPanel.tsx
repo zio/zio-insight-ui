@@ -30,7 +30,7 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
 
   const availableKeys = pipe(
     Insight.getMetricKeys,
-    T.catchAll((_) => T.sync(() => HS.empty<InsightKey>()))
+    T.catchAll((_) => T.succeed(HS.empty<InsightKey>()))
   )
 
   const applySelection = () => {

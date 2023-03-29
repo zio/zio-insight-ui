@@ -1,3 +1,6 @@
+import * as FiberRef from "@effect/io/FiberRef"
+import * as Scheduler from "@effect/io/Scheduler"
+
 export const formatDate = (d: Date) => {
   const pad = (n: number, l: number) => `${n}`.padStart(l, "0")
 
@@ -13,3 +16,15 @@ export const formatDate = (d: Date) => {
 
   return `${tsDay}-${tsMoment}`
 }
+
+export function hashCode(str: string): number {
+  return str.split("").reduce(function (a, b) {
+    a = (a << 5) - a + b.charCodeAt(0)
+    return a & a
+  }, 0)
+}
+
+export const withDefaultScheduler = FiberRef.locally(
+  FiberRef.currentScheduler,
+  Scheduler.defaultScheduler
+)
