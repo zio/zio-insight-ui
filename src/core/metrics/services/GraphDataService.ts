@@ -229,7 +229,7 @@ function makeGraphDataService(
 export function createGraphDataService() {
   // TODO: Review Hub settings
   return T.gen(function* ($) {
-    const mm = yield* $(T.service(MM.MetricsManager))
+    const mm = yield* $(MM.MetricsManager)
     const observed = yield* $(Ref.make(HSet.empty()))
     const maxEntries = yield* $(Ref.make(defaultMaxEntries))
     const timeSeries = yield* $(Ref.make(HMap.empty()))

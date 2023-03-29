@@ -171,8 +171,8 @@ export const live = L.effect(
   T.gen(function* ($) {
     // TODO: Review the Hub configuration
     const hub = yield* $(Hub.unbounded<MetricState>())
-    const insight = yield* $(T.service(Insight.InsightService))
-    const idSvc = yield* $(T.service(IdSvc.IdGenerator))
+    const insight = yield* $(Insight.InsightService)
+    const idSvc = yield* $(IdSvc.IdGenerator)
     const subscriptions = yield* $(
       Ref.make(HMap.empty<string, HS.HashSet<InsightKey>>())
     )

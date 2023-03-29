@@ -26,7 +26,7 @@ describe("MetricsManager", () => {
   it("can be reset", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const mm = yield* $(T.service(MM.MetricsManager))
+        const mm = yield* $(MM.MetricsManager)
         yield* $(mm.reset())
         const keys = yield* $(mm.registeredKeys())
 
@@ -40,7 +40,7 @@ describe("MetricsManager", () => {
   it("should allow to register keys", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const mm = yield* $(T.service(MM.MetricsManager))
+        const mm = yield* $(MM.MetricsManager)
         const id = yield* $(mm.createSubscription(newKeys))
         const res = yield* $(mm.registeredKeys())
         yield* $(mm.removeSubscription(id))
@@ -56,7 +56,7 @@ describe("MetricsManager", () => {
   it("should allow to remove a subscription", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const mm = yield* $(T.service(MM.MetricsManager))
+        const mm = yield* $(MM.MetricsManager)
         const id = yield* $(mm.createSubscription(newKeys))
         yield* $(mm.removeSubscription(id))
         const res = yield* $(mm.registeredKeys())
@@ -70,7 +70,7 @@ describe("MetricsManager", () => {
   it("should only yield distinct keys", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const mm = yield* $(T.service(MM.MetricsManager))
+        const mm = yield* $(MM.MetricsManager)
         const id1 = yield* $(mm.createSubscription(newKeys))
         const id2 = yield* $(mm.createSubscription(newKeys))
         const res = yield* $(mm.registeredKeys())
@@ -86,8 +86,8 @@ describe("MetricsManager", () => {
   it("should publish metric state updates", async () => {
     const res = await RT.runPromise(testRt)(
       T.gen(function* ($) {
-        const insight = yield* $(T.service(Insight.InsightService))
-        const mm = yield* $(T.service(MM.MetricsManager))
+        const insight = yield* $(Insight.InsightService)
+        const mm = yield* $(MM.MetricsManager)
 
         const keys = yield* $(
           pipe(

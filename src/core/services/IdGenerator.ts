@@ -51,4 +51,4 @@ export const live = L.effect(
 )
 
 export const nextId = (prefix: string) =>
-  T.serviceWithEffect(IdGenerator, (svc) => svc.nextId(prefix))
+  T.flatMap(IdGenerator, (svc) => svc.nextId(prefix))
