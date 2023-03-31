@@ -9,7 +9,7 @@ import * as Ref from "@effect/io/Ref"
 import * as Schedule from "@effect/io/Schedule"
 import * as Stream from "@effect/stream/Stream"
 
-import * as F from "@core/metrics/model/insight/fibers/FiberInfo"
+import type * as F from "@core/metrics/model/insight/fibers/FiberInfo"
 import * as IdGen from "@core/services/IdGenerator"
 import * as Utils from "@core/utils"
 
@@ -59,7 +59,7 @@ export const live = Layer.effect(
       return {
         createSubscription: subscribe,
         removeSubscription: unsubscribe,
-        subscriptionIds: subscriptionIds,
+        subscriptionIds,
       } as FiberDataService
     }
 

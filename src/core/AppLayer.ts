@@ -29,7 +29,7 @@ export const appLayerLive = pipe(
   Layer.provideMerge(FDSvc.live)
 )
 
-export const appLayerStatic = pipe(
+export const appLayerStatic: Layer.Layer<never, never, AppLayer> = pipe(
   IdSvc.live,
   Layer.provideMerge(Log.minimumLogLevel(LogLevel.Debug)),
   Layer.provideMerge(Insight.dev),

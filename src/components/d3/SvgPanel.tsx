@@ -9,21 +9,23 @@ export const SVGDimensions = React.createContext<D3Utils.Dimensions>(
 export const SVGPanel: React.FC<React.PropsWithChildren<{}>> = (props) => {
   const [ref, dimensions] = D3Utils.useDimensions<HTMLDivElement>()
 
-  const createSvg = () => {
-    return (
-      <svg id="FiberGraph" width="100%" height="100%">
-        {props.children}
-      </svg>
+  const element = React.useMemo(() => {
+    const svgContent = (
+      <SVGDimensions.Provider value={dimensions}>
+        <g
+          transform={`translate(${dimensions.margins.left},${dimensions.margins.top} )`}
+        >
+          {props.children}
+        </g>
+      </SVGDimensions.Provider>
     )
-  }
 
-  React.useEffect(() => {
-    createSvg()
+    return React.createElement("svg", { width: "100%", height: "100%" }, svgContent)
   }, [dimensions])
 
   return (
     <div ref={ref} className="grow flex relative">
-      <SVGDimensions.Provider value={dimensions}>{createSvg()}</SVGDimensions.Provider>
+      {element}
     </div>
   )
 }

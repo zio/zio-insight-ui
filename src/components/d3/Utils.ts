@@ -1,3 +1,4 @@
+import { ResizeObserver } from "@juggle/resize-observer"
 import * as React from "react"
 
 const topDefault = 40
@@ -50,37 +51,43 @@ export function useDimensions<T extends Element>(
   margins: Margins = {}
 ): [React.MutableRefObject<T | null>, Dimensions] {
   const ref = React.useRef<T>(null)
-  const element = ref.current
 
-  const [observedWidth, changeWidth] = React.useState(0)
-  const [observedHeight, changeHeight] = React.useState(0)
+  const [currentDms, changeDms] = React.useState(emptyDimensions)
 
   React.useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries: Array<ResizeObserverEntry>) => {
-      if (entries.length == 0) return
-      const entry = entries[0]
+    const element = ref.current
 
-      if (observedWidth !== entry.contentRect.width)
-        changeWidth(entry.contentRect.width)
-      if (observedHeight !== entry.contentRect.height)
-        changeHeight(entry.contentRect.height)
+    if (w && h) {
+      changeDms(combineChartDimensions({ width: w, height: h, margins }))
+      return
+    } else {
+      const resizeObserver = new ResizeObserver(
+        (entries: Array<ResizeObserverEntry>) => {
+          if (entries.length == 0) return
+          const entry = entries[0]
 
-      console.log(observedWidth, "--", observedHeight)
-    })
+          if (
+            currentDms.width != entry.contentRect.width ||
+            currentDms.height != entry.contentRect.height
+          ) {
+            changeDms(
+              combineChartDimensions({
+                width: entry.contentRect.width,
+                height: entry.contentRect.height,
+                margins,
+              })
+            )
+          }
+        }
+      )
 
-    if (element) {
-      resizeObserver.observe(element)
+      if (element) {
+        resizeObserver.observe(element, { box: "content-box" })
+      }
+
+      return () => resizeObserver.disconnect()
     }
+  }, [ref, w, h, margins])
 
-    return () => resizeObserver.disconnect()
-  }, [w, h, margins])
-
-  return [
-    ref,
-    combineChartDimensions({
-      width: w || observedWidth,
-      height: h || observedHeight,
-      margins,
-    }),
-  ]
+  return [ref, currentDms]
 }
