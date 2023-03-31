@@ -6,7 +6,7 @@ import * as Runtime from "@effect/io/Runtime"
 import * as Stream from "@effect/stream/Stream"
 
 import * as AL from "@core/AppLayer"
-import * as F from "@core/metrics/model/insight/fibers/FiberInfo"
+import type * as F from "@core/metrics/model/insight/fibers/FiberInfo"
 import * as FDS from "@core/metrics/services/FiberDataService"
 
 const testRt = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
