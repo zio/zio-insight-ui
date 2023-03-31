@@ -76,7 +76,13 @@ export const live = Layer.effect(
         )
       )
 
-      yield* $(Hub.publish(hub, fiberData))
+      yield* $(Effect.logDebug(`Found: ${fiberData.length} fibers`))
+      yield* $(
+        pipe(
+          Hub.publish(hub, fiberData),
+          Effect.when(() => fiberData.length > 0)
+        )
+      )
     })
 
     // TODO: Make this configurable

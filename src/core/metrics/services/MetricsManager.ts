@@ -1,23 +1,23 @@
-import * as C from "@effect/data/Chunk"
-import * as Ctx from "@effect/data/Context"
-import * as D from "@effect/data/Duration"
+import * as Chunk from "@effect/data/Chunk"
+import * as Context from "@effect/data/Context"
+import * as Duration from "@effect/data/Duration"
 import { pipe } from "@effect/data/Function"
-import * as HMap from "@effect/data/HashMap"
-import * as HS from "@effect/data/HashSet"
-import * as Opt from "@effect/data/Option"
-import * as T from "@effect/io/Effect"
+import * as HashMap from "@effect/data/HashMap"
+import * as HashSet from "@effect/data/HashSet"
+import * as Option from "@effect/data/Option"
+import * as Effect from "@effect/io/Effect"
 import * as Hub from "@effect/io/Hub"
-import * as L from "@effect/io/Layer"
+import * as Layer from "@effect/io/Layer"
 import * as Ref from "@effect/io/Ref"
-import * as Sch from "@effect/io/Schedule"
-import * as S from "@effect/stream/Stream"
+import * as Schedule from "@effect/io/Schedule"
+import * as Stream from "@effect/stream/Stream"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import type { MetricState } from "@core/metrics/model/zio/metrics/MetricState"
-import * as IdSvc from "@core/services/IdGenerator"
+import * as IdGenerator from "@core/services/IdGenerator"
 import * as Utils from "@core/utils"
 
-import * as Insight from "./InsightService"
+import * as InsightService from "./InsightService"
 
 // The MetricsManager is a service where interested components can add InsightKeys
 // to register their interest in those keys. Internally the MetricsManager will poll
@@ -32,46 +32,56 @@ import * as Insight from "./InsightService"
 export interface MetricsManager {
   // Allow components to register their interest in particular keys
   readonly createSubscription: (
-    keys: HS.HashSet<InsightKey>
-  ) => T.Effect<never, never, string>
+    keys: HashSet.HashSet<InsightKey>
+  ) => Effect.Effect<never, never, string>
   // Allow components to completely remove their subscription
-  readonly removeSubscription: (id: string) => T.Effect<never, never, void>
+  readonly removeSubscription: (id: string) => Effect.Effect<never, never, void>
   // Modify a given subscription
   readonly modifySubscription: (
     id: string,
-    f: (_: HS.HashSet<InsightKey>) => HS.HashSet<InsightKey>
-  ) => T.Effect<never, never, void>
+    f: (_: HashSet.HashSet<InsightKey>) => HashSet.HashSet<InsightKey>
+  ) => Effect.Effect<never, never, void>
   // Get the union over all registered keys
-  readonly registeredKeys: () => T.Effect<never, never, HS.HashSet<InsightKey>>
+  readonly registeredKeys: () => Effect.Effect<
+    never,
+    never,
+    HashSet.HashSet<InsightKey>
+  >
   // create a stream for incoming Metric State updates
-  readonly updates: () => T.Effect<never, never, S.Stream<never, never, MetricState>>
+  readonly updates: () => Effect.Effect<
+    never,
+    never,
+    Stream.Stream<never, never, MetricState>
+  >
   // Manually trigger a poll, the poll will cause an update to all connected
   // subscribers for metric data
-  readonly poll: () => T.Effect<never, never, number>
+  readonly poll: () => Effect.Effect<never, never, number>
   // Reset all subscriptions within the MetricsManager
-  readonly reset: () => T.Effect<never, never, void>
+  readonly reset: () => Effect.Effect<never, never, void>
 }
 
-export const MetricsManager = Ctx.Tag<MetricsManager>()
+export const MetricsManager = Context.Tag<MetricsManager>()
 
 function makeMetricsManager(
-  idSvc: IdSvc.IdGenerator,
-  insight: Insight.InsightService,
+  idSvc: IdGenerator.IdGenerator,
+  insight: InsightService.InsightService,
   metricsHub: Hub.Hub<MetricState>,
-  subscriptions: Ref.Ref<HMap.HashMap<string, HS.HashSet<InsightKey>>>
+  subscriptions: Ref.Ref<HashMap.HashMap<string, HashSet.HashSet<InsightKey>>>
 ) {
   // create a new subscription for a collection of InsightKeys, the new subscription will have a unique id
   // that can be used to unsubscribe again
-  const createSubscription = (keys: HS.HashSet<InsightKey>) =>
+  const createSubscription = (keys: HashSet.HashSet<InsightKey>) =>
     pipe(
       idSvc.nextId("mm"),
-      T.flatMap((id) =>
+      Effect.flatMap((id) =>
         pipe(
-          T.logDebug(
-            `Adding subscription <${id}> with <${HS.size(keys)}> keys to MetricsManager`
+          Effect.logDebug(
+            `Adding subscription <${id}> with <${HashSet.size(
+              keys
+            )}> keys to MetricsManager`
           ),
-          T.flatMap((_) => Ref.update(subscriptions, HMap.set(id, keys))),
-          T.map((_) => id)
+          Effect.flatMap((_) => Ref.update(subscriptions, HashMap.set(id, keys))),
+          Effect.map((_) => id)
         )
       )
     )
@@ -79,73 +89,87 @@ function makeMetricsManager(
   // remove the subscription with the given subscription id
   const removeSubscription = (id: string) =>
     pipe(
-      T.logDebug(`Removing subscription <${id}> from MetricsManager`),
-      T.flatMap((_) => Ref.update(subscriptions, HMap.remove(id)))
+      Effect.logDebug(`Removing subscription <${id}> from MetricsManager`),
+      Effect.flatMap((_) => Ref.update(subscriptions, HashMap.remove(id)))
     )
 
   const modifySubscription = (
     id: string,
-    f: (_: HS.HashSet<InsightKey>) => HS.HashSet<InsightKey>
+    f: (_: HashSet.HashSet<InsightKey>) => HashSet.HashSet<InsightKey>
   ) =>
-    T.gen(function* ($) {
-      yield* $(T.logDebug(`Modifying subscription <${id}> in MetricsManager`))
+    Effect.gen(function* ($) {
+      yield* $(Effect.logDebug(`Modifying subscription <${id}> in MetricsManager`))
       const subs = yield* $(Ref.get(subscriptions))
-      const oldKeys = Opt.getOrElse(HMap.get(id)(subs), HS.empty<InsightKey>)
+      const oldKeys = Option.getOrElse(HashMap.get(id)(subs), HashSet.empty<InsightKey>)
       const newKeys = f(oldKeys)
-      yield $(T.logDebug(`Subscription <${id}> has now <${HS.size(newKeys)}> keys`))
-      yield* $(Ref.set(subscriptions, HMap.set(subs, id, newKeys)))
+      yield $(
+        Effect.logDebug(`Subscription <${id}> has now <${HashSet.size(newKeys)}> keys`)
+      )
+      yield* $(Ref.set(subscriptions, HashMap.set(subs, id, newKeys)))
     })
 
   const registeredKeys = () =>
-    T.gen(function* ($) {
+    Effect.gen(function* ($) {
       const subs = yield* $(Ref.get(subscriptions))
-      const keys = HMap.reduce(subs, HS.empty<InsightKey>(), (z, v) => HS.union(z, v))
-      yield $(T.logDebug(`Found <${HS.size(keys)}> metric keys over all registrations`))
+      const keys = HashMap.reduce(subs, HashSet.empty<InsightKey>(), (z, v) =>
+        HashSet.union(z, v)
+      )
+      yield $(
+        pipe(
+          Effect.logDebug(
+            `Found <${HashSet.size(keys)}> metric keys over all registrations`
+          ),
+          Effect.when(() => HashSet.size(keys) > 0)
+        )
+      )
       return keys
     })
 
   const updates = () =>
-    T.gen(function* ($) {
-      const stream = S.fromHub(metricsHub)
-      yield* $(T.logDebug(`Created stream for metric updates`))
+    Effect.gen(function* ($) {
+      const stream = Stream.fromHub(metricsHub)
+      yield* $(Effect.logDebug(`Created stream for metric updates`))
       return stream
     })
 
   const reset = () =>
-    Ref.set(subscriptions, HMap.empty<string, HS.HashSet<InsightKey>>())
+    Ref.set(subscriptions, HashMap.empty<string, HashSet.HashSet<InsightKey>>())
 
   const getStates = (keys: readonly string[]) =>
     pipe(
       insight.getMetricStates(keys),
-      T.catchAll((err) =>
+      Effect.catchAll((err) =>
         pipe(
-          T.logWarning(
+          Effect.logWarning(
             `Error getting metric states from server: <${JSON.stringify(err)}>`
           ),
-          T.flatMap((_) => T.succeed(C.empty<MetricState>()))
+          Effect.flatMap((_) => Effect.succeed(Chunk.empty<MetricState>()))
         )
       ),
-      T.tap((res) => T.logDebug(`Got <${res.length}> metric states from Application`))
+      Effect.tap((res) =>
+        Effect.logDebug(`Got <${res.length}> metric states from Application`)
+      )
     )
 
   const pollMetrics = () =>
-    T.gen(function* ($) {
-      const keys = yield* $(pipe(registeredKeys(), T.map(HS.map((k) => k.id))))
-
-      yield* $(
-        T.logDebug(
-          `MM: Found <${HS.size(keys)}> registered keys over all subscriptions`
-        )
+    Effect.gen(function* ($) {
+      const keys = yield* $(
+        pipe(registeredKeys(), Effect.map(HashSet.map((k) => k.id)))
       )
 
-      if (HS.size(keys) > 0) {
-        // TODO: Most likely it is better to use Chunk in the API rather than arrays
+      if (HashSet.size(keys) > 0) {
+        yield* $(
+          Effect.logDebug(
+            `MM: Found <${HashSet.size(keys)}> registered keys over all subscriptions`
+          )
+        )
+
         const keyArr = [...keys]
-        yield* $(T.logInfo(`polling metrics for <${keyArr.length}> keys`))
+        yield* $(Effect.logInfo(`polling metrics for <${keyArr.length}> keys`))
         const states = yield* $(getStates(keyArr))
         const published = yield* $(metricsHub.publishAll(states))
         yield* $(
-          T.logDebug(
+          Effect.logDebug(
             `published <${states.length}> metric states to metrics hub : ${published}`
           )
         )
@@ -166,15 +190,15 @@ function makeMetricsManager(
   } as MetricsManager
 }
 
-export const live = L.effect(
+export const live = Layer.effect(
   MetricsManager,
-  T.gen(function* ($) {
+  Effect.gen(function* ($) {
     // TODO: Review the Hub configuration
     const hub = yield* $(Hub.unbounded<MetricState>())
-    const insight = yield* $(Insight.InsightService)
-    const idSvc = yield* $(IdSvc.IdGenerator)
+    const insight = yield* $(InsightService.InsightService)
+    const idSvc = yield* $(IdGenerator.IdGenerator)
     const subscriptions = yield* $(
-      Ref.make(HMap.empty<string, HS.HashSet<InsightKey>>())
+      Ref.make(HashMap.empty<string, HashSet.HashSet<InsightKey>>())
     )
 
     const mm = makeMetricsManager(idSvc, insight, hub, subscriptions)
@@ -182,11 +206,13 @@ export const live = L.effect(
     // TODO: Make the polling interval configurable
     yield* $(
       Utils.withDefaultScheduler(
-        T.forkDaemon(T.repeat(Sch.spaced(D.millis(3000)))(mm.poll()))
+        Effect.forkDaemon(
+          Effect.repeat(Schedule.spaced(Duration.millis(3000)))(mm.poll())
+        )
       )
     )
 
-    yield* $(T.logDebug(`Started MetricsManager`))
+    yield* $(Effect.logDebug(`Started MetricsManager`))
     return mm
   })
 )

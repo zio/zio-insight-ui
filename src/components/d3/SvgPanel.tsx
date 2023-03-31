@@ -26,7 +26,7 @@ export const SVGPanel: React.FC<React.PropsWithChildren<{}>> = (props) => {
     )
 
     return React.createElement("svg", { width: "100%", height: "100%" }, svgContent)
-  }, [dimensions])
+  }, [dimensions, props.children])
 
   // Render the div with the SVG element
   return (
