@@ -399,9 +399,9 @@
   integrity sha512-vHDyTq66H5JIFMysp11KawygR7ikc2do5FdRdvruLN4H6hFW7u404Bl/UVOu4MiKugHvV1MUaV2fy/dzOlwY7w==
 
 "@effect/io@^0.15.0", "@effect/io@~0.15.1":
-  version "0.15.1"
-  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.15.1.tgz#ba088d82384e28368abddc6ae8d534671975349b"
-  integrity sha512-+y4xJsNSeDM0ULcHathoVGB6uxSUTXT0IBiwyZUdqhB7sgZpTrYoi5RUnQSgpI8cVLZr7ukfOVPHI/PMVt9DXw==
+  version "0.15.2"
+  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.15.2.tgz#fc7d63b6ea27979579cb5eeb8c0b9641205ae059"
+  integrity sha512-PzbEFTQb+7anfu9UtT85n3PR2mKSaqcRX8TyI6YEaJODII7sZqru2kB3pEIwLhsSwZkcPoaJg70R/wv6Lb7lrQ==
   dependencies:
     "@effect/data" "~0.7.3"
 
