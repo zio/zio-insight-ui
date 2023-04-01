@@ -32,8 +32,6 @@ export interface FiberDataService {
 
 export const FiberDataService = Context.Tag<FiberDataService>()
 
-const s: unique symbol = Symbol()
-
 export const live = Layer.effect(
   FiberDataService,
   Effect.gen(function* ($) {
@@ -44,7 +42,7 @@ export const live = Layer.effect(
     ): FiberDataService {
       const subscribe = () =>
         Effect.gen(function* ($) {
-          const id = yield* $(idSvc.nextId(s.toString()))
+          const id = yield* $(idSvc.nextId("fds"))
           const stream = Stream.fromHub(fiberInfoHub)
           yield* $(Ref.update(subscriptions, (s) => HashSet.add(s, id)))
           return [id, stream] as [string, Stream.Stream<never, never, F.FiberInfo[]>]

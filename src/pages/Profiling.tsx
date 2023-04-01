@@ -1,4 +1,4 @@
-import { FiberGraph } from "@components/d3/FiberGraph"
+import { SimpleForceGraph } from "@components/d3/SimpleForceGraph"
 import { GridFrame } from "@components/panel/GridFrame"
 import * as React from "react"
 
@@ -18,7 +18,7 @@ export function Profiling() {
       maximize={() => {
         /* ignore */
       }}
-      content={<FiberGraph />}
+      content={<SimpleForceGraph />}
       config={undefined}
     ></GridFrame>
   )
