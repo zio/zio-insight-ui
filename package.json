@@ -34,6 +34,8 @@
     "react-icons": "^4.6.0",
     "react-resizable": "^3.0.4",
     "react-router-dom": "^6.4.3",
+    "three": "^0.151.2",
+    "three-spritetext": "^1.8.0",
     "zod": "^3.19.1"
   },
   "devDependencies": {

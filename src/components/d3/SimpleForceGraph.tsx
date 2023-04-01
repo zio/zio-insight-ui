@@ -32,9 +32,9 @@ export const SimpleForceGraph: React.FC<{}> = (props) => {
   const dataRef = React.useRef<FiberNode[]>([])
 
   const updateGraph = () => {
-    console.log(`New data has ${dataRef.current.length} nodes`)
+    const nodes = dataRef.current.slice()
 
-    const links = dataRef.current.reduce((acc, info) => {
+    const links = nodes.reduce((acc, info) => {
       if (
         info.fiber.parent &&
         dataRef.current.find((i) => i.id == info.fiber.parent!.id) !== undefined
@@ -50,24 +50,19 @@ export const SimpleForceGraph: React.FC<{}> = (props) => {
     }, [] as FiberLink[])
 
     setGraphData({
-      nodes: dataRef.current,
+      nodes,
       links,
     })
   }
 
   const updateReference = (infos: FiberInfo.FiberInfo[]) => {
-    console.log(`1- Received update with ${infos.length} fibers`)
-
     const newNodes = infos
       .slice()
       .filter((info) => dataRef.current.find((i) => i.id == info.id.id) === undefined)
-    console.log(`2 - New nodes has ${newNodes.length} nodes`)
 
     const oldNodes = dataRef.current.filter(
       (info) => infos.find((i) => i.id.id == info.id) !== undefined
     )
-
-    console.log(`3 - Old nodes has ${oldNodes.length} nodes`)
 
     oldNodes.push(
       ...newNodes.slice().map(
@@ -80,7 +75,6 @@ export const SimpleForceGraph: React.FC<{}> = (props) => {
     )
 
     dataRef.current = oldNodes
-    console.log(`New shadow data has ${dataRef.current.length} nodes`)
   }
 
   React.useEffect(() => {
@@ -93,6 +87,24 @@ export const SimpleForceGraph: React.FC<{}> = (props) => {
   return (
     <ForceGraph.ForceGraph3D
       graphData={graphData}
+      nodeLabel={(node) => {
+        const f = (node as FiberNode).fiber
+        const lbl = `${f.id.id} - ${f.id.location[0]}(${f.id.location[1]}:${f.id.location[2]})`
+        return lbl
+      }}
+      linkDirectionalArrowLength={3}
+      onNodeDragEnd={(node) => {
+        node.fx = node.x
+        node.fy = node.y
+        node.fz = node.z
+      }}
+      onNodeClick={(node) => {
+        console.log(`Clicked on node ${node.id}`)
+      }}
+      nodeAutoColorBy={(node) => {
+        const f = (node as FiberNode).fiber
+        return Object.keys(f.status).length > 0 ? Object.keys(f.status)[0] : ""
+      }}
       nodeColor={(node) => {
         const f = (node as FiberNode).fiber
         const status = Object.keys(f.status).length > 0 ? Object.keys(f.status)[0] : ""
