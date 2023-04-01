@@ -1,14 +1,10 @@
 import { RuntimeContext } from "@components/App"
-import * as HashMap from "@effect/data/HashMap"
-import * as Effect from "@effect/io/Effect"
-import type * as Fiber from "@effect/io/Fiber"
-import * as Runtime from "@effect/io/Runtime"
-import * as Stream from "@effect/stream/Stream"
 import * as React from "react"
 import * as ForceGraph from "react-force-graph"
 
-import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
-import * as FiberDataService from "@core/metrics/services/FiberDataService"
+import * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
+
+import * as FiberDataConsumer from "./FiberDataConsumer"
 
 interface FiberNode {
   id: number
@@ -20,12 +16,6 @@ interface FiberLink {
   target: number
 }
 
-interface FiberUpdater {
-  fds: FiberDataService.FiberDataService
-  id: string
-  updater: Fiber.Fiber<unknown, void>
-}
-
 interface FiberGraph {
   nodes: FiberNode[]
   links: FiberLink[]
@@ -33,80 +23,71 @@ interface FiberGraph {
 
 export const SimpleForceGraph: React.FC<{}> = (props) => {
   const appRt = React.useContext(RuntimeContext)
+  // The state is the data backing the actual graph
   const [graphData, setGraphData] = React.useState<FiberGraph>({
     nodes: [],
     links: [],
   })
-  const dataRef = React.useRef<FiberGraph>(graphData)
+  // We keep a shadow copy of the data in a ref, so we can use it to determine node updates and removals
+  const dataRef = React.useRef<FiberNode[]>([])
 
-  const createGraph = (infos: FiberInfo.FiberInfo[]) => {
-    const nodeMap = HashMap.fromIterable<number, FiberNode>(
-      infos.map((info) => {
-        return [info.id.id, { id: info.id.id, fiber: info }] as [number, FiberNode]
-      })
-    )
+  const updateGraph = () => {
+    console.log(`New data has ${dataRef.current.length} nodes`)
 
-    const nodes = infos.map((info) => {
-      return {
-        id: info.id.id,
-        fiber: info,
-      } as FiberNode
-    })
-
-    const links = infos.reduce((acc, info) => {
-      if (info.parent && HashMap.has(nodeMap, info.parent.id)) {
-        acc.push({ source: info.parent.id, target: info.id.id } as FiberLink)
+    const links = dataRef.current.reduce((acc, info) => {
+      if (
+        info.fiber.parent &&
+        dataRef.current.find((i) => i.id == info.fiber.parent!.id) !== undefined
+      ) {
+        acc.push({
+          source: info.fiber.parent.id,
+          target: info.fiber.id.id,
+        } as FiberLink)
         return acc
       } else {
         return acc
       }
     }, [] as FiberLink[])
 
-    return {
-      nodes,
+    setGraphData({
+      nodes: dataRef.current,
       links,
-    }
+    })
   }
 
-  const updateData = (gd: FiberGraph) => {
-    setGraphData(gd)
-    dataRef.current = gd
-  }
+  const updateReference = (infos: FiberInfo.FiberInfo[]) => {
+    console.log(`1- Received update with ${infos.length} fibers`)
 
-  const createUpdater = () => {
-    const updater = Effect.gen(function* ($) {
-      const fds = yield* $(FiberDataService.FiberDataService)
-      const [id, updates] = yield* $(fds.createSubscription())
+    const newNodes = infos
+      .slice()
+      .filter((info) => dataRef.current.find((i) => i.id == info.id.id) === undefined)
+    console.log(`2 - New nodes has ${newNodes.length} nodes`)
 
-      const updater = yield* $(
-        Effect.forkDaemon(
-          Stream.runForEach(updates, (infos) => {
-            return Effect.attempt(() => {
-              if (infos.length > 0) {
-                const newData = createGraph(infos)
-                updateData(newData)
-              }
-            })
-          })
-        )
+    const oldNodes = dataRef.current.filter(
+      (info) => infos.find((i) => i.id.id == info.id) !== undefined
+    )
+
+    console.log(`3 - Old nodes has ${oldNodes.length} nodes`)
+
+    oldNodes.push(
+      ...newNodes.slice().map(
+        (info) =>
+          ({
+            id: info.id.id,
+            fiber: info,
+          } as FiberNode)
       )
+    )
 
-      return {
-        fds,
-        id,
-        updater,
-      } as FiberUpdater
-    })
-
-    const runner = Runtime.runSync(appRt)(updater)
-
-    Runtime.runPromise(appRt)(runner.fds.removeSubscription(runner.id)).then((_) => {
-      // do nothing
-    })
+    dataRef.current = oldNodes
+    console.log(`New shadow data has ${dataRef.current.length} nodes`)
   }
 
   React.useEffect(() => {
-    createUpdater()
+    FiberDataConsumer.createFiberUpdater(appRt, (infos: FiberInfo.FiberInfo[]) => {
+      updateReference(infos)
+      updateGraph()
+    })
   }, [appRt])
 
   return (
@@ -115,7 +96,6 @@ export const SimpleForceGraph: React.FC<{}> = (props) => {
       nodeColor={(node) => {
         const f = (node as FiberNode).fiber
         const status = Object.keys(f.status).length > 0 ? Object.keys(f.status)[0] : ""
-        console.log(status)
         switch (status) {
           case "Running":
             return "cornflowerblue"
