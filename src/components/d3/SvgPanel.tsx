@@ -25,12 +25,16 @@ export const SVGPanel: React.FC<React.PropsWithChildren<{}>> = (props) => {
       </SVGDimensions.Provider>
     )
 
-    return React.createElement("svg", { width: "100%", height: "100%" }, svgContent)
+    return React.createElement(
+      "svg",
+      { width: dimensions.width, height: dimensions.height },
+      svgContent
+    )
   }, [dimensions, props.children])
 
   // Render the div with the SVG element
   return (
-    <div ref={ref} className="grow flex relative">
+    <div ref={ref} className="grow h-full flex relative">
       {element}
     </div>
   )

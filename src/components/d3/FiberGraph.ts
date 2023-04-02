@@ -1,19 +1,35 @@
+import * as d3 from "d3"
+
 import type * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
-export interface FiberNode {
-  id: number
+export interface FiberNode extends d3.SimulationNodeDatum {
+  radius: number
   fiber: FiberInfo.FiberInfo
 }
 
-export interface FiberLink {
-  source: number
-  target: number
+export interface FiberLink extends d3.SimulationLinkDatum<FiberNode> {
+  source: FiberNode
+  target: FiberNode
 }
 
 export interface FiberGraph {
   nodes: FiberNode[]
   links: FiberLink[]
+}
+
+const createNode = (info: FiberInfo.FiberInfo) => {
+  return {
+    id: info.id.id,
+    radius: 5,
+    fiber: info,
+  } as FiberNode
+}
+
+export const idAccessor = (f: FiberNode) => f.fiber.id.id
+export const stateAccessor = (f: FiberNode) => {
+  const keys = Object.keys(f.fiber.status)
+  return keys.length > 0 ? keys[0] : "Unknown"
 }
 
 const rootId = {
@@ -25,12 +41,12 @@ const rootId = {
 // an artificial root node that will be used as a "parent" for all nodes that do not have a parent
 // that can be calculated from the data
 // This is used only because the result force graphs look nicer
-export const root = {
+export const root = createNode({
   id: rootId,
   status: {
     Root: {},
   },
-} as FiberInfo.FiberInfo
+})
 
 export function updateFiberNodes(
   oldNodes: FiberNode[],
@@ -39,11 +55,11 @@ export function updateFiberNodes(
   // determine which nodes are added to the graph
   const newNodes = infos
     .slice()
-    .filter((info) => oldNodes.find((i) => i.id == info.id.id) === undefined)
+    .filter((info) => oldNodes.find((i) => idAccessor(i) == info.id.id) === undefined)
 
   // Now we need to update nodes that previously existed with the new data
   const updated = oldNodes.reduce((acc, old) => {
-    const updated = infos.find((i) => i.id.id == old.id)
+    const updated = infos.find((i) => i.id.id == idAccessor(old))
     if (updated) {
       old.fiber = updated
       return [...acc, old]
@@ -52,15 +68,7 @@ export function updateFiberNodes(
     }
   }, [] as FiberNode[])
 
-  updated.push(
-    ...newNodes.slice().map(
-      (info) =>
-        ({
-          id: info.id.id,
-          fiber: info,
-        } as FiberNode)
-    )
-  )
+  updated.push(...newNodes.slice().map((info) => createNode(info)))
 
   return updated
 }
@@ -71,27 +79,21 @@ export const updateFiberGraph = (
 ): FiberGraph => {
   const nodes = newNodes.slice()
 
-  nodes.push({
-    id: rootId.id,
-    fiber: root,
-  } as FiberNode)
+  nodes.push(root)
 
   const links = nodes.reduce((acc, info) => {
     const p = info.fiber.parent
     const source = (() => {
       if (p) {
-        if (nodes.find((i) => i.id == p.id) !== undefined) {
-          return p.id
-        } else {
-          return rootId.id
-        }
+        const mbNode = nodes.find((i) => idAccessor(i) == p.id)
+        return mbNode ? mbNode : root
       } else {
-        return rootId.id
+        return root
       }
     })()
     acc.push({
       source,
-      target: info.id,
+      target: info,
     } as FiberLink)
     return acc
   }, [] as FiberLink[])
