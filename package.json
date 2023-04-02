@@ -15,7 +15,7 @@
     "test": "vitest --run --coverage",
     "test:watch": "vitest --watch",
     "test:ui": "vitest --watch --ui",
-    "build": "yarn clean && yarn compile && yarn test:compile && yarn test && yarn dist"
+    "build": "yarn clean && yarn lint && yarn compile && yarn test:compile && yarn test && yarn dist"
   },
   "dependencies": {
     "@effect/data": "^0.7.4",

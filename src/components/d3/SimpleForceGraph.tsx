@@ -2,7 +2,7 @@ import { RuntimeContext } from "@components/App"
 import * as React from "react"
 import * as ForceGraph from "react-force-graph"
 
-import * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
+import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
 import * as FiberDataConsumer from "./FiberDataConsumer"
 
@@ -35,12 +35,10 @@ export const SimpleForceGraph: React.FC<{}> = (props) => {
     const nodes = dataRef.current.slice()
 
     const links = nodes.reduce((acc, info) => {
-      if (
-        info.fiber.parent &&
-        dataRef.current.find((i) => i.id == info.fiber.parent!.id) !== undefined
-      ) {
+      const p = info.fiber.parent
+      if (p && dataRef.current.find((i) => i.id == p.id) !== undefined) {
         acc.push({
-          source: info.fiber.parent.id,
+          source: p.id,
           target: info.fiber.id.id,
         } as FiberLink)
         return acc

@@ -3,7 +3,7 @@ import type * as Fiber from "@effect/io/Fiber"
 import * as Runtime from "@effect/io/Runtime"
 import * as Stream from "@effect/stream/Stream"
 
-import * as AppLayer from "@core/AppLayer"
+import type * as AppLayer from "@core/AppLayer"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 import * as FiberDataService from "@core/metrics/services/FiberDataService"
 
