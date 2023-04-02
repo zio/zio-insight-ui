@@ -7,3 +7,5 @@ export const fiberIdSchema = Z.object({
   startTimeMillis: Z.number(),
   location: locationSchema,
 })
+
+export interface FiberId extends Z.TypeOf<typeof fiberIdSchema> {}

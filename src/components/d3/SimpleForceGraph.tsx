@@ -2,6 +2,7 @@ import { RuntimeContext } from "@components/App"
 import * as React from "react"
 import * as ForceGraph from "react-force-graph"
 
+import type * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
 import * as FiberDataConsumer from "./FiberDataConsumer"
@@ -21,6 +22,19 @@ interface FiberGraph {
   links: FiberLink[]
 }
 
+const rootId = {
+  id: -1,
+  startTimeMillis: 0,
+  location: ["", "", 0],
+} as FiberId.FiberId
+
+const root = {
+  id: rootId,
+  status: {
+    Root: {},
+  },
+} as FiberInfo.FiberInfo
+
 export const SimpleForceGraph: React.FC<{}> = (props) => {
   const appRt = React.useContext(RuntimeContext)
   // The state is the data backing the actual graph
@@ -33,18 +47,29 @@ export const SimpleForceGraph: React.FC<{}> = (props) => {
 
   const updateGraph = () => {
     const nodes = dataRef.current.slice()
+    nodes.push({
+      id: rootId.id,
+      fiber: root,
+    } as FiberNode)
 
     const links = nodes.reduce((acc, info) => {
       const p = info.fiber.parent
-      if (p && dataRef.current.find((i) => i.id == p.id) !== undefined) {
-        acc.push({
-          source: p.id,
-          target: info.fiber.id.id,
-        } as FiberLink)
-        return acc
-      } else {
-        return acc
-      }
+      const source = (() => {
+        if (p) {
+          if (nodes.find((i) => i.id == p.id) !== undefined) {
+            return p.id
+          } else {
+            return rootId.id
+          }
+        } else {
+          return rootId.id
+        }
+      })()
+      acc.push({
+        source,
+        target: info.id,
+      } as FiberLink)
+      return acc
     }, [] as FiberLink[])
 
     setGraphData({
@@ -58,9 +83,15 @@ export const SimpleForceGraph: React.FC<{}> = (props) => {
       .slice()
       .filter((info) => dataRef.current.find((i) => i.id == info.id.id) === undefined)
 
-    const oldNodes = dataRef.current.filter(
-      (info) => infos.find((i) => i.id.id == info.id) !== undefined
-    )
+    const oldNodes = dataRef.current.reduce((acc, old) => {
+      const updated = infos.find((i) => i.id.id == old.id)
+      if (updated) {
+        old.fiber = updated
+        return [...acc, old]
+      } else {
+        return acc
+      }
+    }, [] as FiberNode[])
 
     oldNodes.push(
       ...newNodes.slice().map(
