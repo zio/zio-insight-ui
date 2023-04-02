@@ -49,24 +49,25 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
         d3
           .forceLink<FiberGraph.FiberNode, FiberGraph.FiberLink>()
           .id(idAccessor)
-          //.distance(30)
+          .distance(30)
           .strength(0.6)
       )
       .force(
         "collide",
         d3
           .forceCollide()
-          .strength(0.2)
+          .strength(0.3)
           .radius(
             (f: d3.SimulationNodeDatum) => radiusAccessor(f as FiberGraph.FiberNode) * 3
           )
       )
-      .force("charge", d3.forceManyBody().strength(-3).distanceMin(15))
-      .force("center", d3.forceCenter(w / 2, h / 2).strength(0.3))
-      .force("x", d3.forceX(w / 2).strength(0.003))
-      .force("y", d3.forceY(h / 2).strength(0.003))
-      .alphaTarget(0.002)
-      .on("tick", ticked)
+      .force("charge", d3.forceManyBody().strength(-20).distanceMin(30))
+      .force("center", d3.forceCenter(w / 2, h / 2).strength(0.03))
+      .force("x", d3.forceX(w / 2).strength(0.03))
+      .force("y", d3.forceY(h / 2).strength(0.03))
+      .alphaTarget(0.0015)
+      .alphaDecay(0.005)
+      .stop()
   }
 
   const group = () => {
@@ -109,9 +110,14 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
       dataRef.current = FiberGraph.updateFiberNodes(dataRef.current, infos)
       const newGraph = FiberGraph.updateFiberGraph(graphData, dataRef.current)
       if (simRef.current) {
-        simRef.current.nodes(newGraph.nodes)
+        simRef.current.nodes(newGraph.nodes).alphaTarget(1).restart()
         // @ts-ignore
         simRef.current.force("link").links(newGraph.links)
+        for (var i = 0; i < 200; i++) {
+          simRef.current.tick()
+          if (i % 10 == 0) ticked()
+        }
+        ticked()
       }
       setGraphData(newGraph)
     })
