@@ -309,25 +309,25 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@effect/data@^0.10.0", "@effect/data@~0.10.2", "@effect/data@~0.7.4":
+"@effect/data@^0.10.0", "@effect/data@~0.10.2":
   version "0.10.3"
   resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.10.3.tgz#31beb253785c1c5044fdf55f96cf71f454445754"
   integrity sha512-D3T43FOiCDeYYQCfjR4ra1apgL78GS4T85wMMZ4A2UZ3SmKWeM0CP66jnysUoRW4f9Q6xnk4BfbU8eyUQo8oZw==
 
-"@effect/io@^0.17.0", "@effect/io@~0.15.1":
+"@effect/io@^0.17.0", "@effect/io@~0.17.0":
   version "0.17.0"
   resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.17.0.tgz#1ebf23d621723f7bef0134469c56b2bde6669d9a"
   integrity sha512-dJX3jaRksA3BXt3pmvjyBVvWsRJ7UVuw69BglWsDATn+7wPK+jTQSpZvtPehUknGm3aow095KsxCC+ruQ/7NnQ==
   dependencies:
     "@effect/data" "~0.10.2"
 
-"@effect/stream@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@effect/stream/-/stream-0.14.0.tgz#9dad8d3415faf8896ab11435718194d75d6cbb93"
-  integrity sha512-wr6HhIN1q3L8QEj/+5ocVGoS615vzmGIQRPCI05mW6OOYNv9ORyF/NyM91NZ67C07KixC1SnP6M8HXCBBJ0QJw==
+"@effect/stream@^0.16.0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@effect/stream/-/stream-0.16.0.tgz#c4787aaf7857ea6184442eb911497b0182435096"
+  integrity sha512-rXpOuDqagiryke/hNOMT/oCne6j54DtXBlNMWwXO9f5M1mtBl4dl+dXKTu+lNuX3u9CZFGJUTZnALI4JGcUSyQ==
   dependencies:
-    "@effect/data" "~0.7.4"
-    "@effect/io" "~0.15.1"
+    "@effect/data" "~0.10.2"
+    "@effect/io" "~0.17.0"
 
 "@emotion/babel-plugin@^11.10.6":
   version "11.10.6"
@@ -2499,7 +2499,7 @@ debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3
   dependencies:
     ms "2.1.2"
 
-"debug@github:ngokevin/debug#noTimestamp":
+debug@ngokevin/debug#noTimestamp:
   version "2.2.0"
   resolved "https://codeload.github.com/ngokevin/debug/tar.gz/ef5f8e66d49ce8bc64c6f282c15f8b7164409e3a"
 
@@ -5877,7 +5877,7 @@ thenify-all@^1.0.0:
   dependencies:
     any-promise "^1.0.0"
 
-"three-bmfont-text@github:dmarcos/three-bmfont-text#21d017046216e318362c48abd1a48bddfb6e0733":
+three-bmfont-text@dmarcos/three-bmfont-text#21d017046216e318362c48abd1a48bddfb6e0733:
   version "2.4.0"
   resolved "https://codeload.github.com/dmarcos/three-bmfont-text/tar.gz/21d017046216e318362c48abd1a48bddfb6e0733"
   dependencies:
