@@ -4,12 +4,11 @@ import { Scrollable } from "@components/panel/Scrollable"
 import * as HashSet from "@effect/data/HashSet"
 import * as React from "react"
 
-import * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
+import type * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
 import { D3ForceGraph } from "./D3ForceGraph"
 import * as FiberDataConsumer from "./FiberDataConsumer"
-import { SVGPanel } from "./SvgPanel"
 
 export const FiberNavigator: React.FC<{}> = (props) => {
   const appRt = React.useContext(RuntimeContext)

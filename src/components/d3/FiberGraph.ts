@@ -1,4 +1,4 @@
-import * as d3 from "d3"
+import type * as d3 from "d3"
 
 import type * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"

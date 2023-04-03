@@ -1,7 +1,7 @@
 import * as d3 from "d3"
 import * as React from "react"
 
-import * as FiberGraph from "./FiberGraph"
+import type * as FiberGraph from "./FiberGraph"
 
 export interface CircleProps {
   node: FiberGraph.FiberNode

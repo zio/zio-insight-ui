@@ -1,4 +1,6 @@
 import { RuntimeContext } from "@components/App"
+import * as Effect from "@effect/io/Effect"
+import * as Runtime from "@effect/io/Runtime"
 import * as d3 from "d3"
 import * as React from "react"
 
@@ -70,40 +72,50 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
       .stop()
   }
 
-  const group = () => {
+  const group = Effect.attempt(() => {
     const sel = d3.select("#FiberGraph")
     return sel
-  }
+  })
 
-  const node = () => {
-    const nodes = group().selectAll<SVGCircleElement, FiberGraph.FiberNode>("circle")
+  const node = Effect.gen(function* ($) {
+    const grp = yield* $(group)
 
-    return nodes
+    return grp
+      .selectAll<SVGCircleElement, FiberGraph.FiberNode>("circle")
       .attr("r", (d) => {
         return radiusAccessor(d)
       })
       .attr("stroke", "cyan")
       .attr("stroke-width", 1)
       .attr("fill", (d) => colorScale(FiberGraph.stateAccessor(d)))
-  }
+  })
 
-  const link = () =>
-    group()
+  const link = Effect.gen(function* ($) {
+    const grp = yield* $(group)
+
+    return grp
       .selectAll<SVGLineElement, FiberGraph.FiberLink>("line")
       .attr("stroke", "white")
       .attr("stroke-width", 1)
+  })
 
-  function ticked() {
-    node()
-      .attr("cx", (d) => xAccessor(d))
-      .attr("cy", (d) => yAccessor(d))
+  const ticked = Effect.gen(function* ($) {
+    const circles = yield* $(node)
+    circles.attr("cx", (d) => xAccessor(d)).attr("cy", (d) => yAccessor(d))
 
-    link()
+    const lines = yield* $(link)
+    lines
       .attr("x1", (d) => xAccessor(d.source))
       .attr("y1", (d) => yAccessor(d.source))
       .attr("x2", (d) => xAccessor(d.target))
       .attr("y2", (d) => yAccessor(d.target))
-  }
+  })
+
+  const singleTick = Effect.attempt(() => {
+    if (simRef.current) {
+      simRef.current.tick()
+    }
+  })
 
   React.useEffect(() => {
     FiberDataConsumer.createFiberUpdater(appRt, (infos: FiberInfo.FiberInfo[]) => {
@@ -113,11 +125,7 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
         simRef.current.nodes(newGraph.nodes).alphaTarget(1).restart()
         // @ts-ignore
         simRef.current.force("link").links(newGraph.links)
-        for (var i = 0; i < 200; i++) {
-          simRef.current.tick()
-          if (i % 10 == 0) ticked()
-        }
-        ticked()
+        Runtime.runFork(appRt)(Effect.zipRight(ticked, Effect.repeatN(200)(singleTick)))
       }
       setGraphData(newGraph)
     })
