@@ -1,0 +1,42 @@
+{
+  "id": {
+    "id": 89,
+    "startTimeMillis": 1680435869782,
+    "location": [
+      "sample.SampleApp.program",
+      "SampleApp.scala",
+      73
+    ]
+  },
+  "parent": {
+    "id": 4,
+    "startTimeMillis": 1680435868914,
+    "location": [
+      "",
+      "",
+      0
+    ]
+  },
+  "status": {
+    "Suspended": {
+      "blockingOn": [],
+      "currentLocation": [
+        "sample.FiberTree.run",
+        "FiberTree.scala",
+        12
+      ]
+    }
+  },
+  "stacktrace": [
+    [
+      "sample.FiberTree.run",
+      "FiberTree.scala",
+      12
+    ],
+    [
+      "sample.SampleApp.program",
+      "SampleApp.scala",
+      73
+    ]
+  ]
+}

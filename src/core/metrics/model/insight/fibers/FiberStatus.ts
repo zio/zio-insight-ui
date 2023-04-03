@@ -28,7 +28,12 @@ const runningSchema = Z.object({
   }),
 })
 
+const rootSchema = Z.object({
+  Root: Z.object({}),
+})
+
 export const statusSchema = successSchema
   .or(erroredSchema)
   .or(suspendedSchema)
   .or(runningSchema)
+  .or(rootSchema)
