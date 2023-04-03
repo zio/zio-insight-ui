@@ -1,3 +1,5 @@
+import { CssBaseline } from "@mui/material"
+import * as MUIStyles from "@mui/material/styles"
 import * as React from "react"
 import { IconContext } from "react-icons/lib"
 
@@ -10,16 +12,34 @@ import { AppRouter } from "./AppRouter"
 const runtime = AL.unsafeMakeRuntime(AL.appLayerStatic).runtime
 export const RuntimeContext = React.createContext(runtime)
 
+const theme = MUIStyles.createTheme({
+  palette: {
+    primary: {
+      main: "#B10101",
+    },
+    secondary: {
+      main: "#262830",
+    },
+    background: {
+      default: "#555",
+      paper: "#DDD",
+    },
+  },
+})
+
 export function App() {
   return (
     <RuntimeContext.Provider value={runtime}>
-      <IconContext.Provider
-        value={{
-          className: "text-neutral-content text-3xl mx-2",
-        }}
-      >
-        <AppRouter />
-      </IconContext.Provider>
+      <CssBaseline />
+      <MUIStyles.ThemeProvider theme={theme}>
+        <IconContext.Provider
+          value={{
+            className: "text-neutral-content text-3xl mx-2",
+          }}
+        >
+          <AppRouter />
+        </IconContext.Provider>
+      </MUIStyles.ThemeProvider>
     </RuntimeContext.Provider>
   )
 }

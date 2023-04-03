@@ -1,5 +1,3 @@
-import "@styles/tailwind.css"
-
 import { App } from "@components/App"
 import React from "react"
 import ReactDOM from "react-dom/client"
