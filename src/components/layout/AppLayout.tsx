@@ -1,7 +1,18 @@
+import * as MUICore from "@mui/material"
+import * as MUIStyles from "@mui/material/styles"
 import * as React from "react"
 
+import { NavBar } from "../navbar/NavBar"
+import { SideBar } from "../sidebar/SideBar"
+
 export function AppLayout() {
-  return <h1>Hello Andreas</h1>
+  return (
+    <MUICore.Box sx={{ flexGrow: 1 }}>
+      <MUICore.AppBar position="static">
+        <MUICore.Toolbar />
+      </MUICore.AppBar>
+    </MUICore.Box>
+  )
 }
 // export function AppLayout() {
 //   return (

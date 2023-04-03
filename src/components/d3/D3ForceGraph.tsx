@@ -1,4 +1,4 @@
-import { RuntimeContext } from "@components/App"
+import { RuntimeContext } from "@components/app/App"
 import * as Effect from "@effect/io/Effect"
 import * as Runtime from "@effect/io/Runtime"
 import * as d3 from "d3"

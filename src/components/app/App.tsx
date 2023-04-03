@@ -1,11 +1,11 @@
-import { CssBaseline } from "@mui/material"
+import { CssBaseline, StyledEngineProvider } from "@mui/material"
 import * as MUIStyles from "@mui/material/styles"
 import * as React from "react"
 import { IconContext } from "react-icons/lib"
 
 import * as AL from "@core/AppLayer"
 
-import { AppRouter } from "./AppRouter"
+import { AppRouter } from "../routes/AppRouter"
 
 // To connect to a real ZIO application we need to use
 // AL.appLayerLive
@@ -37,7 +37,9 @@ export function App() {
             className: "text-neutral-content text-3xl mx-2",
           }}
         >
-          <AppRouter />
+          <StyledEngineProvider injectFirst>
+            <AppRouter />
+          </StyledEngineProvider>
         </IconContext.Provider>
       </MUIStyles.ThemeProvider>
     </RuntimeContext.Provider>

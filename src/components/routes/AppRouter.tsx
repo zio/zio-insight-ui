@@ -9,7 +9,7 @@ import { Settings } from "@pages/Settings"
 import * as React from "react"
 import { Route, Routes } from "react-router-dom"
 
-import { AppLayout } from "./AppLayout"
+import { AppLayout } from "../layout/AppLayout"
 
 export function AppRouter() {
   return (

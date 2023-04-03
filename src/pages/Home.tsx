@@ -1,4 +1,4 @@
-import { Dummy } from "@components/Dummy"
+import { Dummy } from "@components/dummy/Dummy"
 import * as React from "react"
 
 export function Home() {
