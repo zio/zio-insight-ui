@@ -72,7 +72,7 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
       .stop()
   }
 
-  const group = Effect.attempt(() => {
+  const group = Effect.try(() => {
     const sel = d3.select("#FiberGraph")
     return sel
   })
@@ -111,7 +111,7 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
       .attr("y2", (d) => yAccessor(d.target))
   })
 
-  const singleTick = Effect.attempt(() => {
+  const singleTick = Effect.try(() => {
     if (simRef.current) {
       simRef.current.tick()
     }

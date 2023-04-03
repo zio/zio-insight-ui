@@ -93,7 +93,7 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
       const updater = yield* $(
         Effect.forkDaemon(
           Stream.runForEach((e: GraphDataService.GraphData) =>
-            Effect.attempt(() => updateState(e))
+            Effect.try(() => updateState(e))
           )(updates)
         )
       )

@@ -24,7 +24,7 @@ export const createFiberUpdater = (
     const updater = yield* $(
       Effect.forkDaemon(
         Stream.runForEach(updates, (infos) => {
-          return Effect.attempt(() => {
+          return Effect.try(() => {
             onData(infos)
           })
         })

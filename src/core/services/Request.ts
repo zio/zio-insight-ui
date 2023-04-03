@@ -1,4 +1,4 @@
-import * as T from "@effect/io/Effect"
+import * as Effect from "@effect/io/Effect"
 
 /**
  * An error indicating a fetch from an URL failed.
@@ -18,18 +18,18 @@ export class InvalidJsonResponse {
 }
 
 export const request = (input: RequestInfo, init?: RequestInit | undefined) =>
-  T.asyncInterrupt<never, FetchError, Response>((resume) => {
+  Effect.asyncInterrupt<never, FetchError, Response>((resume) => {
     const controller = new AbortController()
 
     fetch(input, { ...(init ?? {}), signal: controller.signal })
       .then((response) => {
-        return resume(T.succeed(response))
+        return resume(Effect.succeed(response))
       })
       .catch((error) => {
-        return resume(T.fail(new FetchError(error)))
+        return resume(Effect.fail(new FetchError(error)))
       })
 
-    return T.sync(() => {
+    return Effect.sync(() => {
       controller.abort()
     })
   })
@@ -40,7 +40,7 @@ export const request = (input: RequestInfo, init?: RequestInit | undefined) =>
  * turning the response body into a JSON object or fails with an error
  */
 export const jsonFromResponse = (response: Response) =>
-  T.attemptCatchPromise(
+  Effect.tryCatchPromise(
     () => response.json(),
     (error) => new InvalidJsonResponse(error)
   )
