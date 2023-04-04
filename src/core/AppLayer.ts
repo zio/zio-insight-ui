@@ -16,7 +16,7 @@ import * as Insight from "./metrics/services/InsightService"
 export type AppLayer =
   | Insight.InsightService
   | MM.MetricsManager
-  | IdSvc.IdGenerator
+  | IdGenerator.IdGenerator
   | GDM.GraphDataManager
   | FDSvc.FiberDataService
 
