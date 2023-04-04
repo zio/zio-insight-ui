@@ -14,10 +14,10 @@ export const RuntimeContext = React.createContext(runtime)
 const theme = MUIStyles.createTheme({
   palette: {
     primary: {
-      main: "#B10101",
+      main: "#404350",
     },
     secondary: {
-      main: "#262830",
+      main: "#007700",
     },
     background: {
       default: "#555",

@@ -3,7 +3,7 @@ import * as React from "react"
 
 export function AppLayout() {
   return (
-    <NavBar.NavBar
+    <NavBar.StyledNavBar
       onMenuClick={() => {
         /* Do Nothing */
       }}

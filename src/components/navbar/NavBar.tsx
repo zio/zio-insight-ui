@@ -1,36 +1,49 @@
-import * as MUI from "@mui/material"
+import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material"
+import { styled } from "@mui/system"
 import Logo from "@static/ZIO.png"
 import * as React from "react"
 import * as FaIcons from "react-icons/fa"
+import * as MdIcons from "react-icons/md"
 
 interface NavBarProps {
   onMenuClick: () => void
 }
 
-export const NavBar: React.FC<NavBarProps> = () => {
-  const ghButton = (
-    <span className="flex-none btn btn-ghost">
-      <FaIcons.FaGithub />
-    </span>
-  )
+const StyledTitle = styled(Typography)(({ theme }) => ({
+  flexGrow: 1,
+}))
 
-  const logo = (
-    <>
+export const NavBar: React.FC<NavBarProps> = (props) => (
+  <AppBar position="fixed">
+    <Toolbar>
+      <IconButton
+        edge="start"
+        color="inherit"
+        aria-label="menu"
+        onClick={props.onMenuClick}
+      >
+        <MdIcons.MdMenu />
+      </IconButton>
       <img src={Logo} alt="" />
-      <li className="flex-none">
-        <span>Insight</span>
-      </li>
-    </>
-  )
+      <StyledTitle>Insight</StyledTitle>
+      <Box>
+        <IconButton
+          edge="end"
+          color="inherit"
+          aria-label="GitHub Repository"
+          href="https://github.com/zio/zio-insight-ui"
+          target="_blank"
+        >
+          <FaIcons.FaGithub />
+        </IconButton>
+      </Box>
+    </Toolbar>
+  </AppBar>
+)
 
-  return (
-    <MUI.AppBar position="fixed">
-      <MUI.Toolbar></MUI.Toolbar>
-    </MUI.AppBar>
-    // <div className="flex flex-row flex-none navbar bg-neutral w-full text-neutral-content text-2xl border-b-2">
-    //   {logo}
-    //   <span className="flex-grow" />
-    //   {ghButton}
-    // </div>
-  )
-}
+export const StyledNavBar = styled(NavBar)(({ theme }) => ({
+  "& .navbar-title": {
+    color: "green",
+    flexGrow: 1,
+  },
+}))
