@@ -6,26 +6,33 @@ import { Outlet } from "react-router-dom"
 
 export function AppLayout() {
   return (
-    <>
-      <NavBar.StyledNavBar
-        onMenuClick={() => {
-          /* Do Nothing */
-        }}
-      />
+    <ClientContainer>
+      <SideBar.SideBar />
       <RootContainer>
-        <SideBar.SideBar />
+        <NavBar.NavBar
+          onMenuClick={() => {
+            /* Do Nothing */
+          }}
+        />
         <Outlet />
       </RootContainer>
-    </>
+    </ClientContainer>
   )
 }
 
-const RootContainer = styled("div")(({ theme }) => ({
+const ClientContainer = styled("div")(({ theme }) => ({
   width: "100vw",
+  height: "100vh",
+  display: "flex relative",
+}))
+
+const RootContainer = styled("div")(({ theme }) => ({
+  width: "calc(100vw-240px)",
   height: "calc(100vh - 64px)",
   top: "64px",
+  left: "240px",
   position: "absolute",
   backgroundColor: theme.palette.background.default,
-  display: "flex",
+  display: "flex relative",
   flexDirection: "row",
 }))

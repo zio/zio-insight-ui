@@ -3,9 +3,6 @@ import { styled } from "@mui/system"
 import Logo from "@static/ZIO.png"
 import * as React from "react"
 import * as FaIcons from "react-icons/fa"
-import * as MdIcons from "react-icons/md"
-
-import { useDrawerOpen } from "./useDrawerOpen"
 
 interface NavBarProps {
   onMenuClick: () => void
@@ -16,24 +13,10 @@ const StyledTitle = styled(Typography)(({ theme }) => ({
 }))
 
 export const NavBar: React.FC<NavBarProps> = (props) => {
-  const drawer = useDrawerOpen()
-
   return (
     <>
       <AppBar position="fixed">
         <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            onClick={props.onMenuClick}
-          >
-            {drawer.drawerOpenState ? (
-              <FaIcons.FaAngleLeft onClick={drawer.toggleDrawer} />
-            ) : (
-              <FaIcons.FaAngleRight onClick={drawer.toggleDrawer} />
-            )}
-          </IconButton>
           <img src={Logo} alt="" />
           <StyledTitle>Insight</StyledTitle>
           <Box>
@@ -52,10 +35,3 @@ export const NavBar: React.FC<NavBarProps> = (props) => {
     </>
   )
 }
-
-export const StyledNavBar = styled(NavBar)(({ theme }) => ({
-  "& .navbar-title": {
-    color: "green",
-    flexGrow: 1,
-  },
-}))
