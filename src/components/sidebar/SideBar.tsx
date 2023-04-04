@@ -1,55 +1,7 @@
+import { routes } from "@components/routes/AppRoutes"
 import * as React from "react"
-import * as AiIcons from "react-icons/ai"
-import * as BsIcons from "react-icons/bs"
 import * as FaIcons from "react-icons/fa"
-import * as GiIcons from "react-icons/gi"
-import * as MdIcons from "react-icons/md"
-import * as VscIcons from "react-icons/vsc"
 import { NavLink } from "react-router-dom"
-
-interface NavEntry {
-  title: string
-  path: string
-  icon: React.ReactElement
-}
-
-const entries: NavEntry[] = [
-  {
-    title: "Dashboard",
-    path: "/",
-    icon: <VscIcons.VscGraphLine />,
-  },
-  {
-    title: "Metrics",
-    path: "/metrics",
-    icon: <VscIcons.VscGraphLine />,
-  },
-  {
-    title: "Services",
-    path: "/services",
-    icon: <AiIcons.AiOutlinePartition />,
-  },
-  {
-    title: "Profiling",
-    path: "/profiling",
-    icon: <BsIcons.BsSpeedometer2 />,
-  },
-  {
-    title: "Fibers",
-    path: "/fibers",
-    icon: <GiIcons.GiFamilyTree />,
-  },
-  {
-    title: "Help",
-    path: "/help",
-    icon: <MdIcons.MdOutlineLiveHelp />,
-  },
-  {
-    title: "Settings",
-    path: "/settings",
-    icon: <VscIcons.VscSettings />,
-  },
-]
 
 export const SideBar: React.FC<{}> = (props) => {
   const [shown, setShown] = React.useState<boolean>(true)
@@ -75,7 +27,7 @@ export const SideBar: React.FC<{}> = (props) => {
     >
       <div className="h-[70px] border-b-2 relative">{collapseBtn}</div>
       <div className="h-full flex flex-col">
-        {entries.map((e) => (
+        {routes.map((e) => (
           <NavLink
             key={e.path}
             data-tip={e.title}

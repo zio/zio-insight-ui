@@ -1,11 +1,10 @@
+import { AppRouter } from "@components/routes/AppRouter"
 import { CssBaseline, StyledEngineProvider } from "@mui/material"
 import * as MUIStyles from "@mui/material/styles"
 import * as React from "react"
 import { IconContext } from "react-icons/lib"
 
 import * as AL from "@core/AppLayer"
-
-import { AppRouter } from "../routes/AppRouter"
 
 // To connect to a real ZIO application we need to use
 // AL.appLayerLive
