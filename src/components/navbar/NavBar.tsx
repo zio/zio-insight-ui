@@ -28,7 +28,11 @@ export const NavBar: React.FC<NavBarProps> = (props) => {
             aria-label="menu"
             onClick={props.onMenuClick}
           >
-            <MdIcons.MdMenu />
+            {drawer.drawerOpenState ? (
+              <FaIcons.FaAngleLeft onClick={drawer.toggleDrawer} />
+            ) : (
+              <FaIcons.FaAngleRight onClick={drawer.toggleDrawer} />
+            )}
           </IconButton>
           <img src={Logo} alt="" />
           <StyledTitle>Insight</StyledTitle>

@@ -17,10 +17,10 @@ const theme = MUIStyles.createTheme({
       main: "#404350",
     },
     secondary: {
-      main: "#007700",
+      main: "#E74100B2",
     },
     background: {
-      default: "#555",
+      default: "#404350",
       paper: "#DDD",
     },
   },

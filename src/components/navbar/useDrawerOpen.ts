@@ -1,13 +1,9 @@
 import * as React from "react"
-import { useLocalStorage } from "usehooks-ts"
 
 export const useDrawerOpen = () => {
-  const [drawerOpenState, setDrawerOpenState] = useLocalStorage("drawerOpen", true)
+  const [drawerOpenState, setDrawerOpenState] = React.useState<boolean>(true)
 
-  const toggleDrawer = React.useCallback(
-    () => setDrawerOpenState(!drawerOpenState),
-    [setDrawerOpenState]
-  )
+  const toggleDrawer = () => setDrawerOpenState(!drawerOpenState)
 
   return {
     drawerOpenState,
