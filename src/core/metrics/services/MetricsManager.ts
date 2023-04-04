@@ -11,10 +11,10 @@ import * as Layer from "@effect/io/Layer"
 import * as Ref from "@effect/io/Ref"
 import * as Schedule from "@effect/io/Schedule"
 import * as Stream from "@effect/stream/Stream"
+import * as IdGenerator from "@services/idgenerator/IdGenerator"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import type { MetricState } from "@core/metrics/model/zio/metrics/MetricState"
-import * as IdGenerator from "@core/services/IdGenerator"
 import * as Utils from "@core/utils"
 
 import * as InsightService from "./InsightService"

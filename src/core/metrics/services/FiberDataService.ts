@@ -8,9 +8,9 @@ import * as Layer from "@effect/io/Layer"
 import * as Ref from "@effect/io/Ref"
 import * as Schedule from "@effect/io/Schedule"
 import * as Stream from "@effect/stream/Stream"
+import * as IdGen from "@services/idgenerator/IdGenerator"
 
 import type * as F from "@core/metrics/model/insight/fibers/FiberInfo"
-import * as IdGen from "@core/services/IdGenerator"
 import * as Utils from "@core/utils"
 
 import * as Insight from "./InsightService"

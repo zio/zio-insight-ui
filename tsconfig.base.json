@@ -33,6 +33,7 @@
       "@core/*": ["src/core/*"],
       "@components/*": ["src/components/*"],
       "@pages/*": ["src/pages/*"],
+      "@services/*": ["src/services/*"],
       "@static/*": ["src/static/*"],
       "@styles/*": ["src/styles/*"],
     },
