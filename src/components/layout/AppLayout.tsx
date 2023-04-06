@@ -2,7 +2,6 @@ import * as NavBar from "@components/navbar/NavBar"
 import * as SideBar from "@components/sidebar/SideBar"
 import { styled } from "@mui/system"
 import * as React from "react"
-import { Outlet } from "react-router-dom"
 
 export function AppLayout() {
   return (
@@ -14,7 +13,6 @@ export function AppLayout() {
             /* Do Nothing */
           }}
         />
-        <Outlet />
       </RootContainer>
     </ClientContainer>
   )

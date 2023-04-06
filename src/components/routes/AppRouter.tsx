@@ -11,7 +11,7 @@ export function AppRouter() {
       <Route path="/" element={<AppLayout />}>
         <Route index element={<Pages.Dashboard />} />
         {routes.map((route) => {
-          return <Route path={route.path} element={route.component} />
+          return <Route key={route.title} path={route.path} element={route.component} />
         })}
         <Route path="*" element={<Pages.NotFound />} />
       </Route>
