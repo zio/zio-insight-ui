@@ -10,66 +10,87 @@ import {
   ListItemIcon,
   ListItemText,
   Mixins,
-  ListItemProps,
+  DrawerProps,
+  useTheme,
 } from "@mui/material"
 import { styled } from "@mui/system"
 import * as React from "react"
 import * as FaIcons from "react-icons/fa"
-import { NavLink } from "react-router-dom"
+import { NavLink, NavLinkProps } from "react-router-dom"
 
-interface LinkProps extends ListItemProps {
-  isActive: boolean
+interface SideBarProps extends DrawerProps {
+  drawerWidth: number
 }
 
-const StyledDrawer = styled(Drawer)(({ theme }) => ({
-  width: "240px",
+const StyledDrawer = styled(Drawer, {
+  shouldForwardProp: (prop) => prop != "drawerWidth",
+})<SideBarProps>(({ theme, drawerWidth }) => ({
+  ".MuiPaper-root": {
+    backgroundColor: theme.palette.primary.dark,
+  },
+  width: `${drawerWidth}px`,
 }))
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
+  backgroundColor: theme.palette.primary.dark,
   // necessary for content to be below app bar
   ...(theme.mixins as Mixins).toolbar,
 }))
 
-const StyledItem = styled(
-  ListItem,
+const StyledLink = styled(
+  NavLink,
   {}
-)<LinkProps>(({ theme, isActive }) => ({
+)<NavLinkProps>(({ theme }) => ({
   ".MuiTypography-root": {
-    color: "white",
-    textDecoration: "none",
+    color: theme.palette.primary.contrastText,
     fontSize: "1.2rem",
     fontWeight: "bold",
   },
-  backgroundColor: isActive ? theme.palette.secondary.main : "inherit",
-  color: "inherit",
+  textDecoration: "none",
   padding: 0,
 }))
 
 export const SideBar: React.FC<{}> = (props) => {
   const drawer = useDrawerOpen()
+  const theme = useTheme()
 
   return (
-    <StyledDrawer variant="permanent">
+    <StyledDrawer drawerWidth={drawer.drawerWidth()} variant="permanent">
       <DrawerHeader>
         <IconButton onClick={drawer.toggleDrawer}>
           {drawer.drawerOpenState ? <FaIcons.FaAngleLeft /> : <FaIcons.FaAngleRight />}
         </IconButton>
       </DrawerHeader>
-      <Divider />
+      <Divider
+        sx={{
+          backgroundColor: theme.palette.primary.contrastText,
+        }}
+      />
       <List
         sx={{
           width: `${drawer.drawerWidth()}px`,
         }}
       >
         {routes.map((route) => (
-          <NavLink key={route.path} data-tip={route.title} to={route.path}>
+          <StyledLink key={route.path} data-tip={route.title} to={route.path}>
             {({ isActive }) => {
               return (
-                <StyledItem key={route.title} isActive={isActive}>
-                  <ListItemButton>
+                <ListItem
+                  key={route.title}
+                  sx={{
+                    backgroundColor: isActive
+                      ? theme.palette.secondary.dark
+                      : theme.palette.primary.dark,
+                  }}
+                >
+                  <ListItemButton
+                    sx={{
+                      padding: 0,
+                    }}
+                  >
                     <ListItemIcon>{route.icon}</ListItemIcon>
                     {drawer.drawerOpenState ? (
                       <ListItemText primary={route.title} />
@@ -77,10 +98,10 @@ export const SideBar: React.FC<{}> = (props) => {
                       <></>
                     )}
                   </ListItemButton>
-                </StyledItem>
+                </ListItem>
               )
             }}
-          </NavLink>
+          </StyledLink>
         ))}
       </List>
     </StyledDrawer>

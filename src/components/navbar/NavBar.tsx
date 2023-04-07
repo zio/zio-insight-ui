@@ -57,7 +57,6 @@ export const StyledNavBar: React.FC<AppBarProps> = (props) => {
       >
         <Toolbar>
           <IconButton
-            color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={drawer.toggleDrawer}
@@ -73,7 +72,6 @@ export const StyledNavBar: React.FC<AppBarProps> = (props) => {
           <Box>
             <IconButton
               edge="end"
-              color="inherit"
               aria-label="GitHub Repository"
               href="https://github.com/zio/zio-insight-ui"
               target="_blank"

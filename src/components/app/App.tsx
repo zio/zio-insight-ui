@@ -15,13 +15,14 @@ const theme = MUIStyles.createTheme({
   palette: {
     primary: {
       main: "#404350",
+      dark: "#262830",
     },
     secondary: {
       main: "#E74100B2",
     },
     background: {
-      default: "#404350",
-      paper: "#404350",
+      default: "#f5f5f5",
+      paper: "#a0a0a0",
     },
   },
 })
@@ -33,7 +34,7 @@ export function App() {
       <MUIStyles.ThemeProvider theme={theme}>
         <IconContext.Provider
           value={{
-            color: "white",
+            color: theme.palette.primary.contrastText,
             size: "1.5em",
           }}
         >
