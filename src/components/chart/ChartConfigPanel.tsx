@@ -1,5 +1,5 @@
-import * as App from "@components/App"
-import { TableMetricKeys } from "@components/TableMetricKey"
+import * as App from "@components/app/App"
+import { TableMetricKeys } from "@components/tablemetrickey/TableMetricKey"
 import { pipe } from "@effect/data/Function"
 import * as HS from "@effect/data/HashSet"
 import * as T from "@effect/io/Effect"
@@ -11,7 +11,7 @@ import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as Insight from "@core/metrics/services/InsightService"
 
-import { Scrollable } from "./Scrollable"
+import { Scrollable } from "../scrollable/Scrollable"
 
 export interface ChartConfigPanelProps {
   id: string

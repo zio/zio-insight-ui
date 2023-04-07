@@ -5,23 +5,23 @@ import * as Layer from "@effect/io/Layer"
 import * as Log from "@effect/io/Logger"
 import * as LogLevel from "@effect/io/Logger/Level"
 import * as Scope from "@effect/io/Scope"
+import { IdGenerator } from "@services/Services"
 
 import * as FDSvc from "@core/metrics/services/FiberDataService"
 import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as MM from "@core/metrics/services/MetricsManager"
-import * as IdSvc from "@core/services/IdGenerator"
 
 import * as Insight from "./metrics/services/InsightService"
 
 export type AppLayer =
   | Insight.InsightService
   | MM.MetricsManager
-  | IdSvc.IdGenerator
+  | IdGenerator.IdGenerator
   | GDM.GraphDataManager
   | FDSvc.FiberDataService
 
 export const appLayerLive = pipe(
-  IdSvc.live,
+  IdGenerator.live,
   Layer.provideMerge(Log.minimumLogLevel(LogLevel.Debug)),
   Layer.provideMerge(Insight.live),
   Layer.provideMerge(MM.live),
@@ -30,7 +30,7 @@ export const appLayerLive = pipe(
 )
 
 export const appLayerStatic: Layer.Layer<never, never, AppLayer> = pipe(
-  IdSvc.live,
+  IdGenerator.live,
   Layer.provideMerge(Log.minimumLogLevel(LogLevel.Debug)),
   Layer.provideMerge(Insight.dev),
   Layer.provideMerge(MM.live),

@@ -1,5 +1,5 @@
-import { ChartConfigPanel } from "@components/panel/ChartConfigPanel"
-import { GridFrame } from "@components/panel/GridFrame"
+import { ChartConfigPanel } from "@components/chart/ChartConfigPanel"
+import { GridFrame } from "@components/gridframe/GridFrame"
 import * as React from "react"
 
 export function Metrics() {

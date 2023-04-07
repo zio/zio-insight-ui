@@ -1,6 +1,4 @@
-import "@styles/tailwind.css"
-
-import { App } from "@components/App"
+import { App } from "@components/app/App"
 import React from "react"
 import ReactDOM from "react-dom/client"
 import { BrowserRouter as Router } from "react-router-dom"

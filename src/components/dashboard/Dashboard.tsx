@@ -1,4 +1,4 @@
-import * as App from "@components/App"
+import * as App from "@components/app/App"
 import * as TK from "@data/testkeys"
 import * as C from "@effect/data/Chunk"
 import * as HMap from "@effect/data/HashMap"
@@ -6,6 +6,7 @@ import * as HS from "@effect/data/HashSet"
 import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
 import * as RT from "@effect/io/Runtime"
+import * as IdSvc from "@services/idgenerator/IdGenerator"
 import "@styles/grid.css"
 import * as React from "react"
 import type { Layout, Layouts } from "react-grid-layout"
@@ -16,11 +17,10 @@ import * as MdIcons from "react-icons/md"
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as InsightSvc from "@core/metrics/services/InsightService"
-import * as IdSvc from "@core/services/IdGenerator"
 
-import { ChartConfigPanel } from "./panel/ChartConfigPanel"
-import { ChartPanel } from "./panel/ChartPanel"
-import { GridFrame } from "./panel/GridFrame"
+import { ChartConfigPanel } from "../chart/ChartConfigPanel"
+import { ChartPanel } from "../chart/ChartPanel"
+import { GridFrame } from "../gridframe/GridFrame"
 
 // An Insight Dashboard uses react-grid-layout under the covers to allow the users to create and arrange their
 // panels as they see fit. In that sense a dashboard is a collection of views, each of which is an instance of

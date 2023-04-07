@@ -1,6 +1,6 @@
-import { RuntimeContext } from "@components/App"
-import { TableFiberIds } from "@components/TableFiberId"
-import { Scrollable } from "@components/panel/Scrollable"
+import { RuntimeContext } from "@components/app/App"
+import { Scrollable } from "@components/scrollable/Scrollable"
+import { TableFiberIds } from "@components/tablefiberid/TableFiberId"
 import * as HashSet from "@effect/data/HashSet"
 import * as React from "react"
 

@@ -7,7 +7,7 @@
  * The panel consumes changes from the GraphDataService and updates the chart accordingly.
  *
  */
-import { RuntimeContext } from "@components/App"
+import { RuntimeContext } from "@components/app/App"
 import * as Chunk from "@effect/data/Chunk"
 import * as HashMap from "@effect/data/HashMap"
 import * as Option from "@effect/data/Option"

@@ -1,0 +1,80 @@
+// GanttChart.tsx
+import React, { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
+import { Paper } from '@material-ui/core';
+
+interface Task {
+  id: number;
+  name: string;
+  start: Date;
+  end: Date;
+}
+
+interface GanttChartProps {
+  tasks: Task[];
+}
+
+const GanttChart: React.FC<GanttChartProps> = ({ tasks }) => {
+  const containerRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Remove the previous chart to avoid overlapping
+    d3.select(containerRef.current).selectAll('*').remove();
+
+    const margin = { top: 20, right: 20, bottom: 30, left: 150 };
+    const width = 800 - margin.left - margin.right;
+    const height = 500 - margin.top - margin.bottom;
+
+    const x = d3
+      .scaleTime()
+      .domain([
+        d3.min(tasks, (d) => d.start),
+        d3.max(tasks, (d) => d.end),
+      ])
+      .range([0, width]);
+
+    const y = d3
+      .scaleBand()
+      .domain(tasks.map((d) => d.id.toString()))
+      .range([0, height])
+      .padding(0.1);
+
+    const svg = d3
+      .select(containerRef.current)
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Add the X-axis
+    svg
+      .append('g')
+      .attr('transform', `translate(0,${height})`)
+      .call(d3.axisBottom(x));
+
+    // Add the Y-axis
+    svg.append('g').call(d3.axisLeft(y));
+
+    // Add the bars
+    svg
+      .selectAll('.bar')
+      .data(tasks)
+      .enter()
+      .append('rect')
+      .attr('class', 'bar')
+      .attr('x', (d) => x(d.start))
+      .attr('y', (d) => y(d.id.toString()))
+      .attr('width', (d) => x(d.end) - x(d.start))
+      .attr('height', y.bandwidth());
+  }, [tasks]);
+
+  return (
+    <Paper>
+      <svg ref={containerRef} />
+    </Paper>
+  );
+};
+
+export default GanttChart;

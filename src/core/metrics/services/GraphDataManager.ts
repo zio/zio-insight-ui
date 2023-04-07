@@ -3,9 +3,9 @@ import { pipe } from "@effect/data/Function"
 import * as Opt from "@effect/data/Option"
 import * as T from "@effect/io/Effect"
 import * as L from "@effect/io/Layer"
+import { MemoryStore } from "@services/Services"
 
 import * as MM from "@core/metrics/services/MetricsManager"
-import * as MS from "@core/services/MemoryStore"
 
 import * as GDS from "./GraphDataService"
 
@@ -30,7 +30,7 @@ export type GraphDataManagerError = PanelAlreadyRegistered
 export interface GraphDataManager {
   lookup: (
     panelId: string
-  ) => T.Effect<never, MS.KeyDoesNotExist<string>, GDS.GraphDataService>
+  ) => T.Effect<never, MemoryStore.KeyDoesNotExist<string>, GDS.GraphDataService>
   register: (
     panelId: string
   ) => T.Effect<never, GraphDataManagerError, GDS.GraphDataService>
@@ -40,7 +40,7 @@ export interface GraphDataManager {
 export const GraphDataManager = Ctx.Tag<GraphDataManager>()
 
 function makeGraphDataManager(
-  store: MS.MemoryStore<string, GDS.GraphDataService>,
+  store: MemoryStore.MemoryStore<string, GDS.GraphDataService>,
   mm: MM.MetricsManager
 ) {
   const panelById = (panelId: string) =>
@@ -80,7 +80,9 @@ export const live: L.Layer<MM.MetricsManager, never, GraphDataManager> = L.effec
   GraphDataManager,
   T.gen(function* ($) {
     const mm = yield* $(MM.MetricsManager)
-    const store = yield* $(MS.createMemoryStore<string, GDS.GraphDataService>())
+    const store = yield* $(
+      MemoryStore.createMemoryStore<string, GDS.GraphDataService>()
+    )
     return makeGraphDataManager(store, mm)
   })
 )
