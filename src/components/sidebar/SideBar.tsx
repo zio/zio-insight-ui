@@ -2,53 +2,68 @@ import { useDrawerOpen } from "@components/navbar/useDrawerOpen"
 import { routes } from "@components/routes/AppRoutes"
 import {
   Drawer,
+  Divider,
+  IconButton,
+  List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Mixins,
+  ListItemProps,
 } from "@mui/material"
 import { styled } from "@mui/system"
 import * as React from "react"
 import * as FaIcons from "react-icons/fa"
 import { NavLink } from "react-router-dom"
 
+interface LinkProps extends ListItemProps {
+  isActive: boolean
+}
+
+const StyledItem = styled(
+  ListItem,
+  {}
+)<LinkProps>(({ theme, isActive }) => ({
+  backgroundColor: isActive ? "red" : "blue",
+  textDecoration: "none",
+  color: "inherit",
+  fontSize: "2rem",
+  fontWeight: "bold",
+  padding: 0,
+}))
+
 export const SideBar: React.FC<{}> = (props) => {
   const drawer = useDrawerOpen()
 
   return (
     <StyledDrawer variant="permanent">
-      <ListItem>
-        <ListItemButton>
-          <ListItemIcon>
-            {drawer.drawerOpenState ? (
-              <FaIcons.FaAngleLeft onClick={drawer.toggleDrawer} />
-            ) : (
-              <FaIcons.FaAngleRight onClick={drawer.toggleDrawer} />
-            )}
-          </ListItemIcon>
-        </ListItemButton>
-      </ListItem>
-      {routes.map((route) => (
-        <NavLink
-          key={route.path}
-          data-tip={route.title}
-          className={({ isActive }) => {
-            return `py-2 text-xl font-extralight w-full flex flex-row border-b ${
-              isActive ? "bg-accent" : "hover:bg-neutral-focus"
-            } ${
-              drawer.drawerOpenState ? "" : "tooltip tooltip-right tooltip-secondary"
-            }`
-          }}
-          to={route.path}
-        >
-          <ListItem key={route.title} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>{route.icon}</ListItemIcon>
-              <ListItemText primary={route.title} />
-            </ListItemButton>
-          </ListItem>
-        </NavLink>
-      ))}
+      <DrawerHeader>
+        <IconButton onClick={drawer.toggleDrawer}>
+          {drawer.drawerOpenState ? <FaIcons.FaAngleLeft /> : <FaIcons.FaAngleRight />}
+        </IconButton>
+      </DrawerHeader>
+      <Divider />
+      <List
+        sx={{
+          width: `${drawer.drawerWidth}px`,
+        }}
+      >
+        {routes.map((route) => (
+          <NavLink key={route.path} data-tip={route.title} to={route.path}>
+            {({ isActive }) => {
+              return (
+                <StyledItem key={route.title} isActive={isActive}>
+                  <ListItemButton>
+                    <ListItemIcon>{route.icon}</ListItemIcon>
+                    <ListItemText primary={route.title} />
+                  </ListItemButton>
+                </StyledItem>
+              )
+            }}
+          </NavLink>
+        ))}
+      </List>
     </StyledDrawer>
     // <div
     //   className={`${
@@ -86,5 +101,12 @@ export const SideBar: React.FC<{}> = (props) => {
 
 const StyledDrawer = styled(Drawer)(({ theme }) => ({
   width: "240px",
-  height: "100%",
+}))
+
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  // necessary for content to be below app bar
+  ...(theme.mixins as Mixins).toolbar,
 }))

@@ -1,22 +1,73 @@
-import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material"
+import {
+  AppBar,
+  AppBarProps,
+  Box,
+  IconButton,
+  Toolbar,
+  Transitions,
+  Typography,
+  ZIndex,
+} from "@mui/material"
 import { styled } from "@mui/system"
 import Logo from "@static/ZIO.png"
 import * as React from "react"
 import * as FaIcons from "react-icons/fa"
+import * as MdIcons from "react-icons/md"
 
-interface NavBarProps {
-  onMenuClick: () => void
+import { useDrawerOpen } from "./useDrawerOpen"
+
+interface NavBarProps extends AppBarProps {
+  open: boolean
+  drawerWidth: number
 }
 
 const StyledTitle = styled(Typography)(({ theme }) => ({
   flexGrow: 1,
+  fontWeight: "bold",
+  fontSize: "1.5rem",
 }))
 
-export const NavBar: React.FC<NavBarProps> = (props) => {
+const NavBar = styled(AppBar, {
+  shouldForwardProp: (prop) => prop != "open" && prop != "drawerWidth",
+})<NavBarProps>(({ theme, open, drawerWidth }) => ({
+  zIndex: (theme.zIndex as ZIndex).drawer + 1,
+  transition: (theme.transitions as Transitions).create(["width", "margin"], {
+    easing: (theme.transitions as Transitions).easing.sharp,
+    duration: (theme.transitions as Transitions).duration.leavingScreen,
+  }),
+  ...(open && {
+    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: `${drawerWidth}px`,
+    transition: (theme.transitions as Transitions).create(["width", "margin"], {
+      easing: (theme.transitions as Transitions).easing.sharp,
+      duration: (theme.transitions as Transitions).duration.enteringScreen,
+    }),
+  }),
+}))
+
+export const StyledNavBar: React.FC<AppBarProps> = (props) => {
+  const drawer = useDrawerOpen()
+
   return (
     <>
-      <AppBar position="fixed">
+      <NavBar
+        position="fixed"
+        open={drawer.drawerOpenState}
+        drawerWidth={drawer.drawerWidth}
+      >
         <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={drawer.toggleDrawer}
+            sx={{
+              marginRight: 5,
+              ...(drawer.drawerOpenState && { display: "none" }),
+            }}
+          >
+            <MdIcons.MdMenu />
+          </IconButton>
           <img src={Logo} alt="" />
           <StyledTitle>Insight</StyledTitle>
           <Box>
@@ -31,7 +82,7 @@ export const NavBar: React.FC<NavBarProps> = (props) => {
             </IconButton>
           </Box>
         </Toolbar>
-      </AppBar>
+      </NavBar>
     </>
   )
 }

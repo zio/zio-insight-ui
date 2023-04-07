@@ -1,12 +1,19 @@
-import * as React from "react"
+import { useLocalStorage } from "usehooks-ts"
 
-export const useDrawerOpen = () => {
-  const [drawerOpenState, setDrawerOpenState] = React.useState<boolean>(true)
+// It is important that the open state is kept in the local storage, so that it can be shared acrros different
+// components.
+export function useDrawerOpen() {
+  const [drawerOpenState, setDrawerOpenState] = useLocalStorage("drawerOpen", true)
 
-  const toggleDrawer = () => setDrawerOpenState(!drawerOpenState)
+  const toggleDrawer = () => {
+    setDrawerOpenState(!drawerOpenState)
+  }
+
+  const drawerWidth = 240
 
   return {
     drawerOpenState,
+    drawerWidth,
     toggleDrawer,
   }
 }
