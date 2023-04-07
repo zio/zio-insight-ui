@@ -1,7 +1,8 @@
 import * as NavBar from "@components/navbar/NavBar"
 import { useDrawerOpen } from "@components/navbar/useDrawerOpen"
 import * as SideBar from "@components/sidebar/SideBar"
-import { Box, BoxProps, Mixins } from "@mui/material"
+import { Box } from "@mui/material"
+import type { BoxProps, Mixins } from "@mui/material"
 import { styled } from "@mui/system"
 import * as React from "react"
 
@@ -11,7 +12,7 @@ interface MainBoxProps extends BoxProps {
 
 const MainBox = styled(Box, {
   shouldForwardProp: (prop) => prop != "drawerWidth",
-})<MainBoxProps>(({ theme, drawerWidth }) => ({
+})<MainBoxProps>(({ drawerWidth, theme }) => ({
   position: "absolute",
   top: `${(theme.mixins as Mixins).toolbar.minHeight}px`,
   left: drawerWidth,

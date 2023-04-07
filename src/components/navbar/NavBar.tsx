@@ -1,13 +1,5 @@
-import {
-  AppBar,
-  AppBarProps,
-  Box,
-  IconButton,
-  Toolbar,
-  Transitions,
-  Typography,
-  ZIndex,
-} from "@mui/material"
+import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material"
+import type { AppBarProps, Transitions, ZIndex } from "@mui/material"
 import { styled } from "@mui/system"
 import Logo from "@static/ZIO.png"
 import * as React from "react"
@@ -29,7 +21,7 @@ const StyledTitle = styled(Typography)(({ theme }) => ({
 
 const NavBar = styled(AppBar, {
   shouldForwardProp: (prop) => prop != "open" && prop != "drawerWidth",
-})<NavBarProps>(({ theme, open, drawerWidth }) => ({
+})<NavBarProps>(({ drawerWidth, open, theme }) => ({
   zIndex: (theme.zIndex as ZIndex).drawer + 1,
   transition: (theme.transitions as Transitions).create(["width", "margin"], {
     easing: (theme.transitions as Transitions).easing.sharp,

@@ -1,22 +1,22 @@
 import { useDrawerOpen } from "@components/navbar/useDrawerOpen"
 import { routes } from "@components/routes/AppRoutes"
 import {
-  Drawer,
   Divider,
+  Drawer,
   IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Mixins,
-  DrawerProps,
   useTheme,
 } from "@mui/material"
+import type { DrawerProps, Mixins } from "@mui/material"
 import { styled } from "@mui/system"
 import * as React from "react"
 import * as FaIcons from "react-icons/fa"
-import { NavLink, NavLinkProps } from "react-router-dom"
+import { NavLink } from "react-router-dom"
+import type { NavLinkProps } from "react-router-dom"
 
 interface SideBarProps extends DrawerProps {
   drawerWidth: number
@@ -24,7 +24,7 @@ interface SideBarProps extends DrawerProps {
 
 const StyledDrawer = styled(Drawer, {
   shouldForwardProp: (prop) => prop != "drawerWidth",
-})<SideBarProps>(({ theme, drawerWidth }) => ({
+})<SideBarProps>(({ drawerWidth, theme }) => ({
   ".MuiPaper-root": {
     backgroundColor: theme.palette.primary.dark,
   },
