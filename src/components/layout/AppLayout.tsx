@@ -1,32 +1,34 @@
 import * as NavBar from "@components/navbar/NavBar"
+import { useDrawerOpen } from "@components/navbar/useDrawerOpen"
 import * as SideBar from "@components/sidebar/SideBar"
-import { Box } from "@mui/material"
+import { Box, BoxProps } from "@mui/material"
 import { styled } from "@mui/system"
 import * as React from "react"
 
-export const AppLayout: React.FC<{}> = (props) => {
-  return (
-    <Box sx={{ display: "flex" }}>
-      <NavBar.StyledNavBar />
-      <SideBar.SideBar />
-    </Box>
-  )
+interface MainBoxProps extends BoxProps {
+  drawerWidth: number
 }
 
-const ClientContainer = styled("div")(({ theme }) => ({
-  width: "100vw",
-  height: "100vh",
-  display: "flex relative",
-  flexDirection: "row",
+const MainBox = styled(Box, {
+  shouldForwardProp: (prop) => prop != "drawerWidth",
+})<MainBoxProps>(({ theme, drawerWidth }) => ({
+  position: "absolute",
+  top: "64px",
+  left: drawerWidth,
+  bottom: 0,
+  right: 0,
 }))
 
-const RootContainer = styled("div")(({ theme }) => ({
-  width: "calc(100vw-240px)",
-  height: "calc(100vh - 64px)",
-  top: "64px",
-  left: "240px",
-  position: "absolute",
-  backgroundColor: theme.palette.background.default,
-  display: "flex relative",
-  flexDirection: "row",
-}))
+export const AppLayout: React.FC<{}> = (props) => {
+  const drawer = useDrawerOpen()
+
+  return (
+    <>
+      <NavBar.StyledNavBar />
+      <SideBar.SideBar />
+      <MainBox component="main" drawerWidth={drawer.drawerWidth()}>
+        <h1>Hello</h1>
+      </MainBox>
+    </>
+  )
+}

@@ -53,7 +53,7 @@ export const StyledNavBar: React.FC<AppBarProps> = (props) => {
       <NavBar
         position="fixed"
         open={drawer.drawerOpenState}
-        drawerWidth={drawer.drawerWidth}
+        drawerWidth={drawer.drawerWidth()}
       >
         <Toolbar>
           <IconButton

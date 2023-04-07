@@ -21,7 +21,7 @@ const theme = MUIStyles.createTheme({
     },
     background: {
       default: "#404350",
-      paper: "#DDD",
+      paper: "#404350",
     },
   },
 })
@@ -33,7 +33,8 @@ export function App() {
       <MUIStyles.ThemeProvider theme={theme}>
         <IconContext.Provider
           value={{
-            className: "text-neutral-content text-3xl mx-2",
+            color: "white",
+            size: "1.5em",
           }}
         >
           <StyledEngineProvider injectFirst>

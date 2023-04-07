@@ -9,7 +9,7 @@ export function useDrawerOpen() {
     setDrawerOpenState(!drawerOpenState)
   }
 
-  const drawerWidth = 240
+  const drawerWidth = () => (drawerOpenState ? 240 : 48)
 
   return {
     drawerOpenState,
