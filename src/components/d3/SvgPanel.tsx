@@ -33,9 +33,5 @@ export const SVGPanel: React.FC<React.PropsWithChildren<{}>> = (props) => {
   }, [dimensions, props.children])
 
   // Render the div with the SVG element
-  return (
-    <div ref={ref} className="grow h-full flex relative">
-      {element}
-    </div>
-  )
+  return <div ref={ref}>{element}</div>
 }

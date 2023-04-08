@@ -5,6 +5,7 @@ export interface InsightTheme extends Theme {
   dimensions: {
     drawerClosed: number
     drawerOpen: number
+    padding: number
   }
 }
 
@@ -18,8 +19,8 @@ const muiTheme = MUIStyles.createTheme({
       main: "#E74100B2",
     },
     background: {
-      default: "#f5f5f5",
-      paper: "#a0a0a0",
+      default: "#d0d0d0",
+      paper: "#f0f0e8",
     },
   },
 })
@@ -29,6 +30,7 @@ export const insightTheme: InsightTheme = {
   dimensions: {
     drawerClosed: 56,
     drawerOpen: 240,
+    padding: 16,
   },
 }
 

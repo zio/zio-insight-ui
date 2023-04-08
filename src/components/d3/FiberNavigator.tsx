@@ -2,7 +2,7 @@ import { RuntimeContext } from "@components/app/App"
 import { Scrollable } from "@components/scrollable/Scrollable"
 import { TableFiberIds } from "@components/tablefiberid/TableFiberId"
 import * as HashSet from "@effect/data/HashSet"
-import { Box } from "@mui/material"
+import { Box, Grid, Paper, Toolbar } from "@mui/material"
 import * as React from "react"
 
 import type * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
@@ -28,12 +28,19 @@ export const FiberNavigator: React.FC<{}> = (props) => {
   return (
     <Box
       sx={{
+        display: "flex",
+        flexDirection: "row",
         width: "100%",
         height: "100%",
-        border: "2px solid",
-        borderColor: "red",
+        position: "relative",
       }}
-    ></Box>
+    >
+      <TableFiberIds
+        available={HashSet.fromIterable(fibers.map((f) => f.id))}
+        selection={selected}
+        onSelect={(id) => setSelected(HashSet.make(id))}
+      ></TableFiberIds>
+    </Box>
     // <div>
     //   <div>
     //     <D3ForceGraph />

@@ -1,4 +1,16 @@
+import { useInsightTheme } from "@components/theme/InsightTheme"
 import * as HS from "@effect/data/HashSet"
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material"
+import * as dateFns from "date-fns"
 import React from "react"
 
 import * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
@@ -15,36 +27,74 @@ interface TableFiberIdProps {
 }
 
 export const TableFiberIds: React.FC<TableFiberIdProps> = (props) => {
+  const theme = useInsightTheme()
+  // A simple sort function for the fiber ids
   const sorted = [...props.available].sort((a, b) => FiberId.OrdFiberId.compare(a, b))
 
+  // A function that checks if a key is selected
   const isSelected =
     (k: FiberId.FiberId) => (selection: HS.HashSet<FiberId.FiberId>) => {
       return HS.some(selection, (e) => e.id == k.id)
     }
 
   return (
-    <>
-      <table className="table table-zebra table-compact w-full">
-        <thead>
-          <tr>
-            <th></th>
-            <th>FiberId</th>
-            <th>Started At</th>
-            <th>Location</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((k) => (
-            <RowMetricKey
-              key={k.id}
-              fiberId={k}
-              checked={isSelected(k)(props.selection)}
-              toggled={() => props.onSelect(k)}
-            />
-          ))}
-        </tbody>
-      </table>
-    </>
+    <Box
+      sx={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        margin: "0px",
+        padding: `${theme.dimensions.padding}px`,
+        backgroundColor: theme.palette.background.default,
+      }}
+    >
+      <Box
+        sx={{
+          padding: "10px",
+        }}
+      >
+        <Paper
+          sx={{
+            padding: "10px",
+          }}
+        >
+          <h2>Create a filter here</h2>
+        </Paper>
+      </Box>
+      <Box
+        sx={{
+          padding: "10px",
+          flex: "1 1 auto",
+          overflow: "auto",
+        }}
+      >
+        <TableContainer>
+          <Table component={Paper}>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <input type="checkbox"></input>
+                </TableCell>
+                <TableCell>FiberId</TableCell>
+                <TableCell>Started At</TableCell>
+                <TableCell>Location</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {sorted.map((k) => (
+                <RowMetricKey
+                  key={k.id}
+                  fiberId={k}
+                  checked={isSelected(k)(props.selection)}
+                  toggled={() => props.onSelect(k)}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    </Box>
   )
 }
 
@@ -54,19 +104,26 @@ interface RowFiberIdProps {
   toggled: (k: FiberId.FiberId) => void
 }
 
-const RowMetricKey: React.FC<RowFiberIdProps> = (props) => (
-  <tr className="hover">
-    <td>
-      <input
-        type="checkbox"
-        checked={props.checked}
-        onChange={() => {
-          props.toggled(props.fiberId)
-        }}
-      ></input>
-    </td>
-    <td>{props.fiberId.id}</td>
-    <td>{props.fiberId.startTimeMillis}</td>
-    <td>{FiberId.formatLocation(props.fiberId.location)}</td>
-  </tr>
-)
+const RowMetricKey: React.FC<RowFiberIdProps> = (props) => {
+  const toDate = (millis: number) => {
+    const d = new Date(millis)
+    return dateFns.format(d, "yyyy-MM-dd HH:mm:ss")
+  }
+
+  return (
+    <TableRow>
+      <TableCell>
+        <input
+          type="checkbox"
+          checked={props.checked}
+          onChange={() => {
+            props.toggled(props.fiberId)
+          }}
+        ></input>
+      </TableCell>
+      <TableCell>{props.fiberId.id}</TableCell>
+      <TableCell>{toDate(props.fiberId.startTimeMillis)}</TableCell>
+      <TableCell>{FiberId.formatLocation(props.fiberId.location)}</TableCell>
+    </TableRow>
+  )
+}
