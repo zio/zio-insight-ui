@@ -1,5 +1,4 @@
 import { RuntimeContext } from "@components/app/App"
-import { Scrollable } from "@components/scrollable/Scrollable"
 import { TableFiberIds } from "@components/tablefiberid/TableFiberId"
 import * as HashSet from "@effect/data/HashSet"
 import { Box, Grid, Paper, Toolbar } from "@mui/material"

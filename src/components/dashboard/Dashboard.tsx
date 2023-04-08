@@ -1,4 +1,5 @@
 import * as App from "@components/app/App"
+import { ContentBox } from "@components/contentbox/ContentBox"
 import * as TK from "@data/testkeys"
 import * as Chunk from "@effect/data/Chunk"
 import * as HashMap from "@effect/data/HashMap"
@@ -277,23 +278,24 @@ export function InsightGridLayout() {
 
   const renderDashboard = () => {
     return (
-      <div className="w-full h-full flex flex-col p-2">
-        <div className="flex flex-row justify-between">
-          <span className="btn btn-primary" onClick={() => addPanel()}>
-            <MdIcons.MdAddChart />
-            Create Panel
-          </span>
-          <span />
-          <div className="flex flex-row">
-            <span className="btn btn-neutral">
-              <BiIcons.BiSave />
-              Save this view
-            </span>
-            <span className="ml-2 btn btn-neutral btn-disabled">Select View</span>
-          </div>
-        </div>
+      <ContentBox></ContentBox>
+      // <div className="w-full h-full flex flex-col p-2">
+      //   <div className="flex flex-row justify-between">
+      //     <span className="btn btn-primary" onClick={() => addPanel()}>
+      //       <MdIcons.MdAddChart />
+      //       Create Panel
+      //     </span>
+      //     <span />
+      //     <div className="flex flex-row">
+      //       <span className="btn btn-neutral">
+      //         <BiIcons.BiSave />
+      //         Save this view
+      //       </span>
+      //       <span className="ml-2 btn btn-neutral btn-disabled">Select View</span>
+      //     </div>
+      //   </div>
 
-        <ResponsiveGridLayout
+      /* <ResponsiveGridLayout
           className="layout w-full h-full"
           compactType="horizontal"
           layouts={dbState.layouts}
@@ -324,8 +326,8 @@ export function InsightGridLayout() {
               </div>
             )
           })}
-        </ResponsiveGridLayout>
-      </div>
+        </ResponsiveGridLayout> }
+      </div> */
     )
   }
 

@@ -1,11 +1,15 @@
-import { Theme, useTheme } from "@mui/material"
+import { useTheme } from "@mui/material"
+import type { Theme } from "@mui/material"
 import * as MUIStyles from "@mui/material/styles"
 
 export interface InsightTheme extends Theme {
   dimensions: {
     drawerClosed: number
     drawerOpen: number
-    padding: number
+  }
+  padding: {
+    panel: number
+    button: number
   }
 }
 
@@ -16,7 +20,7 @@ const muiTheme = MUIStyles.createTheme({
       dark: "#262830",
     },
     secondary: {
-      main: "#E74100B2",
+      main: "#B10101",
     },
     background: {
       default: "#d0d0d0",
@@ -30,7 +34,10 @@ export const insightTheme: InsightTheme = {
   dimensions: {
     drawerClosed: 56,
     drawerOpen: 240,
-    padding: 16,
+  },
+  padding: {
+    panel: 16,
+    button: 8,
   },
 }
 

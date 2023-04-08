@@ -1,3 +1,4 @@
+import { ContentBox, ContentPanel } from "@components/contentbox/Content"
 import { useInsightTheme } from "@components/theme/InsightTheme"
 import * as HS from "@effect/data/HashSet"
 import {
@@ -38,33 +39,13 @@ export const TableFiberIds: React.FC<TableFiberIdProps> = (props) => {
     }
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        margin: "0px",
-        padding: `${theme.dimensions.padding}px`,
-        backgroundColor: theme.palette.background.default,
-      }}
-    >
+    <ContentBox>
+      <ContentPanel>
+        <h2>Create a filter here</h2>
+      </ContentPanel>
       <Box
         sx={{
-          padding: "10px",
-        }}
-      >
-        <Paper
-          sx={{
-            padding: "10px",
-          }}
-        >
-          <h2>Create a filter here</h2>
-        </Paper>
-      </Box>
-      <Box
-        sx={{
-          padding: "10px",
+          mt: `${theme.padding.panel}px`,
           flex: "1 1 auto",
           overflow: "auto",
         }}
@@ -94,7 +75,7 @@ export const TableFiberIds: React.FC<TableFiberIdProps> = (props) => {
           </Table>
         </TableContainer>
       </Box>
-    </Box>
+    </ContentBox>
   )
 }
 

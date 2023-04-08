@@ -1,6 +1,9 @@
+import { ContentBox } from "@components/contentbox/ContentBox"
 import * as HS from "@effect/data/HashSet"
 import {
-  Container,
+  Chip,
+  Paper,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -30,27 +33,30 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
   }
 
   return (
-    <Container>
+    <ContentBox>
       <TableContainer>
-        <TableHead>
-          <TableRow>
-            <TableCell>Metric Type</TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell>Labels</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sorted.map((k) => (
-            <RowMetricKey
-              key={k.id}
-              metricKey={k}
-              checked={isSelected(k)(props.selection)}
-              toggled={() => props.onSelect(k)}
-            />
-          ))}
-        </TableBody>
+        <Table component={Paper}>
+          <TableHead>
+            <TableRow>
+              <TableCell></TableCell>
+              <TableCell>Metric Type</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Labels</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sorted.map((k) => (
+              <RowMetricKey
+                key={k.id}
+                metricKey={k}
+                checked={isSelected(k)(props.selection)}
+                toggled={() => props.onSelect(k)}
+              />
+            ))}
+          </TableBody>
+        </Table>
       </TableContainer>
-    </Container>
+    </ContentBox>
   )
 }
 
@@ -62,13 +68,27 @@ interface RowMetricKeyProps {
 
 const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
   <TableRow>
+    <TableCell>
+      <input
+        type="checkbox"
+        checked={props.checked}
+        onChange={() => {
+          props.toggled(props.metricKey)
+        }}
+      ></input>
+    </TableCell>
     <TableCell>{props.metricKey.key.metricType}</TableCell>
     <TableCell>{props.metricKey.key.name}</TableCell>
     <TableCell>
       {props.metricKey.key.labels.map((l) => (
-        <span className="badge" key={l.key}>
-          {l.key}={l.value}
-        </span>
+        <Chip
+          label={`${l.key}=${l.value}`}
+          color="primary"
+          variant="outlined"
+          sx={{
+            mx: "2px",
+          }}
+        />
       ))}
     </TableCell>
   </TableRow>

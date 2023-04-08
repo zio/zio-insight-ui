@@ -1,17 +1,17 @@
 import * as App from "@components/app/App"
+import { ContentBox } from "@components/contentbox/ContentBox"
 import { TableMetricKeys } from "@components/tablemetrickey/TableMetricKey"
 import { pipe } from "@effect/data/Function"
 import * as HS from "@effect/data/HashSet"
 import * as T from "@effect/io/Effect"
 import * as Ex from "@effect/io/Exit"
 import * as RT from "@effect/io/Runtime"
+import { Box } from "@mui/material"
 import * as React from "react"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as Insight from "@core/metrics/services/InsightService"
-
-import { Scrollable } from "../scrollable/Scrollable"
 
 export interface ChartConfigPanelProps {
   id: string
@@ -98,36 +98,55 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
     })
 
   return (
-    <div className="w-full h-full flex flex-col justify-items-stretch">
-      <div className="flex flex-col mb-2">
-        <div className="flex flex-row">
-          <input type="text" />
-          <input type="text" />
-        </div>
-        <div className="flex flex-row">
-          <input type="text" />
-        </div>
-      </div>
-      <Scrollable>
+    <ContentBox
+      sx={{
+        border: "1px solid #000",
+      }}
+    >
+      <Box
+        sx={{
+          padding: "10px",
+          flex: "1 1 auto",
+          overflow: "auto",
+        }}
+      >
         <TableMetricKeys
           available={available}
           selection={selected}
           onSelect={updateSelected}
         ></TableMetricKeys>
-      </Scrollable>
-      <div className="m-2 flex-none flex flex-row justify-end">
-        <span className="btn btn-neutral" onClick={closeHandler}>
-          Discard Changes
-        </span>
-        <span
-          className={`ml-2 btn ${
-            HS.size(selected) > 0 ? "btn-primary" : "btn-disabled"
-          }`}
-          onClick={applySelection}
-        >
-          {HS.size(selected) > 0 ? "Apply Changes" : "Nothing Selected"}
-        </span>
-      </div>
-    </div>
+      </Box>
+    </ContentBox>
+    // <div className="w-full h-full flex flex-col justify-items-stretch">
+    //   <div className="flex flex-col mb-2">
+    //     <div className="flex flex-row">
+    //       <input type="text" />
+    //       <input type="text" />
+    //     </div>
+    //     <div className="flex flex-row">
+    //       <input type="text" />
+    //     </div>
+    //   </div>
+    //   <Scrollable>
+    //     <TableMetricKeys
+    //       available={available}
+    //       selection={selected}
+    //       onSelect={updateSelected}
+    //     ></TableMetricKeys>
+    //   </Scrollable>
+    //   <div className="m-2 flex-none flex flex-row justify-end">
+    //     <span className="btn btn-neutral" onClick={closeHandler}>
+    //       Discard Changes
+    //     </span>
+    //     <span
+    //       className={`ml-2 btn ${
+    //         HS.size(selected) > 0 ? "btn-primary" : "btn-disabled"
+    //       }`}
+    //       onClick={applySelection}
+    //     >
+    //       {HS.size(selected) > 0 ? "Apply Changes" : "Nothing Selected"}
+    //     </span>
+    //   </div>
+    // </div>
   )
 }
