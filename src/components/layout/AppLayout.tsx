@@ -7,6 +7,8 @@ import { styled } from "@mui/system"
 import * as React from "react"
 import { Outlet } from "react-router-dom"
 
+import { useInsightTheme } from "../theme/InsightTheme"
+
 interface MainBoxProps extends BoxProps {
   drawerWidth: number
 }
@@ -24,12 +26,16 @@ const MainBox = styled(Box, {
 
 export const AppLayout: React.FC<{}> = (props) => {
   const drawer = useDrawerOpen()
+  const theme = useInsightTheme()
+
+  const drawerWidth = () =>
+    drawer.drawerOpenState ? theme.dimensions.drawerOpen : theme.dimensions.drawerClosed
 
   return (
     <>
       <NavBar.StyledNavBar />
       <SideBar.SideBar />
-      <MainBox component="main" drawerWidth={drawer.drawerWidth()}>
+      <MainBox component="main" drawerWidth={drawerWidth()}>
         <Outlet />
       </MainBox>
     </>

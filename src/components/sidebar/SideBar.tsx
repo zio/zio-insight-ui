@@ -1,5 +1,6 @@
 import { useDrawerOpen } from "@components/navbar/useDrawerOpen"
 import { routes } from "@components/routes/AppRoutes"
+import { useInsightTheme } from "@components/theme/InsightTheme"
 import {
   Divider,
   Drawer,
@@ -9,7 +10,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  useTheme,
 } from "@mui/material"
 import type { DrawerProps, Mixins } from "@mui/material"
 import { styled } from "@mui/system"
@@ -31,13 +31,19 @@ const StyledDrawer = styled(Drawer, {
   width: `${drawerWidth}px`,
 }))
 
-const DrawerHeader = styled("div")(({ theme }) => ({
+interface DrawerHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  drawerWidth: number
+}
+
+const DrawerHeader = styled("div", {
+  shouldForwardProp: (prop) => prop != "drawerWidth",
+})<DrawerHeaderProps>(({ drawerWidth, theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
   backgroundColor: theme.palette.primary.dark,
-  // necessary for content to be below app bar
-  ...(theme.mixins as Mixins).toolbar,
+  width: drawerWidth,
+  height: (theme.mixins as Mixins).toolbar.minHeight,
 }))
 
 const StyledLink = styled(
@@ -55,11 +61,14 @@ const StyledLink = styled(
 
 export const SideBar: React.FC<{}> = (props) => {
   const drawer = useDrawerOpen()
-  const theme = useTheme()
+  const theme = useInsightTheme()
+
+  const drawerWidth = () =>
+    drawer.drawerOpenState ? theme.dimensions.drawerOpen : theme.dimensions.drawerClosed
 
   return (
-    <StyledDrawer drawerWidth={drawer.drawerWidth()} variant="permanent">
-      <DrawerHeader>
+    <StyledDrawer drawerWidth={drawerWidth()} variant="permanent">
+      <DrawerHeader drawerWidth={drawerWidth()}>
         <IconButton onClick={drawer.toggleDrawer}>
           {drawer.drawerOpenState ? <FaIcons.FaAngleLeft /> : <FaIcons.FaAngleRight />}
         </IconButton>
@@ -71,7 +80,7 @@ export const SideBar: React.FC<{}> = (props) => {
       />
       <List
         sx={{
-          width: `${drawer.drawerWidth()}px`,
+          width: `${drawerWidth()}px`,
         }}
       >
         {routes.map((route) => (

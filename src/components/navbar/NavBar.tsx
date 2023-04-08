@@ -1,4 +1,4 @@
-import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material"
+import { AppBar, Box, IconButton, Mixins, Toolbar, Typography } from "@mui/material"
 import type { AppBarProps, Transitions, ZIndex } from "@mui/material"
 import { styled } from "@mui/system"
 import Logo from "@static/ZIO.png"
@@ -6,6 +6,7 @@ import * as React from "react"
 import * as FaIcons from "react-icons/fa"
 import * as MdIcons from "react-icons/md"
 
+import { useInsightTheme } from "../theme/InsightTheme"
 import { useDrawerOpen } from "./useDrawerOpen"
 
 interface NavBarProps extends AppBarProps {
@@ -23,6 +24,7 @@ const NavBar = styled(AppBar, {
   shouldForwardProp: (prop) => prop != "open" && prop != "drawerWidth",
 })<NavBarProps>(({ drawerWidth, open, theme }) => ({
   zIndex: (theme.zIndex as ZIndex).drawer + 1,
+  height: (theme.mixins as Mixins).toolbar.minHeight,
   transition: (theme.transitions as Transitions).create(["width", "margin"], {
     easing: (theme.transitions as Transitions).easing.sharp,
     duration: (theme.transitions as Transitions).duration.leavingScreen,
@@ -39,13 +41,17 @@ const NavBar = styled(AppBar, {
 
 export const StyledNavBar: React.FC<AppBarProps> = (props) => {
   const drawer = useDrawerOpen()
+  const theme = useInsightTheme()
+
+  const drawerWidth = () =>
+    drawer.drawerOpenState ? theme.dimensions.drawerOpen : theme.dimensions.drawerClosed
 
   return (
     <>
       <NavBar
         position="fixed"
         open={drawer.drawerOpenState}
-        drawerWidth={drawer.drawerWidth()}
+        drawerWidth={drawerWidth()}
       >
         <Toolbar>
           <IconButton

@@ -1,11 +1,11 @@
 import * as App from "@components/app/App"
 import * as TK from "@data/testkeys"
-import * as C from "@effect/data/Chunk"
-import * as HMap from "@effect/data/HashMap"
-import * as HS from "@effect/data/HashSet"
-import * as Opt from "@effect/data/Option"
-import * as T from "@effect/io/Effect"
-import * as RT from "@effect/io/Runtime"
+import * as Chunk from "@effect/data/Chunk"
+import * as HashMap from "@effect/data/HashMap"
+import * as HashSet from "@effect/data/HashSet"
+import * as Option from "@effect/data/Option"
+import * as Effect from "@effect/io/Effect"
+import * as Runtime from "@effect/io/Runtime"
 import * as IdSvc from "@services/idgenerator/IdGenerator"
 import "@styles/grid.css"
 import * as React from "react"
@@ -58,18 +58,18 @@ interface DashboardState {
   // is defined the GridFrame will show a corresponding "edit" button to switch to the config
   // panel, a config panel will always be shown maximized. If another content panel is currently
   // maximized, the config panel will take precedence.
-  content: HMap.HashMap<string, ConfigurableContent>
+  content: HashMap.HashMap<string, ConfigurableContent>
   // If set, maximized will contain the id of a panel that shall be shown maximized,
   // In that case the corresponding panel will take all space of the dashboard view
   // including the control buttons at the top of the Dashboard
-  maximized: Opt.Option<string>
+  maximized: Option.Option<string>
   // If set, configure will call the configure function to create a configuration panel
   // for the configuration of the panel with the given id.
   // If both maximized AND configure are set, the configure panel takes precedence
   // Typically a config dialog would modify the state in some Memory Store service
   // within the app runtime so that any interested panel can consume the modified
   // configuration.
-  configure: Opt.Option<string>
+  configure: Option.Option<string>
 }
 
 export function InsightGridLayout() {
@@ -83,17 +83,17 @@ export function InsightGridLayout() {
       md: [],
       lg: [],
     },
-    content: HMap.empty(),
-    maximized: Opt.none(),
-    configure: Opt.none(),
+    content: HashMap.empty(),
+    maximized: Option.none(),
+    configure: Option.none(),
   } as DashboardState)
 
   const updateState = (p: {
     newBreakpoint?: string
     newLayouts?: Layouts
-    newContent?: HMap.HashMap<string, ConfigurableContent>
-    newMaximized?: Opt.Option<string>
-    newConfigure?: Opt.Option<string>
+    newContent?: HashMap.HashMap<string, ConfigurableContent>
+    newMaximized?: Option.Option<string>
+    newConfigure?: Option.Option<string>
   }) => {
     setState((curr) => {
       return {
@@ -108,17 +108,17 @@ export function InsightGridLayout() {
 
   // TODO: This must be replaced with a proper config page. For now we are randomly choosing
   // an existing metric to actually see some graph being rendered
-  const randomKey = T.gen(function* ($) {
+  const randomKey = Effect.gen(function* ($) {
     const gdm = yield* $(GDM.GraphDataManager)
     const app = yield* $(InsightSvc.InsightService)
     const idSvc = yield* $(IdSvc.IdGenerator)
     const panelId = yield* $(idSvc.nextId("panel"))
-    const keys = C.fromIterable(yield* $(app.getMetricKeys))
-    const idx = Math.floor(Math.random() * C.size(keys))
+    const keys = Chunk.fromIterable(yield* $(app.getMetricKeys))
+    const idx = Math.floor(Math.random() * Chunk.size(keys))
     const gk = yield* $(TK.gaugeKey)
-    const res: InsightKey = Opt.getOrElse(C.get(keys, idx), () => gk)
+    const res: InsightKey = Option.getOrElse(Chunk.get(keys, idx), () => gk)
     const gds = yield* $(gdm.register(panelId))
-    yield* $(gds.setMetrics(HS.make(res)))
+    yield* $(gds.setMetrics(HashSet.make(res)))
 
     return panelId
   })
@@ -130,8 +130,8 @@ export function InsightGridLayout() {
       return l.filter((c) => c.i != id)
     }
 
-    RT.runPromise(appRt)(
-      T.gen(function* ($) {
+    Runtime.runPromise(appRt)(
+      Effect.gen(function* ($) {
         const gdm = yield* $(GDM.GraphDataManager)
         yield* $(gdm.deregister(panelId))
       })
@@ -146,16 +146,16 @@ export function InsightGridLayout() {
         return {
           breakpoint: curr.breakpoint,
           layouts,
-          content: HMap.remove(panelId)(curr.content),
+          content: HashMap.remove(panelId)(curr.content),
           // If we close the currently maximized panel we need to clear the
           // maximized flag as well
           maximized: (() => {
             switch (curr.maximized._tag) {
               case "None":
-                return Opt.none()
+                return Option.none()
               case "Some":
                 if (curr.maximized.value == panelId) {
-                  return Opt.none()
+                  return Option.none()
                 } else {
                   return curr.maximized
                 }
@@ -164,10 +164,10 @@ export function InsightGridLayout() {
           configure: (() => {
             switch (curr.configure._tag) {
               case "None":
-                return Opt.none()
+                return Option.none()
               case "Some":
                 if (curr.configure.value == panelId) {
-                  return Opt.none()
+                  return Option.none()
                 } else {
                   return curr.configure
                 }
@@ -192,10 +192,10 @@ export function InsightGridLayout() {
       const newVal = (() => {
         switch (curr._tag) {
           case "None":
-            return Opt.some(panelId)
+            return Option.some(panelId)
           case "Some":
             if (curr.value === panelId) {
-              return Opt.none()
+              return Option.none()
             } else {
               return curr
             }
@@ -235,7 +235,7 @@ export function InsightGridLayout() {
   // TODO: Most like this should create a TSConfig and stick that into the underlying
   // panel as an init parameter. That would make the entire dashboard serializable
   const addPanel = () => {
-    RT.runCallback(appRt)(randomKey, (res) => {
+    Runtime.runCallback(appRt)(randomKey, (res) => {
       switch (res._tag) {
         case "Failure":
           break
@@ -256,7 +256,7 @@ export function InsightGridLayout() {
 
           updateState({
             newLayouts: layouts,
-            newContent: HMap.set(res.value, {
+            newContent: HashMap.set(res.value, {
               title: `${res.value}`,
               content: newPanel,
               config: cfgPanel,
@@ -268,7 +268,9 @@ export function InsightGridLayout() {
   }
 
   const configMode = (panelId: string) => {
-    return Opt.getOrElse(() => false)(Opt.map((v) => v == panelId)(dbState.configure))
+    return Option.getOrElse(() => false)(
+      Option.map((v) => v == panelId)(dbState.configure)
+    )
   }
 
   const ResponsiveGridLayout = WidthProvider(Responsive)
@@ -304,7 +306,7 @@ export function InsightGridLayout() {
           }
           rowHeight={50}
         >
-          {HMap.mapWithIndex(dbState.content, (ct, id) => {
+          {HashMap.mapWithIndex(dbState.content, (ct, id) => {
             return (
               <div key={id} className="w-full h-full bg-neutral text-neutral-content">
                 <GridFrame
@@ -328,7 +330,7 @@ export function InsightGridLayout() {
   }
 
   const renderMaximized = (id: string) => {
-    const mbMax = HMap.get(dbState.content, id)
+    const mbMax = HashMap.get(dbState.content, id)
 
     switch (mbMax._tag) {
       case "None":
