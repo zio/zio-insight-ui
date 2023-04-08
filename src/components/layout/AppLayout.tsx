@@ -5,6 +5,7 @@ import { Box } from "@mui/material"
 import type { BoxProps, Mixins } from "@mui/material"
 import { styled } from "@mui/system"
 import * as React from "react"
+import { Outlet } from "react-router-dom"
 
 interface MainBoxProps extends BoxProps {
   drawerWidth: number
@@ -29,7 +30,7 @@ export const AppLayout: React.FC<{}> = (props) => {
       <NavBar.StyledNavBar />
       <SideBar.SideBar />
       <MainBox component="main" drawerWidth={drawer.drawerWidth()}>
-        <h1>Hello</h1>
+        <Outlet />
       </MainBox>
     </>
   )
