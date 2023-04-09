@@ -1,4 +1,4 @@
-import { ContentBox, ContentPanel } from "@components/contentbox/Content"
+import { ContentBox } from "@components/contentbox/ContentBox"
 import { useInsightTheme } from "@components/theme/InsightTheme"
 import * as HS from "@effect/data/HashSet"
 import {
@@ -40,12 +40,12 @@ export const TableFiberIds: React.FC<TableFiberIdProps> = (props) => {
 
   return (
     <ContentBox>
-      <ContentPanel>
+      <Box>
         <h2>Create a filter here</h2>
-      </ContentPanel>
+      </Box>
       <Box
         sx={{
-          mt: `${theme.padding.panel}px`,
+          mt: `${theme.padding.medium}px`,
           flex: "1 1 auto",
           overflow: "auto",
         }}

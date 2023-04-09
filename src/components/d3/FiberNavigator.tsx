@@ -1,13 +1,12 @@
 import { RuntimeContext } from "@components/app/App"
 import { TableFiberIds } from "@components/tablefiberid/TableFiberId"
 import * as HashSet from "@effect/data/HashSet"
-import { Box, Grid, Paper, Toolbar } from "@mui/material"
+import { Box } from "@mui/material"
 import * as React from "react"
 
 import type * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
-import { D3ForceGraph } from "./D3ForceGraph"
 import * as FiberDataConsumer from "./FiberDataConsumer"
 
 export const FiberNavigator: React.FC<{}> = (props) => {

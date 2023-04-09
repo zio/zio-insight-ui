@@ -1,13 +1,13 @@
-import { ContentBox, ContentPanel } from "@components/contentbox/Content"
-import { Typography } from "@mui/material"
+import { ContentBox } from "@components/contentbox/ContentBox"
+import { Box, Typography } from "@mui/material"
 import * as React from "react"
 
 export const Dummy: React.FC<{ title: string }> = (props) => {
   return (
     <ContentBox>
-      <ContentPanel>
+      <Box>
         <Typography variant="h4">{props.title}</Typography>
-      </ContentPanel>
+      </Box>
     </ContentBox>
   )
 }

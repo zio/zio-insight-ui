@@ -1,6 +1,5 @@
 import * as App from "@components/app/App"
 import { ContentBox } from "@components/contentbox/ContentBox"
-import { ContentPanel } from "@components/contentbox/ContentPanel"
 import { useInsightTheme } from "@components/theme/InsightTheme"
 import * as TK from "@data/testkeys"
 import * as Chunk from "@effect/data/Chunk"
@@ -9,8 +8,7 @@ import * as HashSet from "@effect/data/HashSet"
 import * as Option from "@effect/data/Option"
 import * as Effect from "@effect/io/Effect"
 import * as Runtime from "@effect/io/Runtime"
-import { Button } from "@mui/material"
-import { Box, Paper } from "@mui/material"
+import { Box, Button, Paper } from "@mui/material"
 import * as IdSvc from "@services/idgenerator/IdGenerator"
 import "@styles/grid.css"
 import * as React from "react"
@@ -26,7 +24,7 @@ import * as InsightSvc from "@core/metrics/services/InsightService"
 import { ChartConfigPanel } from "../chart/ChartConfigPanel"
 import { ChartPanel } from "../chart/ChartPanel"
 import { GridFrame } from "../gridframe/GridFrame"
-import { ConfigurableContent, DashboardState } from "./DashboardState"
+import type { ConfigurableContent, DashboardState } from "./DashboardState"
 
 // An Insight Dashboard uses react-grid-layout under the covers to allow the users to create and arrange their
 // panels as they see fit. In that sense a dashboard is a collection of views, each of which is an instance of
@@ -168,7 +166,7 @@ export function InsightGridLayout() {
           case "None":
             return Option.some(panelId)
           case "Some":
-            if (curr.value === panelId) {
+            if (curr.value == panelId) {
               return Option.none()
             } else {
               return curr
@@ -217,7 +215,7 @@ export function InsightGridLayout() {
           const newPanel = <ChartPanel id={res.value} />
           const cfgPanel = (
             <ChartConfigPanel
-              id={res.value}
+              id={Option.some(res.value)}
               onDone={(k: string) => configurePanel(k)}
             />
           )

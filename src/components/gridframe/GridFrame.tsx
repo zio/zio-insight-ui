@@ -1,8 +1,7 @@
 import { useInsightTheme } from "@components/theme/InsightTheme"
-import { Box, Button, IconButton, Typography } from "@mui/material"
+import { Box, Button, Typography } from "@mui/material"
 import * as RxIcons from "@radix-ui/react-icons"
 import * as React from "react"
-import { IconType } from "react-icons"
 import * as AiIcons from "react-icons/ai"
 import * as BoxIcons from "react-icons/bi"
 import * as BsIcons from "react-icons/bs"
@@ -236,22 +235,5 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
         {resizeHandle()}
       </Box>
     </Box>
-    // <div className="grow h-full flex flex-row justify-items-stretch">
-    //   <div className="grow h-full flex flex-col">
-
-    //     <div className="grow grid grid-col-1 m-2 place-items-stretch">
-    //       <div
-    //         className={`overflow-auto grid grid-col-1 place-items-stretch ${
-    //           props.maximized || cfgEnabled ? "" : "p-2 border"
-    //         }`}
-    //       >
-    //         {(() => {
-    //           if (cfgEnabled) return props.config || props.content
-    //           else return props.content
-    //         })()}
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
   )
 }

@@ -1,6 +1,6 @@
-import { ContentBox } from "@components/contentbox/ContentBox"
 import * as HS from "@effect/data/HashSet"
 import {
+  Box,
   Chip,
   Paper,
   Table,
@@ -33,9 +33,9 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
   }
 
   return (
-    <ContentBox>
+    <Box component={Paper}>
       <TableContainer>
-        <Table component={Paper}>
+        <Table>
           <TableHead>
             <TableRow>
               <TableCell></TableCell>
@@ -56,7 +56,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
           </TableBody>
         </Table>
       </TableContainer>
-    </ContentBox>
+    </Box>
   )
 }
 
@@ -82,6 +82,7 @@ const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
     <TableCell>
       {props.metricKey.key.labels.map((l) => (
         <Chip
+          key={l.key}
           label={`${l.key}=${l.value}`}
           color="primary"
           variant="outlined"

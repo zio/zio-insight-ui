@@ -1,6 +1,6 @@
-import * as HashMap from "@effect/data/HashMap"
-import * as Option from "@effect/data/Option"
-import * as React from "react"
+import type * as HashMap from "@effect/data/HashMap"
+import type * as Option from "@effect/data/Option"
+import type * as React from "react"
 import type { Layouts } from "react-grid-layout"
 
 export interface ConfigurableContent {
