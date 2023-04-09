@@ -8,8 +8,10 @@ export interface InsightTheme extends Theme {
     drawerOpen: number
   }
   padding: {
-    panel: number
-    button: number
+    large: number
+    medium: number
+    small: number
+    xsmall: number
   }
 }
 
@@ -17,6 +19,7 @@ const muiTheme = MUIStyles.createTheme({
   palette: {
     primary: {
       main: "#404350",
+      light: "#5f616d",
       dark: "#262830",
     },
     secondary: {
@@ -36,8 +39,10 @@ export const insightTheme: InsightTheme = {
     drawerOpen: 240,
   },
   padding: {
-    panel: 16,
-    button: 8,
+    large: 16,
+    medium: 12,
+    small: 8,
+    xsmall: 4,
   },
 }
 

@@ -1,5 +1,7 @@
 import * as App from "@components/app/App"
 import { ContentBox } from "@components/contentbox/ContentBox"
+import { ContentPanel } from "@components/contentbox/ContentPanel"
+import { useInsightTheme } from "@components/theme/InsightTheme"
 import * as TK from "@data/testkeys"
 import * as Chunk from "@effect/data/Chunk"
 import * as HashMap from "@effect/data/HashMap"
@@ -7,12 +9,14 @@ import * as HashSet from "@effect/data/HashSet"
 import * as Option from "@effect/data/Option"
 import * as Effect from "@effect/io/Effect"
 import * as Runtime from "@effect/io/Runtime"
+import { Button } from "@mui/material"
+import { Box, Paper } from "@mui/material"
 import * as IdSvc from "@services/idgenerator/IdGenerator"
 import "@styles/grid.css"
 import * as React from "react"
 import type { Layout, Layouts } from "react-grid-layout"
 import { Responsive, WidthProvider } from "react-grid-layout"
-import * as BiIcons from "react-icons/bi"
+import * as ImIcons from "react-icons/im"
 import * as MdIcons from "react-icons/md"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
@@ -22,6 +26,7 @@ import * as InsightSvc from "@core/metrics/services/InsightService"
 import { ChartConfigPanel } from "../chart/ChartConfigPanel"
 import { ChartPanel } from "../chart/ChartPanel"
 import { GridFrame } from "../gridframe/GridFrame"
+import { ConfigurableContent, DashboardState } from "./DashboardState"
 
 // An Insight Dashboard uses react-grid-layout under the covers to allow the users to create and arrange their
 // panels as they see fit. In that sense a dashboard is a collection of views, each of which is an instance of
@@ -39,43 +44,11 @@ import { GridFrame } from "../gridframe/GridFrame"
 // A dashboard configuration shall be (de)serializable to/from the local storage, so that users can easily
 // navigate between different dashboards
 
-export interface ConfigurableContent {
-  title: string
-  content: React.ReactElement
-  config?: React.ReactElement
-}
-
-interface DashboardState {
-  // the name of the current breakpoint, such as "lg", "md" etc
-  breakpoint: string
-  // The panel layouts for each breakpoint. Basically it is an object whit the breakpoint
-  // names as keys and each key will point to an array of panel layouts
-  // The layout arrays will be managed via the panel operations. Each panel will have its own
-  // id set in the "i" field of the layout. The id is used to match the actual content for the
-  // panel from the content field below.
-  layouts: Layouts
-  // The actual panel contents, each individual entry will hold a React Element representing
-  // the panel content and an optional React Element to configure the content panel. If the config
-  // is defined the GridFrame will show a corresponding "edit" button to switch to the config
-  // panel, a config panel will always be shown maximized. If another content panel is currently
-  // maximized, the config panel will take precedence.
-  content: HashMap.HashMap<string, ConfigurableContent>
-  // If set, maximized will contain the id of a panel that shall be shown maximized,
-  // In that case the corresponding panel will take all space of the dashboard view
-  // including the control buttons at the top of the Dashboard
-  maximized: Option.Option<string>
-  // If set, configure will call the configure function to create a configuration panel
-  // for the configuration of the panel with the given id.
-  // If both maximized AND configure are set, the configure panel takes precedence
-  // Typically a config dialog would modify the state in some Memory Store service
-  // within the app runtime so that any interested panel can consume the modified
-  // configuration.
-  configure: Option.Option<string>
-}
-
 export function InsightGridLayout() {
   // We need to tap into the runtime to have access to the services
   const appRt = React.useContext(App.RuntimeContext)
+
+  const theme = useInsightTheme()
 
   // The initial state for the dashboard with predefined breakpoints and empty layout/content.
   const [dbState, setState] = React.useState<DashboardState>({
@@ -278,56 +251,87 @@ export function InsightGridLayout() {
 
   const renderDashboard = () => {
     return (
-      <ContentBox></ContentBox>
-      // <div className="w-full h-full flex flex-col p-2">
-      //   <div className="flex flex-row justify-between">
-      //     <span className="btn btn-primary" onClick={() => addPanel()}>
-      //       <MdIcons.MdAddChart />
-      //       Create Panel
-      //     </span>
-      //     <span />
-      //     <div className="flex flex-row">
-      //       <span className="btn btn-neutral">
-      //         <BiIcons.BiSave />
-      //         Save this view
-      //       </span>
-      //       <span className="ml-2 btn btn-neutral btn-disabled">Select View</span>
-      //     </div>
-      //   </div>
-
-      /* <ResponsiveGridLayout
-          className="layout w-full h-full"
-          compactType="horizontal"
-          layouts={dbState.layouts}
-          cols={{ md: 8, lg: 12 }}
-          onLayoutChange={(_: Layout[], all: Layouts) =>
-            updateState({ newLayouts: all })
-          }
-          onBreakpointChange={(bp: string, _: number) =>
-            updateState({ newBreakpoint: bp })
-          }
-          rowHeight={50}
+      <ContentBox>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
         >
-          {HashMap.mapWithIndex(dbState.content, (ct, id) => {
-            return (
-              <div key={id} className="w-full h-full bg-neutral text-neutral-content">
-                <GridFrame
-                  key={id}
-                  title={ct.title}
-                  maximized={false}
-                  configMode={false}
-                  id={id}
-                  closePanel={removePanel}
-                  configure={configurePanel}
-                  maximize={maximizePanel}
-                  content={ct.content}
-                  config={ct.config}
-                ></GridFrame>
-              </div>
-            )
-          })}
-        </ResponsiveGridLayout> }
-      </div> */
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={() => addPanel()}
+            startIcon={<MdIcons.MdAddChart />}
+          >
+            Create Panel
+          </Button>
+          <Box>
+            <Button
+              color="secondary"
+              variant="contained"
+              startIcon={<ImIcons.ImDownload />}
+            >
+              Save this view
+            </Button>
+            <Button
+              color="secondary"
+              variant="contained"
+              disabled={true}
+              startIcon={<ImIcons.ImUpload />}
+              sx={{
+                ml: "8px",
+              }}
+            >
+              Restore View
+            </Button>
+          </Box>
+        </Box>
+        <Paper
+          elevation={0}
+          sx={{
+            display: "flex",
+            flex: "1 1 auto",
+            overflow: "auto",
+            backgroundColor: theme.palette.primary.light,
+            mt: "8px",
+          }}
+        >
+          <ResponsiveGridLayout
+            className="layout"
+            compactType="horizontal"
+            layouts={dbState.layouts}
+            cols={{ md: 8, lg: 12 }}
+            onLayoutChange={(_: Layout[], all: Layouts) =>
+              updateState({ newLayouts: all })
+            }
+            onBreakpointChange={(bp: string, _: number) =>
+              updateState({ newBreakpoint: bp })
+            }
+            rowHeight={50}
+          >
+            {HashMap.mapWithIndex(dbState.content, (ct, id) => {
+              return (
+                <div key={id}>
+                  <GridFrame
+                    key={id}
+                    title={ct.title}
+                    maximized={false}
+                    configMode={false}
+                    id={id}
+                    closePanel={removePanel}
+                    configure={configurePanel}
+                    maximize={maximizePanel}
+                    content={ct.content}
+                    config={ct.config}
+                  ></GridFrame>
+                </div>
+              )
+            })}
+          </ResponsiveGridLayout>
+        </Paper>
+      </ContentBox>
     )
   }
 

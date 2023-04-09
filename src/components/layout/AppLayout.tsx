@@ -21,7 +21,7 @@ const MainBox = styled(Box, {
   left: drawerWidth,
   bottom: 0,
   right: 0,
-  backgroundColor: theme.palette.background.paper,
+  backgroundColor: theme.palette.primary.light,
 }))
 
 export const AppLayout: React.FC<{}> = (props) => {

@@ -8,7 +8,7 @@ export const ContentPanel: React.FC<React.PropsWithChildren> = (props) => {
   return (
     <Paper
       sx={{
-        padding: `${theme.padding.panel}px`,
+        padding: `${theme.padding.medium}px`,
       }}
     >
       {props.children}
