@@ -1,5 +1,5 @@
 import { useInsightTheme } from "@components/theme/InsightTheme"
-import { Box, Button, IconButton } from "@mui/material"
+import { Box, Button, IconButton, Typography } from "@mui/material"
 import * as RxIcons from "@radix-ui/react-icons"
 import * as React from "react"
 import { IconType } from "react-icons"
@@ -40,21 +40,46 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
 
   const cfgEnabled = props.config !== undefined && props.configMode
 
+  // Render the title of the panel
+  const title = (max: boolean) => {
+    return (
+      <Typography
+        variant={max ? "h6" : "subtitle1"}
+        sx={{
+          color: theme.palette.primary.contrastText,
+          ml: `${theme.padding.small}px`,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        {props.title}
+      </Typography>
+    )
+  }
+
   // The controls that are shown when the panel is maximized
   const maxControls = () => {
     return (
       <Box
         sx={{
+          padding: `${theme.padding.small}px`,
           display: "flex",
           flexDirection: "row",
         }}
       >
         <Button
+          color="secondary"
+          variant="contained"
           onClick={cfgEnabled ? cfgHandler : maxHandler}
           startIcon={<BsIcons.BsArrowLeft />}
+          sx={{
+            flexGrow: 0,
+          }}
         >
           Back
         </Button>
+        {title(true)}
       </Box>
     )
   }
@@ -82,35 +107,53 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
     return (
       <Box
         sx={{
-          padding: `${theme.padding.xsmall}px`,
           display: "flex",
           flexDirection: "row",
-          justifyContent: "flex-end",
-          height: `${
-            theme.padding.medium + 2 * theme.padding.xsmall + 2 * theme.padding.xsmall
-          }px`,
+          justifyContent: "space-between",
         }}
       >
-        {panelButton(
-          <Tabler.TbArrowsMaximize size={theme.padding.medium} />,
-          maxHandler
-        )}
-        {props.config === undefined ? (
-          <></>
-        ) : (
-          panelButton(<Feather.FiEdit size={theme.padding.medium} />, cfgHandler)
-        )}
-        {panelButton(
-          <AiIcons.AiOutlineClose size={theme.padding.medium} />,
-          closeHandler
-        )}
+        {title(false)}
+        <Box
+          sx={{
+            padding: `${theme.padding.xsmall}px`,
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            height: `${
+              theme.padding.medium + 2 * theme.padding.xsmall + 2 * theme.padding.xsmall
+            }px`,
+          }}
+        >
+          {panelButton(
+            <Tabler.TbArrowsMaximize size={theme.padding.medium} />,
+            maxHandler
+          )}
+          {props.config === undefined ? (
+            <></>
+          ) : (
+            panelButton(<Feather.FiEdit size={theme.padding.medium} />, cfgHandler)
+          )}
+          {panelButton(
+            <AiIcons.AiOutlineClose size={theme.padding.medium} />,
+            closeHandler
+          )}
+        </Box>
       </Box>
     )
   }
 
   // The controls that are shown on the panel
   const controls = () => {
-    return props.maximized ? maxControls() : panelControls()
+    return (
+      <Box
+        sx={{
+          borderRadius: `0 ${theme.padding.small}px 0 0`,
+          backgroundColor: theme.palette.primary.main,
+        }}
+      >
+        {props.maximized ? maxControls() : panelControls()}
+      </Box>
+    )
   }
 
   // The move handle bar that is shown when the panel is not maximized
@@ -154,6 +197,26 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
       )
   }
 
+  // The box for the actual content of the panel
+  const content = () => {
+    const inner = () => {
+      if (cfgEnabled) return props.config || props.content
+      else return props.content
+    }
+
+    return (
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflow: "auto",
+          placeItems: "stretch",
+        }}
+      >
+        {inner()}
+      </Box>
+    )
+  }
+
   // The complete panel using the components above
   return (
     <Box
@@ -169,21 +232,12 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
       {moveHandleBar()}
       <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
         {controls()}
+        {content()}
         {resizeHandle()}
       </Box>
     </Box>
     // <div className="grow h-full flex flex-row justify-items-stretch">
     //   <div className="grow h-full flex flex-col">
-    //     <div className="m-1 flex flex-row flex-none justify-between place-items-center">
-    //       <span
-    //         className={`${
-    //           props.maximized || cfgEnabled ? "ml-2 underline text-2xl" : ""
-    //         }`}
-    //       >
-    //         {props.title}
-    //       </span>
-    //       {controls()}
-    //     </div>
 
     //     <div className="grow grid grid-col-1 m-2 place-items-stretch">
     //       <div
@@ -197,16 +251,6 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
     //         })()}
     //       </div>
     //     </div>
-
-    //     {(() => {
-    //       if (cfgEnabled || props.maximized) return <></>
-    //       else
-    //         return (
-    //           <div className="flex flex-none">
-    //             <ResizeHandle />
-    //           </div>
-    //         )
-    //     })()}
     //   </div>
     // </div>
   )

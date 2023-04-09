@@ -15,6 +15,7 @@ import * as Effect from "@effect/io/Effect"
 import * as Fiber from "@effect/io/Fiber"
 import * as Runtime from "@effect/io/Runtime"
 import * as Stream from "@effect/stream/Stream"
+import { Box } from "@mui/material"
 import { Chart } from "chart.js/auto"
 import "chartjs-adapter-date-fns"
 import * as React from "react"
@@ -161,8 +162,13 @@ export const ChartPanel: React.FC<{ id: string }> = (props) => {
   }, [chartData])
 
   return (
-    <div className="grow flex relative">
+    <Box
+      sx={{
+        width: "100%",
+        height: "100%",
+      }}
+    >
       <canvas className="bg-neutral-content" ref={chartRef} />
-    </div>
+    </Box>
   )
 }
