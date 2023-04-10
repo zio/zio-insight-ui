@@ -28,6 +28,8 @@ export interface FiberDataService {
   readonly removeSubscription: (id: string) => Effect.Effect<never, never, void>
 
   readonly subscriptionIds: () => Effect.Effect<never, never, HashSet.HashSet<string>>
+
+  readonly poll: () => Effect.Effect<never, never, void>
 }
 
 export const FiberDataService = Context.Tag<FiberDataService>()
@@ -38,7 +40,8 @@ export const live = Layer.effect(
     function makeFiberDataService(
       idSvc: IdGen.IdGenerator,
       fiberInfoHub: Hub.Hub<F.FiberInfo[]>,
-      subscriptions: Ref.Ref<HashSet.HashSet<string>>
+      subscriptions: Ref.Ref<HashSet.HashSet<string>>,
+      insight: Insight.InsightService
     ): FiberDataService {
       const subscribe = () =>
         Effect.gen(function* ($) {
@@ -54,10 +57,37 @@ export const live = Layer.effect(
       const subscriptionIds = () =>
         pipe(Ref.get(subscriptions), Effect.map(HashSet.fromIterable))
 
+      const pollFiberData = () =>
+        Effect.gen(function* ($) {
+          const cntSubscriptions = yield* $(
+            pipe(Ref.get(subscriptions), Effect.map(HashSet.size))
+          )
+
+          if (cntSubscriptions > 0) {
+            yield* $(
+              Effect.log(`Fetching Fiber data for ${cntSubscriptions} subscribers`)
+            )
+            const fiberData = yield* $(
+              pipe(
+                insight.getFibers,
+                Effect.catchAll((_) => Effect.succeed([] as F.FiberInfo[]))
+              )
+            )
+            yield* $(Effect.logDebug(`Found: ${fiberData.length} fibers`))
+            yield* $(
+              pipe(
+                Hub.publish(hub, fiberData),
+                Effect.when(() => fiberData.length > 0)
+              )
+            )
+          }
+        })
+
       return {
         createSubscription: subscribe,
         removeSubscription: unsubscribe,
         subscriptionIds,
+        poll: pollFiberData,
       } as FiberDataService
     }
 
@@ -66,32 +96,18 @@ export const live = Layer.effect(
     const idSvc = yield* $(IdGen.IdGenerator)
     const subscriptions = yield* $(Ref.make(HashSet.empty<string>()))
 
-    const pollFiberData = Effect.gen(function* ($) {
-      const fiberData = yield* $(
-        pipe(
-          insight.getFibers,
-          Effect.catchAll((_) => Effect.succeed([] as F.FiberInfo[]))
-        )
-      )
-
-      yield* $(Effect.logDebug(`Found: ${fiberData.length} fibers`))
-      yield* $(
-        pipe(
-          Hub.publish(hub, fiberData),
-          Effect.when(() => fiberData.length > 0)
-        )
-      )
-    })
-
     // TODO: Make this configurable
+
+    const svc = makeFiberDataService(idSvc, hub, subscriptions, insight)
+
     yield* $(
       Utils.withDefaultScheduler(
         Effect.forkDaemon(
-          Effect.repeat(Schedule.spaced(Duration.millis(3000)))(pollFiberData)
+          Effect.repeat(Schedule.spaced(Duration.millis(3000)))(svc.poll())
         )
       )
     )
 
-    return makeFiberDataService(idSvc, hub, subscriptions)
+    return svc
   })
 )

@@ -40,7 +40,7 @@ export const TableFiberIds: React.FC<TableFiberIdProps> = (props) => {
 
   return (
     <ContentBox>
-      <Box>
+      <Box component={Paper}>
         <h2>Create a filter here</h2>
       </Box>
       <Box

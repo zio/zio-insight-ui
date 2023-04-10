@@ -1,7 +1,9 @@
 import { RuntimeContext } from "@components/app/App"
 import { ContentBox } from "@components/contentbox/ContentBox"
+import { StackTrace } from "@components/stacktrace/StackTrace"
 import { TableFiberIds } from "@components/tablefiberid/TableFiberId"
 import * as HashSet from "@effect/data/HashSet"
+import * as Runtime from "@effect/io/Runtime"
 import { Box } from "@mui/material"
 import * as React from "react"
 
@@ -20,9 +22,16 @@ export const FiberNavigator: React.FC<{}> = (props) => {
   )
 
   React.useEffect(() => {
-    FiberDataConsumer.createFiberUpdater(appRt, (infos: FiberInfo.FiberInfo[]) => {
-      setFibers(infos)
-    })
+    const updater = FiberDataConsumer.createFiberUpdater(
+      appRt,
+      (infos: FiberInfo.FiberInfo[]) => {
+        setFibers(infos)
+      }
+    )
+
+    return () => {
+      Runtime.runSync(appRt)(updater.fds.removeSubscription(updater.id))
+    }
   }, [appRt])
 
   return (
@@ -49,29 +58,30 @@ export const FiberNavigator: React.FC<{}> = (props) => {
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           flexGrow: 1,
         }}
       >
-        <TableFiberIds
-          available={HashSet.fromIterable(fibers.map((f) => f.id))}
-          selection={selected}
-          onSelect={(id) => setSelected(HashSet.make(id))}
-        ></TableFiberIds>
+        <Box
+          sx={{
+            display: "flex",
+            height: "50%",
+          }}
+        >
+          <TableFiberIds
+            available={HashSet.fromIterable(fibers.map((f) => f.id))}
+            selection={selected}
+            onSelect={(id) => setSelected(HashSet.make(id))}
+          ></TableFiberIds>
+        </Box>
+        <Box
+          sx={{
+            flexGrow: 1,
+          }}
+        >
+          <StackTrace />
+        </Box>
       </Box>
     </Box>
-    // <div>
-    //   <div>
-    //     <D3ForceGraph />
-    //   </div>
-    //   <div>
-    //     <Scrollable>
-    //       <TableFiberIds
-    //         available={HashSet.fromIterable(fibers.map((f) => f.id))}
-    //         selection={selected}
-    //         onSelect={(id) => setSelected(HashSet.make(id))}
-    //       ></TableFiberIds>
-    //     </Scrollable>
-    //   </div>
-    // </div>
   )
 }

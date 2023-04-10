@@ -43,6 +43,8 @@ export interface InsightService {
   ) => T.Effect<never, InsightApiError, C.Chunk<MetricState>>
 
   getFibers: T.Effect<never, InsightApiError, FiberInfo[]>
+
+  fiberTrace: (f: FiberInfo) => T.Effect<never, InsightApiError, FiberInfo>
 }
 
 export const InsightService = Ctx.Tag<InsightService>()
@@ -80,6 +82,7 @@ function makeLiveMetrics(): InsightService {
       T.flatMap(fibersFromInsight),
       T.tap((fibers) => T.logInfo(`Got ${fibers.length} fiber infos from server`))
     ),
+    fiberTrace: (f: FiberInfo) => T.succeed(f),
   }
 }
 
@@ -102,6 +105,7 @@ export const dev: L.Layer<never, never, InsightService> = L.effect(
         )
       ),
     getFibers: pipe(T.succeed(staticFibers), T.flatMap(fibersFromInsight)),
+    fiberTrace: (f: FiberInfo) => T.succeed(f),
   })
 )
 

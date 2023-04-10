@@ -1,18 +1,19 @@
-import * as T from "@effect/io/Effect"
-import * as Z from "zod"
+import * as Effect from "@effect/io/Effect"
+import * as Zod from "zod"
 
-import { fiberIdSchema } from "./FiberId"
+import * as FiberId from "./FiberId"
 import { statusSchema } from "./FiberStatus"
 
-export const fiberInfoSchema = Z.object({
-  id: fiberIdSchema,
-  parent: Z.optional(fiberIdSchema),
+export const fiberInfoSchema = Zod.object({
+  id: FiberId.fiberIdSchema,
+  parent: Zod.optional(FiberId.fiberIdSchema),
   status: statusSchema,
+  trace: Zod.optional(Zod.array(FiberId.locationSchema)),
 })
 
-export const fibersInfoSchema = Z.array(fiberInfoSchema)
+export const fibersInfoSchema = Zod.array(fiberInfoSchema)
 
-export interface FiberInfo extends Z.TypeOf<typeof fiberInfoSchema> {}
+export interface FiberInfo extends Zod.TypeOf<typeof fiberInfoSchema> {}
 
 export class InvalidFibers {
   readonly _tag = "InvalidFibers"
@@ -21,12 +22,12 @@ export class InvalidFibers {
 
 export const fibersFromInsight: (
   value: unknown
-) => T.Effect<never, InvalidFibers, FiberInfo[]> = (value: unknown) =>
-  T.gen(function* ($) {
+) => Effect.Effect<never, InvalidFibers, FiberInfo[]> = (value: unknown) =>
+  Effect.gen(function* ($) {
     const parsed = fibersInfoSchema.safeParse(value)
     const states = parsed.success
-      ? yield* $(T.succeed(parsed.data))
-      : yield* $(T.fail(new InvalidFibers(parsed.error.toString())))
+      ? yield* $(Effect.succeed(parsed.data))
+      : yield* $(Effect.fail(new InvalidFibers(parsed.error.toString())))
 
     return states
   })

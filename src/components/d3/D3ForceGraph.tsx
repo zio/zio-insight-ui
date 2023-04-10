@@ -25,6 +25,8 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
   const simRef =
     React.useRef<d3.Simulation<FiberGraph.FiberNode, FiberGraph.FiberLink>>()
 
+  const simulating = React.useRef<boolean>(false)
+
   const dimensions = React.useRef<D3Utils.Dimensions>(D3Utils.emptyDimensions)
   const boundedWidth = () => D3Utils.boundedDimensions(dimensions.current)[0]
   const boundedHeight = () => D3Utils.boundedDimensions(dimensions.current)[1]
@@ -52,7 +54,7 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
           .forceLink<FiberGraph.FiberNode, FiberGraph.FiberLink>()
           .id(idAccessor)
           .distance(30)
-          .strength(0.6)
+          .strength(0.8)
       )
       .force(
         "collide",
@@ -101,34 +103,55 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
 
   const ticked = Effect.gen(function* ($) {
     const circles = yield* $(node)
-    circles.attr("cx", (d) => xAccessor(d)).attr("cy", (d) => yAccessor(d))
+    circles
+      .transition()
+      .duration(2000)
+      .attr("cx", (d) => xAccessor(d))
+      .attr("cy", (d) => yAccessor(d))
 
     const lines = yield* $(link)
     lines
+      .transition()
+      .duration(2000)
       .attr("x1", (d) => xAccessor(d.source))
       .attr("y1", (d) => yAccessor(d.source))
       .attr("x2", (d) => xAccessor(d.target))
       .attr("y2", (d) => yAccessor(d.target))
   })
 
-  const singleTick = Effect.try(() => {
-    if (simRef.current) {
-      simRef.current.tick()
+  const runTicks = (n: number) =>
+    Effect.try(() => {
+      if (simRef.current) {
+        simRef.current.tick(n)
+      }
+    })
+
+  const simulate = Effect.gen(function* ($) {
+    if (!simulating.current) {
+      simulating.current = true
+      yield* $(runTicks(10))
+      yield* $(ticked)
+      simulating.current = false
     }
   })
 
   React.useEffect(() => {
-    FiberDataConsumer.createFiberUpdater(appRt, (infos: FiberInfo.FiberInfo[]) => {
-      dataRef.current = FiberGraph.updateFiberNodes(dataRef.current, infos)
-      const newGraph = FiberGraph.updateFiberGraph(graphData, dataRef.current)
-      if (simRef.current) {
-        simRef.current.nodes(newGraph.nodes).alphaTarget(1).restart()
-        // @ts-ignore
-        simRef.current.force("link").links(newGraph.links)
-        Runtime.runFork(appRt)(Effect.zipRight(ticked, Effect.repeatN(50)(singleTick)))
+    const updater = FiberDataConsumer.createFiberUpdater(
+      appRt,
+      (infos: FiberInfo.FiberInfo[]) => {
+        dataRef.current = FiberGraph.updateFiberNodes(dataRef.current, infos)
+        const newGraph = FiberGraph.updateFiberGraph(graphData, dataRef.current)
+        if (simRef.current) {
+          simRef.current.nodes(newGraph.nodes)
+          // @ts-ignore
+          simRef.current.force("link").links(newGraph.links)
+          Runtime.runFork(appRt)(simulate)
+        }
+        setGraphData(newGraph)
       }
-      setGraphData(newGraph)
-    })
+    )
+
+    return () => Runtime.runSync(appRt)(updater.fds.removeSubscription(updater.id))
   }, [appRt])
 
   const circles = (w: number, h: number) => (

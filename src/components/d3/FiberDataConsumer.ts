@@ -38,9 +38,5 @@ export const createFiberUpdater = (
     } as FiberUpdater
   })
 
-  const runner = Runtime.runSync(appRt)(updater)
-
-  Runtime.runPromise(appRt)(runner.fds.removeSubscription(runner.id)).then((_) => {
-    // do nothing
-  })
+  return Runtime.runSync(appRt)(updater)
 }
