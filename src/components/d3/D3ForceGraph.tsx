@@ -125,7 +125,7 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
         simRef.current.nodes(newGraph.nodes).alphaTarget(1).restart()
         // @ts-ignore
         simRef.current.force("link").links(newGraph.links)
-        Runtime.runFork(appRt)(Effect.zipRight(ticked, Effect.repeatN(200)(singleTick)))
+        Runtime.runFork(appRt)(Effect.zipRight(ticked, Effect.repeatN(50)(singleTick)))
       }
       setGraphData(newGraph)
     })

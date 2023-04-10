@@ -1,4 +1,5 @@
 import { RuntimeContext } from "@components/app/App"
+import { ContentBox } from "@components/contentbox/ContentBox"
 import { TableFiberIds } from "@components/tablefiberid/TableFiberId"
 import * as HashSet from "@effect/data/HashSet"
 import { Box } from "@mui/material"
@@ -7,6 +8,7 @@ import * as React from "react"
 import type * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
+import { D3ForceGraph } from "./D3ForceGraph"
 import * as FiberDataConsumer from "./FiberDataConsumer"
 
 export const FiberNavigator: React.FC<{}> = (props) => {
@@ -33,11 +35,29 @@ export const FiberNavigator: React.FC<{}> = (props) => {
         position: "relative",
       }}
     >
-      <TableFiberIds
-        available={HashSet.fromIterable(fibers.map((f) => f.id))}
-        selection={selected}
-        onSelect={(id) => setSelected(HashSet.make(id))}
-      ></TableFiberIds>
+      <Box
+        sx={{
+          width:"50%",
+          height: "100%",
+          display: "flex",
+        }}
+      >
+        <ContentBox>
+          <D3ForceGraph />
+        </ContentBox>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexGrow: 1,
+        }}
+      >
+        <TableFiberIds
+          available={HashSet.fromIterable(fibers.map((f) => f.id))}
+          selection={selected}
+          onSelect={(id) => setSelected(HashSet.make(id))}
+        ></TableFiberIds>
+      </Box>
     </Box>
     // <div>
     //   <div>
