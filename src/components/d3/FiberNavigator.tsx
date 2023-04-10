@@ -37,7 +37,7 @@ export const FiberNavigator: React.FC<{}> = (props) => {
     >
       <Box
         sx={{
-          width:"50%",
+          width: "50%",
           height: "100%",
           display: "flex",
         }}

@@ -1,6 +1,7 @@
 // Import React and D3Utils
-import * as React from "react"
 import { Box } from "@mui/material"
+import * as React from "react"
+
 import * as D3Utils from "./Utils"
 
 // Create SVGDimensions context to store the dimensions of the SVG element
@@ -33,8 +34,15 @@ export const SVGPanel: React.FC<React.PropsWithChildren<{}>> = (props) => {
   }, [dimensions, props.children])
 
   // Render the div with the SVG element
-  return <Box ref={ref} sx={{ 
-    width: "100%",
-    height: "100%"
-  }}>{element}</Box>
+  return (
+    <Box
+      ref={ref}
+      sx={{
+        width: "100%",
+        height: "100%",
+      }}
+    >
+      {element}
+    </Box>
+  )
 }
