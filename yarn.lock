@@ -278,17 +278,17 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@effect/data@^0.11.7", "@effect/data@~0.11.5":
+"@effect/data@^0.11.7", "@effect/data@~0.11.5", "@effect/data@~0.11.8":
   version "0.11.7"
   resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.11.7.tgz#c3b1c85dc8a7ddee467cdfc77bfe260a45dfae8f"
   integrity sha512-aMkSMpiBey3N4zewEs6XRf7S31meoErSqm9u3neXQ7re6lSfmvGQGrNckix+220Xh1rx7uCXWnQwvazSNMPREQ==
 
 "@effect/io@^0.19.0", "@effect/io@~0.19.2":
-  version "0.19.2"
-  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.19.2.tgz#43be6c90450984fb0464e2b9b4397cb56bfe3441"
-  integrity sha512-8h9rnVPf6afOO4a5NkgfOTdRMqgoyXYA9P1OKtj4IuFSstIf19TfBcJ2UYDGBAFMxWr36OjAOuz6gXZF87hzDQ==
+  version "0.19.3"
+  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.19.3.tgz#7a9832859d2bf6ebeda6e8d10539df3139f7f6f9"
+  integrity sha512-da5OwUrkdKxHZlBC+XdIu9+UhyI4IZ9pqN+ubnx7sePcBmIoL4OnTBXIKyHEC9YmuMGAuvdEqxx7icQHB9ZZNg==
   dependencies:
-    "@effect/data" "~0.11.5"
+    "@effect/data" "~0.11.8"
 
 "@effect/stream@^0.18.0":
   version "0.18.0"
