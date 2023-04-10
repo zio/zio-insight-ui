@@ -50,8 +50,8 @@ export const TableFiberIds: React.FC<TableFiberIdProps> = (props) => {
           overflow: "auto",
         }}
       >
-        <TableContainer>
-          <Table component={Paper}>
+        <TableContainer component={Paper}>
+          <Table>
             <TableHead>
               <TableRow>
                 <TableCell>

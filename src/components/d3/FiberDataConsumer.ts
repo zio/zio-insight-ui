@@ -7,7 +7,7 @@ import type * as AppLayer from "@core/AppLayer"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 import * as FiberDataService from "@core/metrics/services/FiberDataService"
 
-interface FiberUpdater {
+export interface FiberUpdater {
   fds: FiberDataService.FiberDataService
   id: string
   updater: Fiber.Fiber<unknown, void>
