@@ -1,133 +1,161 @@
 import * as App from "@components/app/App"
+import { ContentBox } from "@components/contentbox/ContentBox"
 import { TableMetricKeys } from "@components/tablemetrickey/TableMetricKey"
+import { useInsightTheme } from "@components/theme/InsightTheme"
 import { pipe } from "@effect/data/Function"
-import * as HS from "@effect/data/HashSet"
-import * as T from "@effect/io/Effect"
-import * as Ex from "@effect/io/Exit"
-import * as RT from "@effect/io/Runtime"
+import * as HashSet from "@effect/data/HashSet"
+import * as Option from "@effect/data/Option"
+import * as Effect from "@effect/io/Effect"
+import * as Exit from "@effect/io/Exit"
+import * as Runtime from "@effect/io/Runtime"
+import { Box, Button } from "@mui/material"
 import * as React from "react"
 
 import type { InsightKey } from "@core/metrics/model/zio/metrics/MetricKey"
 import * as GDM from "@core/metrics/services/GraphDataManager"
 import * as Insight from "@core/metrics/services/InsightService"
 
-import { Scrollable } from "../scrollable/Scrollable"
-
 export interface ChartConfigPanelProps {
-  id: string
+  id: Option.Option<string>
   onDone: (_: string) => void
 }
 
 export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
   const appRt = React.useContext(App.RuntimeContext)
+  const theme = useInsightTheme()
 
-  const closeHandler = () => {
-    props.onDone(props.id)
+  const closeHandler = (id: string) => () => {
+    props.onDone(id)
   }
 
-  const [available, setAvailable] = React.useState<HS.HashSet<InsightKey>>(HS.empty)
-  const [selected, setSelected] = React.useState<HS.HashSet<InsightKey>>(HS.empty)
+  const [available, setAvailable] = React.useState<HashSet.HashSet<InsightKey>>(
+    HashSet.empty
+  )
+  const [selected, setSelected] = React.useState<HashSet.HashSet<InsightKey>>(
+    HashSet.empty
+  )
 
   const availableKeys = pipe(
     Insight.getMetricKeys,
-    T.catchAll((_) => T.succeed(HS.empty<InsightKey>()))
+    Effect.catchAll((_) => Effect.succeed(HashSet.empty<InsightKey>()))
   )
 
-  const applySelection = () => {
-    RT.runPromise(appRt)(
-      T.gen(function* ($) {
+  const applySelection = (id: string) => () => {
+    Runtime.runPromise(appRt)(
+      Effect.gen(function* ($) {
         const gdm = yield* $(GDM.GraphDataManager)
         yield* $(
           pipe(
-            gdm.lookup(props.id),
-            T.flatMap((svc) => svc.setMetrics(selected)),
-            T.catchAll((_) =>
-              T.sync(() => {
+            gdm.lookup(id),
+            Effect.flatMap((svc) => svc.setMetrics(selected)),
+            Effect.catchAll((_) =>
+              Effect.sync(() => {
                 /* ignore */
               })
             )
           )
         )
       })
-    ).then((_) => closeHandler())
+    ).then((_) => closeHandler(id)())
   }
 
-  const initialSelection = T.gen(function* ($) {
-    const gdm = yield* $(GDM.GraphDataManager)
-    const keys = yield* $(
+  const initialSelection = Effect.gen(function* ($) {
+    const keysById = (id: string) =>
       pipe(
-        gdm.lookup(props.id),
-        T.flatMap((svc) => svc.metrics()),
-        T.catchAll((_) => T.sync(() => HS.empty<InsightKey>()))
+        gdm.lookup(id),
+        Effect.flatMap((svc) => svc.metrics()),
+        Effect.catchAll((_) => Effect.succeed(HashSet.empty<InsightKey>()))
       )
-    )
-    return keys
+
+    const gdm = yield* $(GDM.GraphDataManager)
+    switch (props.id._tag) {
+      case "None":
+        return HashSet.empty<InsightKey>()
+      case "Some":
+        return yield* $(keysById(props.id.value))
+    }
   })
 
   React.useEffect(() => {
-    RT.runCallback(appRt)(pipe(availableKeys, T.zip(initialSelection)), (e) => {
-      if (Ex.isSuccess(e)) {
-        const [allKeys, selection] = e.value
-        setAvailable(allKeys)
-        setSelected(selection)
-      } else {
-        console.log(e.cause)
-      }
+    Runtime.runCallback(appRt)(
+      pipe(availableKeys, Effect.zip(initialSelection)),
+      (e) => {
+        if (Exit.isSuccess(e)) {
+          const [allKeys, selection] = e.value
+          setAvailable(allKeys)
+          setSelected(selection)
+        } else {
+          console.log(e.cause)
+        }
 
-      return () => {
-        try {
-          /* ignore */
-        } catch {
-          /* ignore */
+        return () => {
+          try {
+            /* ignore */
+          } catch {
+            /* ignore */
+          }
         }
       }
-    })
+    )
   }, [props.id])
 
   const updateSelected = (k: InsightKey) =>
     setSelected((curr) => {
       const newSelection = (() => {
-        if (HS.some(curr, (e) => e.id == k.id)) {
-          return HS.filter(curr, (e) => e.id != k.id)
+        if (HashSet.some(curr, (e) => e.id == k.id)) {
+          return HashSet.filter(curr, (e) => e.id != k.id)
         } else {
-          return HS.add(curr, k)
+          return HashSet.add(curr, k)
         }
       })()
 
       return newSelection
     })
 
+  const confirmSelection = () => {
+    const mbBox = Option.map(props.id, (id) => {
+      return (
+        <Box
+          sx={{
+            padding: `${theme.padding.small}px`,
+            flexGrow: 0,
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <Button variant="contained" color="secondary" onClick={closeHandler(id)}>
+            Discard Changes
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={HashSet.size(selected) == 0}
+            onClick={applySelection(id)}
+          >
+            Apply Changes
+          </Button>
+        </Box>
+      )
+    })
+
+    return Option.getOrElse(mbBox, () => <> </>)
+  }
+
   return (
-    <div className="w-full h-full flex flex-col justify-items-stretch">
-      <div className="flex flex-col mb-2">
-        <div className="flex flex-row">
-          <input type="text" />
-          <input type="text" />
-        </div>
-        <div className="flex flex-row">
-          <input type="text" />
-        </div>
-      </div>
-      <Scrollable>
+    <ContentBox>
+      <Box
+        sx={{
+          flex: "1 1 auto",
+          overflow: "auto",
+        }}
+      >
         <TableMetricKeys
           available={available}
           selection={selected}
           onSelect={updateSelected}
         ></TableMetricKeys>
-      </Scrollable>
-      <div className="m-2 flex-none flex flex-row justify-end">
-        <span className="btn btn-neutral" onClick={closeHandler}>
-          Discard Changes
-        </span>
-        <span
-          className={`ml-2 btn ${
-            HS.size(selected) > 0 ? "btn-primary" : "btn-disabled"
-          }`}
-          onClick={applySelection}
-        >
-          {HS.size(selected) > 0 ? "Apply Changes" : "Nothing Selected"}
-        </span>
-      </div>
-    </div>
+      </Box>
+      {confirmSelection()}
+    </ContentBox>
   )
 }

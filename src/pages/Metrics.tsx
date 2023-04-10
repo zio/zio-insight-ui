@@ -1,5 +1,6 @@
 import { ChartConfigPanel } from "@components/chart/ChartConfigPanel"
 import { GridFrame } from "@components/gridframe/GridFrame"
+import * as Option from "@effect/data/Option"
 import * as React from "react"
 
 export function Metrics() {
@@ -21,7 +22,7 @@ export function Metrics() {
       content={<></>}
       config={
         <ChartConfigPanel
-          id="foo"
+          id={Option.none()}
           onDone={(_) => {
             /* ignore */
           }}

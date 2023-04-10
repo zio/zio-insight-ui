@@ -1,4 +1,5 @@
 // Import React and D3Utils
+import { Box } from "@mui/material"
 import * as React from "react"
 
 import * as D3Utils from "./Utils"
@@ -34,8 +35,14 @@ export const SVGPanel: React.FC<React.PropsWithChildren<{}>> = (props) => {
 
   // Render the div with the SVG element
   return (
-    <div ref={ref} className="grow h-full flex relative">
+    <Box
+      ref={ref}
+      sx={{
+        width: "100%",
+        height: "100%",
+      }}
+    >
       {element}
-    </div>
+    </Box>
   )
 }

@@ -1,4 +1,15 @@
 import * as HS from "@effect/data/HashSet"
+import {
+  Box,
+  Chip,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material"
 import React from "react"
 
 import * as MK from "@core/metrics/model/zio/metrics/MetricKey"
@@ -22,28 +33,30 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
   }
 
   return (
-    <>
-      <table className="table table-zebra table-compact w-full">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Metric Type</th>
-            <th>Name</th>
-            <th>Labels</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((k) => (
-            <RowMetricKey
-              key={k.id}
-              metricKey={k}
-              checked={isSelected(k)(props.selection)}
-              toggled={() => props.onSelect(k)}
-            />
-          ))}
-        </tbody>
-      </table>
-    </>
+    <Box component={Paper}>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell></TableCell>
+              <TableCell>Metric Type</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Labels</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sorted.map((k) => (
+              <RowMetricKey
+                key={k.id}
+                metricKey={k}
+                checked={isSelected(k)(props.selection)}
+                toggled={() => props.onSelect(k)}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   )
 }
 
@@ -54,8 +67,8 @@ interface RowMetricKeyProps {
 }
 
 const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
-  <tr className="hover">
-    <td>
+  <TableRow>
+    <TableCell>
       <input
         type="checkbox"
         checked={props.checked}
@@ -63,15 +76,21 @@ const RowMetricKey: React.FC<RowMetricKeyProps> = (props) => (
           props.toggled(props.metricKey)
         }}
       ></input>
-    </td>
-    <td>{props.metricKey.key.metricType}</td>
-    <td>{props.metricKey.key.name}</td>
-    <td>
+    </TableCell>
+    <TableCell>{props.metricKey.key.metricType}</TableCell>
+    <TableCell>{props.metricKey.key.name}</TableCell>
+    <TableCell>
       {props.metricKey.key.labels.map((l) => (
-        <span className="badge" key={l.key}>
-          {l.key}={l.value}
-        </span>
+        <Chip
+          key={l.key}
+          label={`${l.key}=${l.value}`}
+          color="primary"
+          variant="outlined"
+          sx={{
+            mx: "2px",
+          }}
+        />
       ))}
-    </td>
-  </tr>
+    </TableCell>
+  </TableRow>
 )
