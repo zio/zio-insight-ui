@@ -4,7 +4,7 @@ import * as Runtime from "@effect/io/Runtime"
 import * as d3 from "d3"
 import * as React from "react"
 
-import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
+import * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
 import { Circle, Line } from "./Circle"
 import * as FiberDataConsumer from "./FiberDataConsumer"
@@ -12,7 +12,12 @@ import * as FiberGraph from "./FiberGraph"
 import * as SVGPanel from "./SvgPanel"
 import * as D3Utils from "./Utils"
 
-export const D3ForceGraph: React.FC<{}> = (props) => {
+export interface FiberForceGraphProps {
+  activeOnly: boolean
+  pinned: number[]
+}
+
+export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
   const appRt = React.useContext(RuntimeContext)
   // The state is the data backing the actual graph
   const [graphData, setGraphData] = React.useState<FiberGraph.FiberGraph>({
@@ -40,8 +45,8 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
 
   const colorScale = d3
     .scaleOrdinal<string>()
-    .domain(["Succeeded", "Errored", "Running", "Suspended", "Root", "Unknown"])
-    .range(["green", "red", "cornflowerblue", "gold", "gray", "gray"])
+    .domain(FiberInfo.FiberStates)
+    .range(["gray", "gold", "cornflowerblue", "green", "red"])
 
   const simulation = () => {
     const [w, h] = D3Utils.boundedDimensions(dimensions.current)
@@ -89,7 +94,6 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
       })
       .attr("stroke", "cyan")
       .attr("stroke-width", 1)
-      .attr("fill", (d) => colorScale(FiberGraph.stateAccessor(d)))
   })
 
   const link = Effect.gen(function* ($) {
@@ -105,14 +109,15 @@ export const D3ForceGraph: React.FC<{}> = (props) => {
     const circles = yield* $(node)
     circles
       .transition()
-      .duration(2000)
+      .duration(3000)
       .attr("cx", (d) => xAccessor(d))
       .attr("cy", (d) => yAccessor(d))
+      .attr("fill", (d) => colorScale(FiberInfo.stateAsString(d.fiber)))
 
     const lines = yield* $(link)
     lines
       .transition()
-      .duration(2000)
+      .duration(3000)
       .attr("x1", (d) => xAccessor(d.source))
       .attr("y1", (d) => yAccessor(d.source))
       .attr("x2", (d) => xAccessor(d.target))

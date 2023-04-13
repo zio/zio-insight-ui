@@ -1,7 +1,7 @@
 import { RuntimeContext } from "@components/app/App"
 import { ContentBox } from "@components/contentbox/ContentBox"
 import { StackTrace } from "@components/stacktrace/StackTrace"
-import { TableFiberIds } from "@components/tablefiberid/TableFiberId"
+import { TableFiberInfo } from "@components/tablefiberinfo/TableFiberInfo"
 import * as HashSet from "@effect/data/HashSet"
 import * as Runtime from "@effect/io/Runtime"
 import { Box } from "@mui/material"
@@ -10,7 +10,7 @@ import * as React from "react"
 import type * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
-import { D3ForceGraph } from "./D3ForceGraph"
+import { FiberForceGraph } from "./FiberForceGraph"
 import * as FiberDataConsumer from "./FiberDataConsumer"
 
 export const FiberNavigator: React.FC<{}> = (props) => {
@@ -52,7 +52,7 @@ export const FiberNavigator: React.FC<{}> = (props) => {
         }}
       >
         <ContentBox>
-          <D3ForceGraph />
+          <FiberForceGraph activeOnly={false} pinned={[]}/>
         </ContentBox>
       </Box>
       <Box
@@ -68,11 +68,11 @@ export const FiberNavigator: React.FC<{}> = (props) => {
             height: "50%",
           }}
         >
-          <TableFiberIds
-            available={HashSet.fromIterable(fibers.map((f) => f.id))}
+          <TableFiberInfo
+            available={HashSet.fromIterable(fibers)}
             selection={selected}
             onSelect={(id) => setSelected(HashSet.make(id))}
-          ></TableFiberIds>
+          ></TableFiberInfo>
         </Box>
         <Box
           sx={{

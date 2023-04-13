@@ -27,10 +27,6 @@ const createNode = (info: FiberInfo.FiberInfo) => {
 }
 
 export const idAccessor = (f: FiberNode) => f.fiber.id.id
-export const stateAccessor = (f: FiberNode) => {
-  const keys = Object.keys(f.fiber.status)
-  return keys.length > 0 ? keys[0] : "Unknown"
-}
 
 const rootId = {
   id: -1,

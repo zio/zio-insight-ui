@@ -1,6 +1,7 @@
 import staticKeys from "@data/keys.json"
 import staticFibers from "@data/sampleFibers.json"
 import staticStates from "@data/state.json"
+import staticTrace from "@data/sampleTrace.json"
 import * as C from "@effect/data/Chunk"
 import * as Ctx from "@effect/data/Context"
 import { pipe } from "@effect/data/Function"
@@ -9,9 +10,10 @@ import * as T from "@effect/io/Effect"
 import * as L from "@effect/io/Layer"
 import { Request } from "@services/Services"
 
-import type {
+import {
   FiberInfo,
   InvalidFibers,
+  fiberFromInsight,
 } from "@core/metrics/model/insight/fibers/FiberInfo"
 import { fibersFromInsight } from "@core/metrics/model/insight/fibers/FiberInfo"
 import type {
@@ -82,7 +84,18 @@ function makeLiveMetrics(): InsightService {
       T.flatMap(fibersFromInsight),
       T.tap((fibers) => T.logInfo(`Got ${fibers.length} fiber infos from server`))
     ),
-    fiberTrace: (f: FiberInfo) => T.succeed(f),
+    fiberTrace: (f: FiberInfo) => pipe(
+      Request.request(`${baseUrl}/fibers/${f.id.id}`),
+      T.flatMap(Request.jsonFromResponse),
+      T.flatMap(fiberFromInsight),
+      T.tap((fiber) => T.logInfo(`Got a fiber trace from server`)),
+      T.catchAll( (_) => T.succeed({ 
+        id: f.id,
+        parent: f.parent,
+        status: f.status,
+        trace: []
+      } as FiberInfo))
+    )
   }
 }
 
@@ -105,7 +118,18 @@ export const dev: L.Layer<never, never, InsightService> = L.effect(
         )
       ),
     getFibers: pipe(T.succeed(staticFibers), T.flatMap(fibersFromInsight)),
-    fiberTrace: (f: FiberInfo) => T.succeed(f),
+    fiberTrace: (f: FiberInfo) => pipe(
+      T.succeed(staticTrace),
+      T.flatMap(fiberFromInsight),
+      T.map(res => {
+        return {
+          id: f.id,
+          parent: f.parent,
+          status: f.status,
+          trace: res.trace
+        } as FiberInfo
+      })
+    )
   })
 )
 

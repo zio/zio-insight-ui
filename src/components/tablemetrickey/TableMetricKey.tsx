@@ -1,4 +1,5 @@
 import { ContentBox } from "@components/contentbox/ContentBox"
+import { FilterField } from "@components/filterfield /FilterField"
 import { useInsightTheme } from "@components/theme/InsightTheme"
 import * as HS from "@effect/data/HashSet"
 import {
@@ -12,7 +13,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material"
 import * as React from "react"
@@ -34,7 +34,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
   const theme = useInsightTheme()
   const sorted = [...props.available].sort((a, b) => MK.OrdInsightKey.compare(a, b))
 
-  const [keyFilter, setKeyFilter] = React.useState<string>("")
+  const [keyFilter, setKeyFilter] = React.useState<string[]>([])
 
   const isSelected = (k: MK.InsightKey) => (selection: HS.HashSet<MK.InsightKey>) => {
     return HS.some(selection, (e) => e.id == k.id)
@@ -48,8 +48,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
 
   const isIncluded = (k: MK.InsightKey) => {
     const sKey = MK.keyAsString(k.key)
-    const words = keyFilter.split(/\s+/).filter((s) => s.trim().length > 0)
-    const match = words.reduce<boolean>((acc, s) => acc && sKey.includes(s), true)
+    const match = keyFilter.reduce<boolean>((acc, s) => acc && sKey.includes(s), true)
 
     return isSelected(k)(props.selection) || match
   }
@@ -62,15 +61,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
           padding: `${theme.padding.medium}px`,
         }}
       >
-        <TextField
-          label={"Add a filter phrase"}
-          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-            setKeyFilter(evt.target.value)
-          }}
-          sx={{
-            width: "100%",
-          }}
-        ></TextField>
+        <FilterField onFilterChange={(words) => setKeyFilter(words)} sx={{ width: "100%" }}/>
       </Box>
       <Box
         sx={{
@@ -80,7 +71,7 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
         }}
       >
         <TableContainer component={Paper}>
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow>
                 <TableCell></TableCell>
