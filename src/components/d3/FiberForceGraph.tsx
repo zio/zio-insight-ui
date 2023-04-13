@@ -11,19 +11,20 @@ import * as FiberDataConsumer from "./FiberDataConsumer"
 import * as FiberGraph from "./FiberGraph"
 import * as SVGPanel from "./SvgPanel"
 import * as D3Utils from "./Utils"
+import { useInsightTheme } from "@components/theme/InsightTheme"
+import * as FiberFilter from "./FiberFilter"
 
 export interface FiberForceGraphProps {
-  activeOnly: boolean
-  pinned: number[]
+  filter: FiberFilter.FiberFilterParams
 }
 
 export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
   const appRt = React.useContext(RuntimeContext)
+  const theme = useInsightTheme()
+
   // The state is the data backing the actual graph
-  const [graphData, setGraphData] = React.useState<FiberGraph.FiberGraph>({
-    nodes: [],
-    links: [],
-  })
+  const [graphData, setGraphData] = React.useState<FiberGraph.FiberGraph>(FiberGraph.emptyFiberGraph)
+
   // We keep a shadow copy of the data in a ref, so we can use it to determine node updates and removals
   const dataRef = React.useRef<FiberGraph.FiberNode[]>([])
 
@@ -46,7 +47,13 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
   const colorScale = d3
     .scaleOrdinal<string>()
     .domain(FiberInfo.FiberStates)
-    .range(["gray", "gold", "cornflowerblue", "green", "red"])
+    .range([
+      theme.status.Root, 
+      theme.status.Suspended,
+      theme.status.Running,
+      theme.status.Succeeded,
+      theme.status.Errored
+    ])
 
   const simulation = () => {
     const [w, h] = D3Utils.boundedDimensions(dimensions.current)
@@ -134,7 +141,7 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
   const simulate = Effect.gen(function* ($) {
     if (!simulating.current) {
       simulating.current = true
-      yield* $(runTicks(10))
+      yield* $(runTicks(25))
       yield* $(ticked)
       simulating.current = false
     }
@@ -144,7 +151,10 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
     const updater = FiberDataConsumer.createFiberUpdater(
       appRt,
       (infos: FiberInfo.FiberInfo[]) => {
-        dataRef.current = FiberGraph.updateFiberNodes(dataRef.current, infos)
+        dataRef.current = FiberGraph.updateFiberNodes(
+          dataRef.current, 
+          infos.filter(f => FiberFilter.matchFiber(props.filter)(f))
+        )
         const newGraph = FiberGraph.updateFiberGraph(graphData, dataRef.current)
         if (simRef.current) {
           simRef.current.nodes(newGraph.nodes)
@@ -157,7 +167,7 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
     )
 
     return () => Runtime.runSync(appRt)(updater.fds.removeSubscription(updater.id))
-  }, [appRt])
+  }, [appRt, props])
 
   const circles = (w: number, h: number) => (
     <>

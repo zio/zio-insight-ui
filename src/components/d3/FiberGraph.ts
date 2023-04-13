@@ -18,6 +18,11 @@ export interface FiberGraph {
   links: FiberLink[]
 }
 
+export const emptyFiberGraph = {
+  nodes: [],
+  links: []
+} as FiberGraph
+
 const createNode = (info: FiberInfo.FiberInfo) => {
   return {
     id: info.id.id,

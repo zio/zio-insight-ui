@@ -7,6 +7,13 @@ export interface InsightTheme extends Theme {
     drawerClosed: number
     drawerOpen: number
   }
+  status: {
+    Root: string
+    Suspended: string
+    Running: string
+    Succeeded: string
+    Errored: string
+  }
   padding: {
     large: number
     medium: number
@@ -37,6 +44,13 @@ export const insightTheme: InsightTheme = {
   dimensions: {
     drawerClosed: 56,
     drawerOpen: 240,
+  },
+  status: {
+    Root: "gray",
+    Suspended: "gold",
+    Running: "cornflowerblue",
+    Succeeded: "green",
+    Errored: "red"
   },
   padding: {
     large: 16,

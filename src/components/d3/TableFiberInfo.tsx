@@ -1,9 +1,7 @@
-import { ContentBox } from "@components/contentbox/ContentBox"
 import { useInsightTheme } from "@components/theme/InsightTheme"
 import * as HashSet from "@effect/data/HashSet"
 import {
   Box,
-  FormControlLabel,
   Paper,
   Switch,
   Table,
@@ -18,7 +16,7 @@ import React from "react"
 
 import * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 import * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
-import { FilterField } from "@components/filterfield /FilterField"
+import { FiberFilterParams } from "./FiberFilter"
 
 /**
  * A component for rendering available metric keys in a table. Effectively this
@@ -26,9 +24,7 @@ import { FilterField } from "@components/filterfield /FilterField"
 interface TableFiberInfoProps {
   available: HashSet.HashSet<FiberInfo.FiberInfo>
   // The initially selected keys
-  selection: HashSet.HashSet<FiberId.FiberId>
-  // a Callback that can be used to change the selection state
-  onSelect: (key: FiberId.FiberId) => void
+  filter: FiberFilterParams
 }
 
 export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
@@ -42,36 +38,10 @@ export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
       return HashSet.some(selection, (e) => e.id == k.id)
     }
 
-  const [activeOnly, setActiveOnly] = React.useState<boolean>(false)
-  const toggleActiveOnly = () => setActiveOnly(!activeOnly)
-
-  const [fiberFilter, setFiberFilter] = React.useState<string[]>([])
-
   return (
-    <ContentBox>
-      <Box component={Paper} sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        padding: `${theme.padding.medium}px`
-      }}>
-        <FormControlLabel 
-          label="Active only" 
-          control={
-            <Switch 
-              onChange={toggleActiveOnly} 
-              checked={activeOnly} 
-             color="secondary"/>
-          } 
-          sx={{
-          flexGrow: 0
-          }}></FormControlLabel>
-        <FilterField onFilterChange={(words : string[]) => setFiberFilter(words)} sx={{ 
-          width: "100%"
-        }}/>
-      </Box>
       <Box
         sx={{
-          mt: `${theme.padding.medium}px`,
+          px: `${theme.padding.medium}px`,
           flex: "1 1 auto",
           overflow: "auto",
         }}
@@ -92,22 +62,19 @@ export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
                 <RowMetricKey
                   key={k.id.id}
                   fiber={k}
-                  checked={isSelected(k.id)(props.selection)}
-                  toggled={() => props.onSelect(k.id)}
+                  checked={isSelected(k.id)(HashSet.empty())}
                 />
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Box>
-    </ContentBox>
   )
 }
 
 interface RowFiberIdProps {
   fiber: FiberInfo.FiberInfo
   checked: boolean
-  toggled: (k: FiberId.FiberId) => void
 }
 
 const RowMetricKey: React.FC<RowFiberIdProps> = (props) => {
