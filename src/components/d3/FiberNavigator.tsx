@@ -6,7 +6,7 @@ import * as HashSet from "@effect/data/HashSet"
 import * as Runtime from "@effect/io/Runtime"
 import { Box } from "@mui/material"
 import * as React from "react"
-import { FiberFilter, FiberFilterParams} from "./FiberFilter"
+import * as FiberFilter from "./FiberFilter"
 
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
@@ -16,31 +16,50 @@ import { useInsightTheme } from "@components/theme/InsightTheme"
 
 export const FiberNavigator: React.FC<{}> = (props) => {
   const appRt = React.useContext(RuntimeContext)
+  const fiberConsumer = React.useRef<FiberDataConsumer.FiberUpdater | undefined>(undefined)
+
   const theme = useInsightTheme()
 
   const [fibers, setFibers] = React.useState<FiberInfo.FiberInfo[]>([])
 
-  const [fiberFilter, setFiberFilter] = React.useState<FiberFilterParams>({
+  const [fiberFilter, setFiberFilter] = React.useState<FiberFilter.FiberFilterParams>({
     activeOnly: false,
     filterWords: [],
-    matchWords: false,
+    matchWords: true,
+    root: undefined,
     selected: HashSet.empty(),
     pinned: HashSet.empty(),
     traced: HashSet.empty()
   })
 
+  const rootSelected = (f: FiberInfo.FiberInfo, sel: boolean) => {
+    setFiberFilter({
+      ...fiberFilter,
+      root: sel ? f : undefined
+    })
+  }
+
+  const clearUpdater = () => { 
+    if (fiberConsumer.current !== undefined) { 
+      Runtime.runSync(appRt)(fiberConsumer.current.fds.removeSubscription(fiberConsumer.current.id))
+    } 
+    fiberConsumer.current = undefined
+  }
+
   React.useEffect(() => {
-    const updater = FiberDataConsumer.createFiberUpdater(
+    clearUpdater()
+    fiberConsumer.current = FiberDataConsumer.createFiberUpdater(
       appRt,
       (infos: FiberInfo.FiberInfo[]) => {
-        setFibers(infos)
+        const filtered = infos.filter(f => FiberFilter.matchFiber(fiberFilter)(f))
+        setFibers(filtered)
       }
     )
 
     return () => {
-      Runtime.runSync(appRt)(updater.fds.removeSubscription(updater.id))
+      clearUpdater()
     }
-  }, [appRt])
+  }, [appRt, fiberFilter])
 
   return (
     <Box
@@ -83,11 +102,12 @@ export const FiberNavigator: React.FC<{}> = (props) => {
           <Box sx={{
             padding: `${theme.padding.medium}px`
           }}>
-            <FiberFilter filter={fiberFilter} onFilterChange={setFiberFilter}></FiberFilter>
+            <FiberFilter.FiberFilter filter={fiberFilter} onFilterChange={setFiberFilter}></FiberFilter.FiberFilter>
           </Box>
           <TableFiberInfo
-            available={HashSet.fromIterable(fibers)}
+            available={fibers}
             filter={fiberFilter}
+            onRootSelect={rootSelected}
           ></TableFiberInfo>
         </Box>
         <Box

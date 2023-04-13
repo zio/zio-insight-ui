@@ -113,10 +113,11 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
   })
 
   const ticked = Effect.gen(function* ($) {
+    const duration = 2500
     const circles = yield* $(node)
     circles
       .transition()
-      .duration(3000)
+      .duration(duration)
       .attr("cx", (d) => xAccessor(d))
       .attr("cy", (d) => yAccessor(d))
       .attr("fill", (d) => colorScale(FiberInfo.stateAsString(d.fiber)))
@@ -124,7 +125,7 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
     const lines = yield* $(link)
     lines
       .transition()
-      .duration(3000)
+      .duration(duration)
       .attr("x1", (d) => xAccessor(d.source))
       .attr("y1", (d) => yAccessor(d.source))
       .attr("x2", (d) => xAccessor(d.target))
@@ -133,16 +134,22 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
 
   const runTicks = (n: number) =>
     Effect.try(() => {
-      if (simRef.current) {
-        simRef.current.tick(n)
-      }
+    if (simRef.current) {
+      simRef.current.tick(n)
+    }
     })
 
-  const simulate = Effect.gen(function* ($) {
+  const simulate = (newGraph: FiberGraph.FiberGraph) => Effect.gen(function* ($) {
     if (!simulating.current) {
       simulating.current = true
-      yield* $(runTicks(25))
-      yield* $(ticked)
+      if (simRef.current) { 
+        simRef.current.nodes(newGraph.nodes).alphaTarget(0.0015).restart()
+        // @ts-ignore
+        simRef.current.force("link").links(newGraph.links)
+        yield* $(runTicks(10))
+        yield* $(ticked)
+        setGraphData(newGraph)
+      }
       simulating.current = false
     }
   })
@@ -156,13 +163,7 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
           infos.filter(f => FiberFilter.matchFiber(props.filter)(f))
         )
         const newGraph = FiberGraph.updateFiberGraph(graphData, dataRef.current)
-        if (simRef.current) {
-          simRef.current.nodes(newGraph.nodes)
-          // @ts-ignore
-          simRef.current.force("link").links(newGraph.links)
-          Runtime.runFork(appRt)(simulate)
-        }
-        setGraphData(newGraph)
+        Runtime.runPromise(appRt)(simulate(newGraph))
       }
     )
 

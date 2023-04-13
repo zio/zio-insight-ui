@@ -43,19 +43,30 @@ export const live = Layer.effect(
       subscriptions: Ref.Ref<HashSet.HashSet<string>>,
       insight: Insight.InsightService
     ): FiberDataService {
-      const subscribe = () =>
-        Effect.gen(function* ($) {
-          const id = yield* $(idSvc.nextId("fds"))
-          const stream = Stream.fromHub(fiberInfoHub)
-          yield* $(Ref.update(subscriptions, (s) => HashSet.add(s, id)))
-          return [id, stream] as [string, Stream.Stream<never, never, F.FiberInfo[]>]
-        })
 
       const unsubscribe = (id: string) =>
         Ref.update(subscriptions, (s) => HashSet.remove(s, id))
 
       const subscriptionIds = () =>
         pipe(Ref.get(subscriptions), Effect.map(HashSet.fromIterable))
+
+      const hasSubscription = (id: string) => {
+        return pipe(
+          Ref.get(subscriptions),
+          Effect.map(ids => HashSet.has(ids, id))
+        )
+      }
+
+      const subscribe = () =>
+        Effect.gen(function* ($) {
+          const id = yield* $(idSvc.nextId("fds"))
+          yield* $(Ref.update(subscriptions, (s) => HashSet.add(s, id)))
+          const stream = Stream.takeUntilEffect((_) => pipe(
+            hasSubscription(id),
+            Effect.map(r => !r)
+          ))(Stream.fromHub(fiberInfoHub))
+          return [id, stream] as [string, Stream.Stream<never, never, F.FiberInfo[]>]
+        })
 
       const pollFiberData = () =>
         Effect.gen(function* ($) {

@@ -5,11 +5,13 @@ import { Box, FormControlLabel,  Paper, Switch  } from "@mui/material"
 import { FilterField } from "@components/filterfield /FilterField"
 import * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 import * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
+import { SelectedRoot } from "./SelectedRoot"
 
 export interface FiberFilterParams { 
   activeOnly : boolean
   filterWords: string[]
   matchWords: boolean
+  root: FiberInfo.FiberInfo | undefined
   selected: HashSet.HashSet<number>
   pinned: HashSet.HashSet<number>
   traced: HashSet.HashSet<number>
@@ -26,7 +28,7 @@ export const matchFiber = (filter: FiberFilterParams) => (f: FiberInfo.FiberInfo
   
   const res = (isActive || inSelection) ? (() => {
     if (filter.matchWords) { 
-      const loc = FiberId.formatLocation(f.id.location) 
+      const loc = FiberId.formatLocation(f.id) 
       return filter.filterWords.reduce(
         (cur, w) => {return cur && loc.includes(w)}, true
       )
@@ -34,8 +36,6 @@ export const matchFiber = (filter: FiberFilterParams) => (f: FiberInfo.FiberInfo
       return true
     }
   })() : inSelection
-
-  //console.log(`${JSON.stringify(f.id)} -- ${JSON.stringify(filter)} -- ${FiberInfo.stateAsString(f)} -- ${isActive} -- ${inSelection} -- ${res}`)
 
   return res
 }
@@ -50,7 +50,6 @@ export const FiberFilter : React.FC<FiberFilterProps> = (props) => {
 
   const filterChanged = (newFilter: FiberFilterParams) => 
     {
-      console.log(JSON.stringify(newFilter))
       if (props.onFilterChange) props.onFilterChange(newFilter)
     }
 
@@ -68,27 +67,40 @@ export const FiberFilter : React.FC<FiberFilterProps> = (props) => {
     })
   }
 
+  const clearRoot = () => {
+    filterChanged({
+      ...props.filter,
+      root: undefined
+    })
+  }
+
   return (
-    <Box component={Paper} sx={{
-      display: 'flex',
-      flexDirection: 'row',
-      padding: `${theme.padding.medium}px`
+    <Box component ={Paper} sx={{
+      display: "flex",
+      flexDirection: "column",
+      padding: `${theme.padding.medium}px`  
     }}>
-      <FormControlLabel 
-        label="Active only" 
-        control={
-          <Switch
-            onChange={toggleActiveOnly} 
-            checked={props.filter.activeOnly} 
-           color="secondary"/>
-        } 
-        sx={{
-        flexGrow: 0
-        }}></FormControlLabel>
-      <FilterField 
-        onFilterChange={(words : string[]) => setFilterPhrase(words)} sx={{ 
-          width: "100%"
-        }}/>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'row',
+      }}>
+        <FormControlLabel 
+          label="Active only" 
+          control={
+            <Switch
+              onChange={toggleActiveOnly} 
+              checked={props.filter.activeOnly} 
+            color="secondary"/>
+          } 
+          sx={{
+          flexGrow: 0
+          }}></FormControlLabel>
+        <FilterField 
+          onFilterChange={(words : string[]) => setFilterPhrase(words)} sx={{ 
+            width: "100%"
+          }}/>
+      </Box>
+      { props.filter.root ? <SelectedRoot fiber={props.filter.root} onClear={clearRoot}/> : <></>}
     </Box>
   )
 }

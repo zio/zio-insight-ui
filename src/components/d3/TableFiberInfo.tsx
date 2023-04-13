@@ -1,7 +1,8 @@
 import { useInsightTheme } from "@components/theme/InsightTheme"
-import * as HashSet from "@effect/data/HashSet"
 import {
   Box,
+  Checkbox,
+  Chip,
   Paper,
   Switch,
   Table,
@@ -10,8 +11,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material"
-import * as dateFns from "date-fns"
 import React from "react"
 
 import * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
@@ -22,9 +23,10 @@ import { FiberFilterParams } from "./FiberFilter"
  * A component for rendering available metric keys in a table. Effectively this
  */
 interface TableFiberInfoProps {
-  available: HashSet.HashSet<FiberInfo.FiberInfo>
+  available: FiberInfo.FiberInfo[]
   // The initially selected keys
-  filter: FiberFilterParams
+  filter: FiberFilterParams,
+  onRootSelect:  (_:FiberInfo.FiberInfo, selected: boolean) => void
 }
 
 export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
@@ -34,8 +36,8 @@ export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
 
   // A function that checks if a key is selected
   const isSelected =
-    (k: FiberId.FiberId) => (selection: HashSet.HashSet<FiberId.FiberId>) => {
-      return HashSet.some(selection, (e) => e.id == k.id)
+    (k: FiberId.FiberId) => (filter: FiberFilterParams) => {
+      return filter.root !== undefined && k.id == filter.root.id.id
     }
 
   return (
@@ -50,6 +52,7 @@ export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
           <Table size="small">
             <TableHead>
               <TableRow>
+                <TableCell><Chip label={`${props.available.length}`} color="secondary" /></TableCell>
                 <TableCell>FiberId</TableCell>
                 <TableCell>Started At</TableCell>
                 <TableCell>Location</TableCell>
@@ -62,7 +65,8 @@ export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
                 <RowMetricKey
                   key={k.id.id}
                   fiber={k}
-                  checked={isSelected(k.id)(HashSet.empty())}
+                  checked={isSelected(k.id)(props.filter)}
+                  onChecked={(f, c) => props.onRootSelect(f,c)}
                 />
               ))}
             </TableBody>
@@ -74,20 +78,17 @@ export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
 
 interface RowFiberIdProps {
   fiber: FiberInfo.FiberInfo
-  checked: boolean
+  checked: boolean,
+  onChecked: (_:FiberInfo.FiberInfo, selected: boolean) => void
 }
 
 const RowMetricKey: React.FC<RowFiberIdProps> = (props) => {
-  const toDate = (millis: number) => {
-    const d = new Date(millis)
-    return dateFns.format(d, "yyyy-MM-dd HH:mm:ss")
-  }
-
   return (
     <TableRow>
+      <TableCell><Checkbox checked={props.checked} onChange={(evt, c) => props.onChecked(props.fiber, c)}/></TableCell>
       <TableCell>{props.fiber.id.id}</TableCell>
-      <TableCell>{toDate(props.fiber.id.startTimeMillis)}</TableCell>
-      <TableCell>{FiberId.formatLocation(props.fiber.id.location)}</TableCell>
+      <TableCell>{FiberId.formatDate(props.fiber.id)}</TableCell>
+      <TableCell>{FiberId.formatLocation(props.fiber.id)}</TableCell>
       <TableCell><Switch /></TableCell>
       <TableCell><Switch /></TableCell>
     </TableRow>
