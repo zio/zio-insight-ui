@@ -30,7 +30,8 @@ const muiTheme = MUIStyles.createTheme({
       dark: "#262830",
     },
     secondary: {
-      main: "#B10101",
+      //main: "#B10101",
+      main: "#254490",
     },
     background: {
       default: "#d0d0d0",
@@ -49,8 +50,8 @@ export const insightTheme: InsightTheme = {
     Root: "gray",
     Suspended: "gold",
     Running: "cornflowerblue",
-    Succeeded: "green",
-    Errored: "red"
+    Succeeded: "lightseagreen",
+    Errored: "lightcoral"
   },
   padding: {
     large: 16,
