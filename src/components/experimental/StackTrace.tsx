@@ -36,16 +36,13 @@ export const StackTrace: React.FC<StackTraceProps> = (props) => {
 const SingleTrace: React.FC<{
   fiber: FiberInfo.FiberInfo
 }> = (props) => {
-
   const theme = useInsightTheme()
 
   const rendertrace = (trace: FiberId.Location[]) => {
     return (
       <Box>
         {trace.map((loc) => {
-          return (
-            <Typography>{FiberId.formatLocation(loc)}</Typography>
-          )
+          return <Typography>{FiberId.formatLocation(loc)}</Typography>
         })}
       </Box>
     )
@@ -67,20 +64,26 @@ const SingleTrace: React.FC<{
           width: "100%",
         }}
       >
-        {<Box sx={{
-          borderRadius: theme.pxPadding.small,
-          padding: theme.pxPadding.small,
-          backgroundColor: theme.theme.palette.primary.main,
-          color: theme.theme.palette.primary.contrastText,
-        }}>
-          <Typography variant="h6">
-            {props.fiber.id.id} -- {FiberId.formatDate(props.fiber.id)} --{" "}
-            {FiberId.formatLocation(props.fiber.id.location)}
-          </Typography>
-        </Box>}
-        {props.fiber.stacktrace === undefined 
-          ? <></> 
-          : rendertrace(props.fiber.stacktrace)}
+        {
+          <Box
+            sx={{
+              borderRadius: theme.pxPadding.small,
+              padding: theme.pxPadding.small,
+              backgroundColor: theme.theme.palette.primary.main,
+              color: theme.theme.palette.primary.contrastText,
+            }}
+          >
+            <Typography variant="h6">
+              {props.fiber.id.id} -- {FiberId.formatDate(props.fiber.id)} --{" "}
+              {FiberId.formatLocation(props.fiber.id.location)}
+            </Typography>
+          </Box>
+        }
+        {props.fiber.stacktrace === undefined ? (
+          <></>
+        ) : (
+          rendertrace(props.fiber.stacktrace)
+        )}
       </Box>
     </Box>
   )
