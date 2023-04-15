@@ -1,6 +1,6 @@
 import type { Order } from "@effect/data/typeclass/Order"
-import * as Z from "zod"
 import * as dateFns from "date-fns"
+import * as Z from "zod"
 
 export const locationSchema = Z.tuple([Z.string(), Z.string(), Z.number()])
 
@@ -15,7 +15,11 @@ export const fiberIdSchema = Z.object({
 export interface FiberId extends Z.TypeOf<typeof fiberIdSchema> {}
 
 export const formatLocation = (id: FiberId) => {
-  if (id.location[0].trim() == "" && id.location[1].trim() == "" && id.location[2] == 0) {
+  if (
+    id.location[0].trim() == "" &&
+    id.location[1].trim() == "" &&
+    id.location[2] == 0
+  ) {
     return ""
   } else {
     return `${id.location[0]}:(${id.location[1]}:${id.location[2]})`

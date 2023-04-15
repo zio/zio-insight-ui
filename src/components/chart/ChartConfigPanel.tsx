@@ -117,7 +117,7 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = (props) => {
       return (
         <Box
           sx={{
-            padding: `${theme.padding.small}px`,
+            padding: theme.pxPadding.small,
             flexGrow: 0,
             display: "flex",
             flexDirection: "row",

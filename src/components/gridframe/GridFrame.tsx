@@ -45,8 +45,8 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
       <Typography
         variant={max ? "h6" : "subtitle1"}
         sx={{
-          color: theme.palette.primary.contrastText,
-          ml: `${theme.padding.small}px`,
+          color: theme.theme.palette.primary.contrastText,
+          ml: theme.pxPadding.small,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -62,7 +62,7 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
     return (
       <Box
         sx={{
-          padding: `${theme.padding.small}px`,
+          padding: theme.pxPadding.small,
           display: "flex",
           flexDirection: "row",
         }}
@@ -92,9 +92,9 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
           sx={{
             display: "flex",
             alignContent: "center",
-            backgroundColor: theme.palette.secondary.main,
-            padding: `${theme.padding.xsmall}px`,
-            ml: `${theme.padding.xsmall}px`,
+            backgroundColor: theme.theme.palette.secondary.main,
+            padding: theme.pxPadding.xsmall,
+            ml: `theme.pxPadding.xsmall`,
             borderRadius: "50%",
           }}
         >
@@ -114,26 +114,31 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
         {title(false)}
         <Box
           sx={{
-            padding: `${theme.padding.xsmall}px`,
+            padding: theme.pxPadding.xsmall,
             display: "flex",
             flexDirection: "row",
             justifyContent: "flex-end",
             height: `${
-              theme.padding.medium + 2 * theme.padding.xsmall + 2 * theme.padding.xsmall
+              theme.theme.padding.medium +
+              2 * theme.theme.padding.xsmall +
+              2 * theme.theme.padding.xsmall
             }px`,
           }}
         >
           {panelButton(
-            <Tabler.TbArrowsMaximize size={theme.padding.medium} />,
+            <Tabler.TbArrowsMaximize size={theme.theme.padding.medium} />,
             maxHandler
           )}
           {props.config === undefined ? (
             <></>
           ) : (
-            panelButton(<Feather.FiEdit size={theme.padding.medium} />, cfgHandler)
+            panelButton(
+              <Feather.FiEdit size={theme.theme.padding.medium} />,
+              cfgHandler
+            )
           )}
           {panelButton(
-            <AiIcons.AiOutlineClose size={theme.padding.medium} />,
+            <AiIcons.AiOutlineClose size={theme.theme.padding.medium} />,
             closeHandler
           )}
         </Box>
@@ -146,8 +151,8 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
     return (
       <Box
         sx={{
-          borderRadius: `0 ${theme.padding.small}px 0 0`,
-          backgroundColor: theme.palette.primary.main,
+          borderRadius: `0 ${theme.pxPadding.small} 0 0`,
+          backgroundColor: theme.theme.palette.primary.main,
         }}
       >
         {props.maximized ? maxControls() : panelControls()}
@@ -167,8 +172,8 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
           display: "flex",
           flexDirection: "column",
           flexGrow: 0,
-          backgroundColor: theme.palette.primary.dark,
-          borderRadius: `${theme.padding.small}px 0px 0px ${theme.padding.small}px`,
+          backgroundColor: theme.theme.palette.primary.dark,
+          borderRadius: `${theme.pxPadding.small} 0px 0px ${theme.pxPadding.small}`,
           justifyContent: "center",
           cursor: "move",
         }}
@@ -179,14 +184,14 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
   }
 
   const resizeHandle = () => {
-    const size = `${theme.padding.medium}px`
+    const size = theme.pxPadding.medium
     if (cfgEnabled || props.maximized) return <></>
     else
       return (
         <Box
           sx={{
             position: "absolute",
-            bottom: theme.padding.xsmall,
+            bottom: theme.theme.padding.xsmall,
             right: 0,
             height: size,
           }}
@@ -224,8 +229,8 @@ export const GridFrame: React.FC<GridFrameProps> = (props) => {
         flexDirection: "row",
         justifyItems: "stretch",
         height: "100%",
-        borderRadius: `${theme.padding.small}px`,
-        backgroundColor: theme.palette.background.paper,
+        borderRadius: theme.pxPadding.small,
+        backgroundColor: theme.theme.palette.background.paper,
       }}
     >
       {moveHandleBar()}

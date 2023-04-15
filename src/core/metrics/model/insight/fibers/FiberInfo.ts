@@ -17,7 +17,7 @@ export interface FiberInfo extends Zod.TypeOf<typeof fiberInfoSchema> {}
 
 const activeStates = ["Root", "Suspended", "Running"]
 const inactiveStates = ["Succeeded", "Errored"]
-export const FiberStates = (() => { 
+export const FiberStates = (() => {
   const res = activeStates.slice()
   res.push(...inactiveStates)
   return res
@@ -28,8 +28,8 @@ export const stateAsString = (f: FiberInfo) => {
   return keys.length > 0 ? keys[0] : "Unknown"
 }
 
-export const isActive = (f: FiberInfo) => 
-  activeStates.find(s => s == stateAsString(f)) != undefined
+export const isActive = (f: FiberInfo) =>
+  activeStates.find((s) => s == stateAsString(f)) != undefined
 
 export class InvalidFibers {
   readonly _tag = "InvalidFibers"
@@ -48,7 +48,7 @@ export const fiberFromInsight: (
     return states
   })
 
-  export const fibersFromInsight: (
+export const fibersFromInsight: (
   value: unknown
 ) => Effect.Effect<never, InvalidFibers, FiberInfo[]> = (value: unknown) =>
   Effect.gen(function* ($) {
@@ -59,4 +59,3 @@ export const fiberFromInsight: (
 
     return states
   })
-

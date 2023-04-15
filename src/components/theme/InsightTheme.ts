@@ -15,10 +15,7 @@ export interface InsightTheme extends Theme {
     Errored: string
   }
   padding: {
-    large: number
-    medium: number
-    small: number
-    xsmall: number
+    [key: string]: number
   }
 }
 
@@ -31,7 +28,8 @@ const muiTheme = MUIStyles.createTheme({
     },
     secondary: {
       //main: "#B10101",
-      main: "#254490",
+      main: "#2524b0",
+      //main: "#009020"
     },
     background: {
       default: "#d0d0d0",
@@ -46,12 +44,16 @@ export const insightTheme: InsightTheme = {
     drawerClosed: 56,
     drawerOpen: 240,
   },
+  // This is the palette we are using for rendering the state of fibers
   status: {
+    // An artificial state used for all fibers that we do not have a parent for in the runtime
     Root: "gray",
+    // Suspended an Running are the active states
     Suspended: "gold",
     Running: "cornflowerblue",
+    // Errored and Succeeded are the states for terminated fibers that "linger" for a while to be visualized
     Succeeded: "lightseagreen",
-    Errored: "lightcoral"
+    Errored: "lightcoral",
   },
   padding: {
     large: 16,
@@ -68,5 +70,16 @@ export function mixins(self: InsightTheme) {
 export function useInsightTheme() {
   const theme = useTheme() as InsightTheme
 
-  return theme
+  return {
+    theme,
+    mixins: theme.mixins as MUIStyles.Mixins,
+    transitions: theme.transitions as MUIStyles.Transitions,
+    pxPadding: (() => {
+      const res: {
+        [key: string]: string
+      } = {}
+      Object.keys(theme.padding).forEach((k) => (res[k] = `${theme.padding[k]}px`))
+      return res
+    })(),
+  }
 }

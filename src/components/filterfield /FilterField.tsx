@@ -1,12 +1,12 @@
-import { StandardTextFieldProps, TextField } from "@mui/material";
+import type { StandardTextFieldProps } from "@mui/material"
+import { TextField } from "@mui/material"
 import * as React from "react"
 
 export interface FilterFieldProps extends StandardTextFieldProps {
   onFilterChange?: (words: string[]) => void
 }
 
-export const FilterField : React.FC<FilterFieldProps> = (props) => {
-
+export const FilterField: React.FC<FilterFieldProps> = (props) => {
   const [filterPhrase, setFilterPhrase] = React.useState<string>("")
 
   const updateFilter = (s: string) => {
@@ -23,6 +23,6 @@ export const FilterField : React.FC<FilterFieldProps> = (props) => {
       onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
         updateFilter(evt.target.value)
       }}
-    ></TextField>)
-
+    ></TextField>
+  )
 }

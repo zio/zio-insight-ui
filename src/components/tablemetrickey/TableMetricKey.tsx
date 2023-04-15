@@ -58,14 +58,17 @@ export const TableMetricKeys: React.FC<TableMetricKeysProps> = (props) => {
       <Box
         component={Paper}
         sx={{
-          padding: `${theme.padding.medium}px`,
+          padding: theme.pxPadding.medium,
         }}
       >
-        <FilterField onFilterChange={(words) => setKeyFilter(words)} sx={{ width: "100%" }}/>
+        <FilterField
+          onFilterChange={(words) => setKeyFilter(words)}
+          sx={{ width: "100%" }}
+        />
       </Box>
       <Box
         sx={{
-          mt: `${theme.padding.medium}px`,
+          mt: theme.pxPadding.medium,
           flex: "1 1 auto",
           overflow: "auto",
         }}

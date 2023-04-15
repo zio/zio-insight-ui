@@ -20,7 +20,7 @@ export interface FiberGraph {
 
 export const emptyFiberGraph = {
   nodes: [],
-  links: []
+  links: [],
 } as FiberGraph
 
 const createNode = (info: FiberInfo.FiberInfo) => {

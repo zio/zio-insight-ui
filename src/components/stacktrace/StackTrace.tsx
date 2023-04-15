@@ -11,7 +11,7 @@ export const StackTrace: React.FC<{}> = (props) => {
       <Box
         component={Paper}
         sx={{
-          padding: `${theme.padding.medium}px`,
+          padding: theme.pxPadding.medium,
           display: "flex",
           flexGrow: 1,
         }}

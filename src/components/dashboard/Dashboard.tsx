@@ -292,7 +292,7 @@ export function InsightGridLayout() {
             display: "flex",
             flex: "1 1 auto",
             overflow: "auto",
-            backgroundColor: theme.palette.primary.light,
+            backgroundColor: theme.theme.palette.primary.light,
             mt: "8px",
           }}
         >

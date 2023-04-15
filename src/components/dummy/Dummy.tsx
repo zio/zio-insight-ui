@@ -10,9 +10,9 @@ export const Dummy: React.FC<{ title: string }> = (props) => {
     <ContentBox>
       <Box
         sx={{
-          padding: `${theme.padding.medium}px`,
-          borderRadius: `${theme.padding.xsmall}px`,
-          backgroundColor: theme.palette.background.default,
+          padding: theme.pxPadding.medium,
+          borderRadius: theme.pxPadding.xsmall,
+          backgroundColor: theme.theme.palette.background.default,
         }}
       >
         <Typography variant="h4">{props.title}</Typography>
