@@ -14,15 +14,11 @@ export const fiberIdSchema = Z.object({
 
 export interface FiberId extends Z.TypeOf<typeof fiberIdSchema> {}
 
-export const formatLocation = (id: FiberId) => {
-  if (
-    id.location[0].trim() == "" &&
-    id.location[1].trim() == "" &&
-    id.location[2] == 0
-  ) {
+export const formatLocation = (location: Location) => {
+  if (location[0].trim() == "" && location[1].trim() == "" && location[2] == 0) {
     return ""
   } else {
-    return `${id.location[0]}:(${id.location[1]}:${id.location[2]})`
+    return `${location[0]}:(${location[1]}:${location[2]})`
   }
 }
 

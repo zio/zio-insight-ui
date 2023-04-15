@@ -10,18 +10,28 @@ import * as Schedule from "@effect/io/Schedule"
 import * as Stream from "@effect/stream/Stream"
 import * as IdGen from "@services/idgenerator/IdGenerator"
 
-import type * as F from "@core/metrics/model/insight/fibers/FiberInfo"
+import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
+import * as FiberTraceRequest from "@core/metrics/model/insight/fibers/FiberTraceRequest"
 import * as Utils from "@core/utils"
 
 import * as Insight from "./InsightService"
 
 export interface FiberDataService {
+  readonly traceRequest: Effect.Effect<
+    never,
+    never,
+    FiberTraceRequest.FiberTraceRequest
+  >
+  readonly setTraceRequest: (
+    req: FiberTraceRequest.FiberTraceRequest
+  ) => Effect.Effect<never, never, void>
+
   // Subscribe to regular updates of fiber infos coming from the connected ZIO application
   // The fiber returns the subscription id and a stream of fiber info updates
   readonly createSubscription: () => Effect.Effect<
     never,
     never,
-    [string, Stream.Stream<never, never, F.FiberInfo[]>]
+    [string, Stream.Stream<never, never, FiberInfo.FiberInfo[]>]
   >
 
   // Remove a subscription
@@ -39,12 +49,16 @@ export const live = Layer.effect(
   Effect.gen(function* ($) {
     function makeFiberDataService(
       idSvc: IdGen.IdGenerator,
-      fiberInfoHub: Hub.Hub<F.FiberInfo[]>,
+      fiberInfoHub: Hub.Hub<FiberInfo.FiberInfo[]>,
       subscriptions: Ref.Ref<HashSet.HashSet<string>>,
-      insight: Insight.InsightService
+      insight: Insight.InsightService,
+      traceRequest: Ref.Ref<FiberTraceRequest.FiberTraceRequest>
     ): FiberDataService {
       const unsubscribe = (id: string) =>
-        Ref.update(subscriptions, (s) => HashSet.remove(s, id))
+        Effect.zipRight(
+          Effect.logDebug(`Removed fiber data subscription ${id}`),
+          Ref.update(subscriptions, (s) => HashSet.remove(s, id))
+        )
 
       const subscriptionIds = () =>
         pipe(Ref.get(subscriptions), Effect.map(HashSet.fromIterable))
@@ -66,7 +80,11 @@ export const live = Layer.effect(
               Effect.map((r) => !r)
             )
           )(Stream.fromHub(fiberInfoHub))
-          return [id, stream] as [string, Stream.Stream<never, never, F.FiberInfo[]>]
+          yield* $(Effect.logDebug(`Created fiber data subscription ${id}`))
+          return [
+            id,
+            stream,
+          ] as [string, Stream.Stream<never, never, FiberInfo.FiberInfo[]>]
         })
 
       const pollFiberData = () =>
@@ -76,13 +94,18 @@ export const live = Layer.effect(
           )
 
           if (cntSubscriptions > 0) {
+            const req = yield* $(Ref.get(traceRequest))
             yield* $(
-              Effect.log(`Fetching Fiber data for ${cntSubscriptions} subscribers`)
+              Effect.log(
+                `Fetching Fiber data for ${cntSubscriptions} subscribers with ${JSON.stringify(
+                  req
+                )}}`
+              )
             )
             const fiberData = yield* $(
               pipe(
-                insight.getFibers,
-                Effect.catchAll((_) => Effect.succeed([] as F.FiberInfo[]))
+                insight.getFibers(req),
+                Effect.catchAll((_) => Effect.succeed([] as FiberInfo.FiberInfo[]))
               )
             )
             yield* $(Effect.logDebug(`Found: ${fiberData.length} fibers`))
@@ -95,7 +118,15 @@ export const live = Layer.effect(
           }
         })
 
+      const setTraceRequest = (req: FiberTraceRequest.FiberTraceRequest) =>
+        Effect.zipRight(
+          Effect.logDebug(`Set trace request to ${JSON.stringify(req)}`),
+          Ref.set(traceRequest, req)
+        )
+
       return {
+        traceRequest: Ref.get(traceRequest),
+        setTraceRequest,
         createSubscription: subscribe,
         removeSubscription: unsubscribe,
         subscriptionIds,
@@ -103,14 +134,23 @@ export const live = Layer.effect(
       } as FiberDataService
     }
 
-    const hub = yield* $(Hub.sliding<F.FiberInfo[]>(128))
+    const hub = yield* $(Hub.sliding<FiberInfo.FiberInfo[]>(128))
     const insight = yield* $(Insight.InsightService)
     const idSvc = yield* $(IdGen.IdGenerator)
     const subscriptions = yield* $(Ref.make(HashSet.empty<string>()))
+    const initialTraceRequest = yield* $(
+      Ref.make(FiberTraceRequest.defaultTraceRequest)
+    )
 
     // TODO: Make this configurable
 
-    const svc = makeFiberDataService(idSvc, hub, subscriptions, insight)
+    const svc = makeFiberDataService(
+      idSvc,
+      hub,
+      subscriptions,
+      insight,
+      initialTraceRequest
+    )
 
     yield* $(
       Utils.withDefaultScheduler(

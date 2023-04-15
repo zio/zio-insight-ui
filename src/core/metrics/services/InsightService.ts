@@ -29,6 +29,8 @@ import type {
 } from "@core/metrics/model/zio/metrics/MetricState"
 import { metricStatesFromInsight } from "@core/metrics/model/zio/metrics/MetricState"
 
+import type { FiberTraceRequest } from "../model/insight/fibers/FiberTraceRequest"
+
 const baseUrl = "http://127.0.0.1:8080/insight"
 
 type InsightApiError =
@@ -46,7 +48,7 @@ export interface InsightService {
     ids: readonly string[]
   ) => T.Effect<never, InsightApiError, C.Chunk<MetricState>>
 
-  getFibers: T.Effect<never, InsightApiError, FiberInfo[]>
+  getFibers: (req: FiberTraceRequest) => T.Effect<never, InsightApiError, FiberInfo[]>
 
   fiberTrace: (f: FiberInfo) => T.Effect<never, InsightApiError, FiberInfo>
 }
@@ -80,12 +82,17 @@ function makeLiveMetrics(): InsightService {
 
         return yield* $(metricStatesFromInsight(json))
       }),
-    getFibers: pipe(
-      Request.request(`${baseUrl}/fibers/fibers`),
-      T.flatMap(Request.jsonFromResponse),
-      T.flatMap(fibersFromInsight),
-      T.tap((fibers) => T.logInfo(`Got ${fibers.length} fiber infos from server`))
-    ),
+    getFibers: (req: FiberTraceRequest) =>
+      T.gen(function* ($) {
+        const raw = yield* $(
+          Request.request(`${baseUrl}/fibers/fibers`, {
+            method: "POST",
+            body: JSON.stringify(req),
+          })
+        )
+        const json = yield* $(Request.jsonFromResponse(raw))
+        return yield* $(fibersFromInsight(json))
+      }),
     fiberTrace: (f: FiberInfo) =>
       pipe(
         Request.request(`${baseUrl}/fibers/${f.id.id}`),
@@ -122,7 +129,8 @@ export const dev: L.Layer<never, never, InsightService> = L.effect(
           C.filter(states, (s) => keyIds.findIndex((el) => el === s.id) !== -1)
         )
       ),
-    getFibers: pipe(T.succeed(staticFibers), T.flatMap(fibersFromInsight)),
+    getFibers: (_: FiberTraceRequest) =>
+      pipe(T.succeed(staticFibers), T.flatMap(fibersFromInsight)),
     fiberTrace: (f: FiberInfo) =>
       pipe(
         T.succeed(staticTrace),
@@ -132,7 +140,7 @@ export const dev: L.Layer<never, never, InsightService> = L.effect(
             id: f.id,
             parent: f.parent,
             status: f.status,
-            trace: res.trace,
+            stacktrace: res.stacktrace,
           } as FiberInfo
         })
       ),
@@ -144,4 +152,5 @@ export const getMetricKeys = T.flatMap(InsightService, (api) => api.getMetricKey
 export const getMetricStates = (keyIds: string[]) =>
   T.flatMap(InsightService, (api) => api.getMetricStates(keyIds))
 
-export const getFibers = T.flatMap(InsightService, (api) => api.getFibers)
+export const getFibers = (req: FiberTraceRequest) =>
+  T.flatMap(InsightService, (api) => api.getFibers(req))

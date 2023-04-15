@@ -1,4 +1,5 @@
 import { useInsightTheme } from "@components/theme/InsightTheme"
+import * as HashSet from "@effect/data/HashSet"
 import {
   Box,
   Checkbox,
@@ -27,6 +28,8 @@ interface TableFiberInfoProps {
   // The initially selected keys
   filter: FiberFilterParams
   onRootSelect: (_: FiberInfo.FiberInfo, selected: boolean) => void
+  onTrace: (_: FiberInfo.FiberInfo, selected: boolean) => void
+  onPin: (_: FiberInfo.FiberInfo, selected: boolean) => void
 }
 
 export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
@@ -35,11 +38,6 @@ export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
   const sorted = [...props.available].sort((a, b) =>
     FiberId.OrdFiberId.compare(a.id, b.id)
   )
-
-  // A function that checks if a key is selected
-  const isSelected = (k: FiberId.FiberId) => (filter: FiberFilterParams) => {
-    return filter.root !== undefined && k.id == filter.root.id.id
-  }
 
   return (
     <Box
@@ -68,8 +66,10 @@ export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
               <RowMetricKey
                 key={k.id.id}
                 fiber={k}
-                checked={isSelected(k.id)(props.filter)}
+                filter={props.filter}
                 onChecked={(f, c) => props.onRootSelect(f, c)}
+                onTrace={(f, c) => props.onTrace(f, c)}
+                onPin={(f, c) => props.onPin(f, c)}
               />
             ))}
           </TableBody>
@@ -81,27 +81,42 @@ export const TableFiberInfo: React.FC<TableFiberInfoProps> = (props) => {
 
 interface RowFiberIdProps {
   fiber: FiberInfo.FiberInfo
-  checked: boolean
+  filter: FiberFilterParams
   onChecked: (_: FiberInfo.FiberInfo, selected: boolean) => void
+  onTrace: (_: FiberInfo.FiberInfo, selected: boolean) => void
+  onPin: (_: FiberInfo.FiberInfo, selected: boolean) => void
 }
 
 const RowMetricKey: React.FC<RowFiberIdProps> = (props) => {
+  const rootChecked: boolean =
+    props.filter.root === undefined
+      ? false
+      : props.filter.root.id.id == props.fiber.id.id
+
   return (
     <TableRow>
       <TableCell>
         <Checkbox
-          checked={props.checked}
-          onChange={(evt, c) => props.onChecked(props.fiber, c)}
+          checked={rootChecked}
+          onChange={(_, c) => props.onChecked(props.fiber, c)}
         />
       </TableCell>
       <TableCell>{props.fiber.id.id}</TableCell>
       <TableCell>{FiberId.formatDate(props.fiber.id)}</TableCell>
-      <TableCell>{FiberId.formatLocation(props.fiber.id)}</TableCell>
+      <TableCell>{FiberId.formatLocation(props.fiber.id.location)}</TableCell>
       <TableCell>
-        <Switch />
+        <Switch
+          color="secondary"
+          checked={HashSet.has(props.filter.pinned, props.fiber.id.id)}
+          onChange={(_, c) => props.onPin(props.fiber, c)}
+        />
       </TableCell>
       <TableCell>
-        <Switch />
+        <Switch
+          color="secondary"
+          checked={HashSet.has(props.filter.traced, props.fiber.id.id)}
+          onChange={(_, c) => props.onTrace(props.fiber, c)}
+        />
       </TableCell>
     </TableRow>
   )

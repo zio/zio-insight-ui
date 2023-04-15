@@ -1,14 +1,17 @@
 import { RuntimeContext } from "@components/app/App"
 import { ContentBox } from "@components/contentbox/ContentBox"
+import { StackTrace } from "@components/experimental/StackTrace"
 import { TableFiberInfo } from "@components/experimental/TableFiberInfo"
-import { StackTrace } from "@components/stacktrace/StackTrace"
 import { useInsightTheme } from "@components/theme/InsightTheme"
 import * as HashSet from "@effect/data/HashSet"
+import * as Effect from "@effect/io/Effect"
 import * as Runtime from "@effect/io/Runtime"
 import { Box } from "@mui/material"
 import * as React from "react"
 
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
+import type { FiberTraceRequest } from "@core/metrics/model/insight/fibers/FiberTraceRequest"
+import * as FiberDataService from "@core/metrics/services/FiberDataService"
 
 import * as FiberDataConsumer from "./FiberDataConsumer"
 import * as FiberFilter from "./FiberFilter"
@@ -34,15 +37,59 @@ export const FiberNavigator: React.FC<{}> = (props) => {
     traced: HashSet.empty(),
   })
 
-  const rootSelected = (f: FiberInfo.FiberInfo, sel: boolean) => {
-    setFiberFilter({
+  const tracedFibers = () => {
+    const res = fibers.filter(
+      (f) => f.stacktrace !== undefined && f.stacktrace.length > 0
+    )
+    console.log(`I have ${fibers.length} in total, and ${res.length} are traced`)
+    console.log(`${[...fiberFilter.traced]}`)
+    return res
+  }
+
+  const updateFiberFilter = (f: FiberFilter.FiberFilterParams) => {
+    Runtime.runSync(appRt)(
+      Effect.gen(function* ($) {
+        const fds = yield* $(FiberDataService.FiberDataService)
+        const req: FiberTraceRequest = {
+          root: f.root?.id.id,
+          activeOnly: f.activeOnly,
+          traced: [...f.traced],
+        }
+        yield* $(Effect.logDebug(`Updating Fiber Filter ${JSON.stringify(req)}`))
+        yield* $(fds.setTraceRequest(req))
+      })
+    )
+    setFiberFilter(f)
+  }
+
+  const onRootSelect = (f: FiberInfo.FiberInfo, sel: boolean) => {
+    updateFiberFilter({
       ...fiberFilter,
       root: sel ? f : undefined,
     })
   }
 
+  const onTrace = (f: FiberInfo.FiberInfo, sel: boolean) => {
+    updateFiberFilter({
+      ...fiberFilter,
+      traced: sel
+        ? HashSet.add(fiberFilter.traced, f.id.id)
+        : HashSet.remove(fiberFilter.traced, f.id.id),
+    })
+  }
+
+  const onPin = (f: FiberInfo.FiberInfo, sel: boolean) => {
+    updateFiberFilter({
+      ...fiberFilter,
+      pinned: sel
+        ? HashSet.add(fiberFilter.pinned, f.id.id)
+        : HashSet.remove(fiberFilter.pinned, f.id.id),
+    })
+  }
+
   const clearUpdater = () => {
     if (fiberConsumer.current !== undefined) {
+      console.log(`Clearing Updater ${fiberConsumer.current.id}`)
       Runtime.runSync(appRt)(
         fiberConsumer.current.fds.removeSubscription(fiberConsumer.current.id)
       )
@@ -112,13 +159,15 @@ export const FiberNavigator: React.FC<{}> = (props) => {
           >
             <FiberFilter.FiberFilter
               filter={fiberFilter}
-              onFilterChange={setFiberFilter}
+              onFilterChange={updateFiberFilter}
             ></FiberFilter.FiberFilter>
           </Box>
           <TableFiberInfo
             available={fibers}
             filter={fiberFilter}
-            onRootSelect={rootSelected}
+            onRootSelect={onRootSelect}
+            onTrace={onTrace}
+            onPin={onPin}
           ></TableFiberInfo>
         </Box>
         <Box
@@ -126,7 +175,7 @@ export const FiberNavigator: React.FC<{}> = (props) => {
             flexGrow: 1,
           }}
         >
-          <StackTrace />
+          <StackTrace fibers={tracedFibers()} />
         </Box>
       </Box>
     </Box>

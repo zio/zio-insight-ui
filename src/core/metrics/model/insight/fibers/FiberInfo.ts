@@ -8,7 +8,7 @@ export const fiberInfoSchema = Zod.object({
   id: FiberId.fiberIdSchema,
   parent: Zod.optional(FiberId.fiberIdSchema),
   status: statusSchema,
-  trace: Zod.optional(Zod.array(FiberId.locationSchema)),
+  stacktrace: Zod.optional(Zod.array(FiberId.locationSchema)),
 })
 
 export const fibersInfoSchema = Zod.array(fiberInfoSchema)

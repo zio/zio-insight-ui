@@ -171,7 +171,7 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
     )
 
     return () => Runtime.runSync(appRt)(updater.fds.removeSubscription(updater.id))
-  }, [appRt, props])
+  }, [appRt, props.filter])
 
   const circles = (w: number, h: number) => (
     <>

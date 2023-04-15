@@ -33,7 +33,7 @@ export const matchFiber = (filter: FiberFilterParams) => (f: FiberInfo.FiberInfo
     isActive || inSelection
       ? (() => {
           if (filter.matchWords) {
-            const loc = FiberId.formatLocation(f.id)
+            const loc = FiberId.formatLocation(f.id.location)
             return filter.filterWords.reduce((cur, w) => {
               return cur && loc.includes(w)
             }, true)

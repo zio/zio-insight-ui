@@ -47,7 +47,7 @@ export const root = createNode({
   status: {
     Root: {},
   },
-  trace: [],
+  stacktrace: [],
 })
 
 export function updateFiberNodes(

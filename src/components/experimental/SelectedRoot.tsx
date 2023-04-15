@@ -38,7 +38,7 @@ export const SelectedRoot: React.FC<{ fiber: FiberInfo; onClear: () => void }> =
       {display("Selected Root:")}
       {display(`${props.fiber.id.id}`)}
       {display(FiberId.formatDate(props.fiber.id))}
-      {display(FiberId.formatLocation(props.fiber.id))}
+      {display(FiberId.formatLocation(props.fiber.id.location))}
     </Box>
   )
 }
