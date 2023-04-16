@@ -161,7 +161,9 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
       (infos: FiberInfo.FiberInfo[]) => {
         if (!simulating.current) {
           simulating.current = true
-          console.log(`${new Date()} -- In graph update, ${JSON.stringify(props.filter)}`)
+          console.log(
+            `${new Date()} -- In graph update, ${JSON.stringify(props.filter)}`
+          )
           dataRef.current = FiberGraph.updateFiberNodes(
             dataRef.current,
             infos.filter((f) => FiberFilter.matchFiber(props.filter)(f)),

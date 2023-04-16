@@ -3,6 +3,7 @@ import { ContentBox } from "@components/contentbox/ContentBox"
 import { StackTrace } from "@components/experimental/StackTrace"
 import { TableFiberInfo } from "@components/experimental/TableFiberInfo"
 import { useInsightTheme } from "@components/theme/InsightTheme"
+import { pipe } from "@effect/data/Function"
 import * as HashSet from "@effect/data/HashSet"
 import * as Effect from "@effect/io/Effect"
 import * as Runtime from "@effect/io/Runtime"
@@ -16,7 +17,6 @@ import * as FiberDataService from "@core/metrics/services/FiberDataService"
 import * as FiberDataConsumer from "./FiberDataConsumer"
 import * as FiberFilter from "./FiberFilter"
 import { FiberForceGraph } from "./FiberForceGraph"
-import { pipe } from "@effect/data/Function"
 
 export const FiberNavigator: React.FC<{}> = (props) => {
   const appRt = React.useContext(RuntimeContext)
