@@ -16,6 +16,7 @@ import * as FiberDataService from "@core/metrics/services/FiberDataService"
 import * as FiberDataConsumer from "./FiberDataConsumer"
 import * as FiberFilter from "./FiberFilter"
 import { FiberForceGraph } from "./FiberForceGraph"
+import { pipe } from "@effect/data/Function"
 
 export const FiberNavigator: React.FC<{}> = (props) => {
   const appRt = React.useContext(RuntimeContext)
@@ -41,8 +42,6 @@ export const FiberNavigator: React.FC<{}> = (props) => {
     const res = fibers.filter(
       (f) => f.stacktrace !== undefined && f.stacktrace.length > 0
     )
-    console.log(`I have ${fibers.length} in total, and ${res.length} are traced`)
-    console.log(`${[...fiberFilter.traced]}`)
     return res
   }
 
@@ -55,7 +54,6 @@ export const FiberNavigator: React.FC<{}> = (props) => {
           activeOnly: f.activeOnly,
           traced: [...f.traced],
         }
-        yield* $(Effect.logDebug(`Updating Fiber Filter ${JSON.stringify(req)}`))
         yield* $(fds.setTraceRequest(req))
       })
     )
@@ -89,9 +87,11 @@ export const FiberNavigator: React.FC<{}> = (props) => {
 
   const clearUpdater = () => {
     if (fiberConsumer.current !== undefined) {
-      console.log(`Clearing Updater ${fiberConsumer.current.id}`)
       Runtime.runSync(appRt)(
-        fiberConsumer.current.fds.removeSubscription(fiberConsumer.current.id)
+        pipe(
+          fiberConsumer.current.fds.removeSubscription(fiberConsumer.current.id),
+          Effect.flatMap((_) => Effect.yieldNow())
+        )
       )
     }
     fiberConsumer.current = undefined
@@ -100,6 +100,7 @@ export const FiberNavigator: React.FC<{}> = (props) => {
   React.useEffect(() => {
     clearUpdater()
     fiberConsumer.current = FiberDataConsumer.createFiberUpdater(
+      "FiberNavigator",
       appRt,
       (infos: FiberInfo.FiberInfo[]) => {
         const filtered = infos.filter((f) => FiberFilter.matchFiber(fiberFilter)(f))

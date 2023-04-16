@@ -14,10 +14,12 @@ export interface FiberUpdater {
 }
 
 export const createFiberUpdater = (
+  hint: string,
   appRt: Runtime.Runtime<AppLayer.AppLayer>,
   onData: (fibers: FiberInfo.FiberInfo[]) => void
 ) => {
   const updater = Effect.gen(function* ($) {
+    yield* $(Effect.logDebug(`Creating fiber data subscription ${hint}`))
     const fds = yield* $(FiberDataService.FiberDataService)
     const [id, updates] = yield* $(fds.createSubscription())
 

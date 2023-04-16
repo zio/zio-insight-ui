@@ -1,4 +1,5 @@
 import type * as d3 from "d3"
+import * as HashSet from "@effect/data/HashSet"
 
 import type * as FiberId from "@core/metrics/model/insight/fibers/FiberId"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
@@ -52,7 +53,8 @@ export const root = createNode({
 
 export function updateFiberNodes(
   oldNodes: FiberNode[],
-  infos: FiberInfo.FiberInfo[]
+  infos: FiberInfo.FiberInfo[],
+  pinned: HashSet.HashSet<number>
 ): FiberNode[] {
   // determine which nodes are added to the graph
   const newNodes = infos
@@ -71,6 +73,18 @@ export function updateFiberNodes(
   }, [] as FiberNode[])
 
   updated.push(...newNodes.slice().map((info) => createNode(info)))
+
+  updated.forEach((n) => {
+    if (HashSet.has(pinned, idAccessor(n))) {
+      n.radius = 10
+      n.fx = n.x
+      n.fy = n.y
+    } else { 
+      n.fx = undefined
+      n.fy = undefined
+      n.radius = 5
+    }
+  })
 
   return updated
 }

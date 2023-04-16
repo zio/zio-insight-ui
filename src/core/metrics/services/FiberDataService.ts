@@ -155,7 +155,7 @@ export const live = Layer.effect(
     yield* $(
       Utils.withDefaultScheduler(
         Effect.forkDaemon(
-          Effect.repeat(Schedule.spaced(Duration.millis(3000)))(svc.poll())
+          Effect.repeat(Schedule.spaced(Duration.millis(5000)))(svc.poll())
         )
       )
     )

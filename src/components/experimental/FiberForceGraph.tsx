@@ -143,35 +143,38 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
 
   const simulate = (newGraph: FiberGraph.FiberGraph) =>
     Effect.gen(function* ($) {
-      if (!simulating.current) {
-        simulating.current = true
-        if (simRef.current) {
-          simRef.current.nodes(newGraph.nodes).alphaTarget(0.0015).restart()
-          // @ts-ignore
-          simRef.current.force("link").links(newGraph.links)
-          yield* $(runTicks(10))
-          yield* $(ticked)
-          setGraphData(newGraph)
-        }
-        simulating.current = false
+      if (simRef.current) {
+        simRef.current.nodes(newGraph.nodes) // .alphaTarget(0.0015).restart()
+        // @ts-ignore
+        simRef.current.force("link").links(newGraph.links)
+        yield* $(runTicks(10))
+        yield* $(ticked)
+        setGraphData(newGraph)
       }
+      simulating.current = false
     })
 
   React.useEffect(() => {
     const updater = FiberDataConsumer.createFiberUpdater(
+      "FiberGraph",
       appRt,
       (infos: FiberInfo.FiberInfo[]) => {
-        dataRef.current = FiberGraph.updateFiberNodes(
-          dataRef.current,
-          infos.filter((f) => FiberFilter.matchFiber(props.filter)(f))
-        )
-        const newGraph = FiberGraph.updateFiberGraph(graphData, dataRef.current)
-        Runtime.runPromise(appRt)(simulate(newGraph))
+        if (!simulating.current) {
+          simulating.current = true
+          console.log(`${new Date()} -- In graph update, ${JSON.stringify(props.filter)}`)
+          dataRef.current = FiberGraph.updateFiberNodes(
+            dataRef.current,
+            infos.filter((f) => FiberFilter.matchFiber(props.filter)(f)),
+            props.filter.pinned
+          )
+          const newGraph = FiberGraph.updateFiberGraph(graphData, dataRef.current)
+          Runtime.runPromise(appRt)(simulate(newGraph))
+        }
       }
     )
 
     return () => Runtime.runSync(appRt)(updater.fds.removeSubscription(updater.id))
-  }, [appRt, props.filter])
+  }, [props.filter])
 
   const circles = (w: number, h: number) => (
     <>
