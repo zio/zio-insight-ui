@@ -15,8 +15,8 @@ export const ContentBox: React.FC<BoxProps> = (props) => {
         display: "flex",
         flexDirection: "column",
         margin: "0px",
-        padding: `${theme.padding.medium}px`,
-        backgroundColor: theme.palette.primary.light,
+        padding: theme.pxPadding.medium,
+        backgroundColor: theme.theme.palette.primary.light,
         ...props.sx,
       }}
     />

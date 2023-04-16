@@ -7,17 +7,19 @@ import type * as AppLayer from "@core/AppLayer"
 import type * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 import * as FiberDataService from "@core/metrics/services/FiberDataService"
 
-interface FiberUpdater {
+export interface FiberUpdater {
   fds: FiberDataService.FiberDataService
   id: string
   updater: Fiber.Fiber<unknown, void>
 }
 
 export const createFiberUpdater = (
+  hint: string,
   appRt: Runtime.Runtime<AppLayer.AppLayer>,
   onData: (fibers: FiberInfo.FiberInfo[]) => void
 ) => {
   const updater = Effect.gen(function* ($) {
+    yield* $(Effect.logDebug(`Creating fiber data subscription ${hint}`))
     const fds = yield* $(FiberDataService.FiberDataService)
     const [id, updates] = yield* $(fds.createSubscription())
 
@@ -38,9 +40,5 @@ export const createFiberUpdater = (
     } as FiberUpdater
   })
 
-  const runner = Runtime.runSync(appRt)(updater)
-
-  Runtime.runPromise(appRt)(runner.fds.removeSubscription(runner.id)).then((_) => {
-    // do nothing
-  })
+  return Runtime.runSync(appRt)(updater)
 }

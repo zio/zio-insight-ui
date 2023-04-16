@@ -64,7 +64,9 @@ export const SideBar: React.FC<{}> = (props) => {
   const theme = useInsightTheme()
 
   const drawerWidth = () =>
-    drawer.drawerOpenState ? theme.dimensions.drawerOpen : theme.dimensions.drawerClosed
+    drawer.drawerOpenState
+      ? theme.theme.dimensions.drawerOpen
+      : theme.theme.dimensions.drawerClosed
 
   return (
     <StyledDrawer drawerWidth={drawerWidth()} variant="permanent">
@@ -75,7 +77,7 @@ export const SideBar: React.FC<{}> = (props) => {
       </DrawerHeader>
       <Divider
         sx={{
-          backgroundColor: theme.palette.primary.contrastText,
+          backgroundColor: theme.theme.palette.primary.contrastText,
         }}
       />
       <List
@@ -91,8 +93,8 @@ export const SideBar: React.FC<{}> = (props) => {
                   key={route.title}
                   sx={{
                     backgroundColor: isActive
-                      ? theme.palette.secondary.dark
-                      : theme.palette.primary.dark,
+                      ? theme.theme.palette.secondary.dark
+                      : theme.theme.palette.primary.dark,
                   }}
                 >
                   <ListItemButton

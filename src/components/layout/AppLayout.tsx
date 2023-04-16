@@ -29,7 +29,9 @@ export const AppLayout: React.FC<{}> = (props) => {
   const theme = useInsightTheme()
 
   const drawerWidth = () =>
-    drawer.drawerOpenState ? theme.dimensions.drawerOpen : theme.dimensions.drawerClosed
+    drawer.drawerOpenState
+      ? theme.theme.dimensions.drawerOpen
+      : theme.theme.dimensions.drawerClosed
 
   return (
     <>
