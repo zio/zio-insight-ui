@@ -1,8 +1,10 @@
 import { RuntimeContext } from "@components/app/App"
 import { useInsightTheme } from "@components/theme/InsightTheme"
+import * as HashSet from "@effect/data/HashSet"
 import * as Effect from "@effect/io/Effect"
 import * as Runtime from "@effect/io/Runtime"
 import * as d3 from "d3"
+import type { D3DragEvent } from "d3"
 import * as React from "react"
 
 import * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
@@ -16,11 +18,20 @@ import * as D3Utils from "./Utils"
 
 export interface FiberForceGraphProps {
   filter: FiberFilter.FiberFilterParams
+  onFilterChange: (f: FiberFilter.FiberFilterParams) => void
 }
 
 export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
   const appRt = React.useContext(RuntimeContext)
   const theme = useInsightTheme()
+  const filterRef = React.useRef<FiberFilter.FiberFilterParams>(props.filter)
+
+  const setFilter = (f: FiberFilter.FiberFilterParams) => {
+    filterRef.current = f
+    props.onFilterChange(f)
+  }
+
+  const dragSubject = React.useRef<SVGCircleElement>()
 
   // The state is the data backing the actual graph
   const [graphData, setGraphData] = React.useState<FiberGraph.FiberGraph>(
@@ -33,18 +44,23 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
   const simRef =
     React.useRef<d3.Simulation<FiberGraph.FiberNode, FiberGraph.FiberLink>>()
 
+  const zoomRef = React.useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>()
+
   const simulating = React.useRef<boolean>(false)
 
   const dimensions = React.useRef<D3Utils.Dimensions>(D3Utils.emptyDimensions)
+  const left = () => dimensions.current.margins.left || 0
+  const top = () => dimensions.current.margins.top || 0
+
   const boundedWidth = () => D3Utils.boundedDimensions(dimensions.current)[0]
   const boundedHeight = () => D3Utils.boundedDimensions(dimensions.current)[1]
 
   const idAccessor = (f: FiberGraph.FiberNode) => f.fiber.id.id
   const radiusAccessor = (f: FiberGraph.FiberNode) => f.radius
   const xAccessor = (f: FiberGraph.FiberNode) =>
-    f.x ? f.x : Math.floor(Math.random() * boundedWidth())
+    f.fx ? f.fx : f.x ? f.x : Math.floor(Math.random() * boundedWidth())
   const yAccessor = (f: FiberGraph.FiberNode) =>
-    f.y ? f.y : Math.floor(Math.random() * boundedHeight())
+    f.fy ? f.fy : f.y ? f.y : Math.floor(Math.random() * boundedHeight())
 
   const colorScale = d3
     .scaleOrdinal<string>()
@@ -88,44 +104,77 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
       .stop()
   }
 
-  const group = Effect.try(() => {
+  const group = () => {
     const sel = d3.select("#FiberGraph")
     return sel
-  })
+  }
 
-  const node = Effect.gen(function* ($) {
-    const grp = yield* $(group)
+  const zoom = () => {
+    if (dimensions.current === undefined) {
+      return undefined
+    }
 
-    return grp
+    const svg = d3.select<SVGSVGElement, unknown>("#D3Graph")
+    const grp = d3.select<SVGGElement, unknown>("#FiberGraph")
+
+    const res = d3
+      .zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.1, 10])
+      .on("zoom", (evt: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
+        // @ts-ignore
+        grp.attr("transform", evt.transform)
+      })
+
+    // Add the zoom behavior to the SVG element
+    svg
+      .attr("viewBox", [0, 0, dimensions.current.width, dimensions.current.height])
+      .call(res)
+      .call(res.transform, d3.zoomIdentity.translate(left(), top()).scale(1))
+
+    return res
+  }
+
+  const dragNode = d3
+    .drag<SVGCircleElement, FiberGraph.FiberNode>()
+    .on("start", (evt: any, node: FiberGraph.FiberNode) => {
+      dragstarted(evt, node)
+    })
+    .on("drag", (evt: any, node: FiberGraph.FiberNode) => {
+      dragged(evt, node)
+    })
+    .on("end", (evt: any, node: FiberGraph.FiberNode) => {
+      dragended(evt, node)
+    })
+
+  const node = () => {
+    return group()
       .selectAll<SVGCircleElement, FiberGraph.FiberNode>("circle")
       .attr("r", (d) => {
         return radiusAccessor(d)
       })
+      .attr("fill", (d) => colorScale(FiberInfo.stateAsString(d.fiber)))
       .attr("stroke", "cyan")
       .attr("stroke-width", 1)
-  })
+      .call(dragNode)
+  }
 
-  const link = Effect.gen(function* ($) {
-    const grp = yield* $(group)
-
-    return grp
+  const link = () => {
+    return group()
       .selectAll<SVGLineElement, FiberGraph.FiberLink>("line")
       .attr("stroke", "white")
       .attr("stroke-width", 1)
-  })
+  }
 
-  const ticked = Effect.gen(function* ($) {
+  const ticked = Effect.try(() => {
     const duration = 2500
-    const circles = yield* $(node)
-    circles
+    node()
       .transition()
       .duration(duration)
       .attr("cx", (d) => xAccessor(d))
       .attr("cy", (d) => yAccessor(d))
       .attr("fill", (d) => colorScale(FiberInfo.stateAsString(d.fiber)))
 
-    const lines = yield* $(link)
-    lines
+    link()
       .transition()
       .duration(duration)
       .attr("x1", (d) => xAccessor(d.source))
@@ -159,7 +208,10 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
       "FiberGraph",
       appRt,
       (infos: FiberInfo.FiberInfo[]) => {
-        if (!simulating.current) {
+        if (!simulating.current && dragSubject.current === undefined) {
+          if (zoomRef.current == undefined) {
+            zoomRef.current = zoom()
+          }
           simulating.current = true
           console.log(
             `${new Date()} -- In graph update, ${JSON.stringify(props.filter)}`
@@ -194,17 +246,79 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
     </>
   )
 
+  const dragstarted = (
+    evt: D3DragEvent<SVGCircleElement, FiberGraph.FiberNode, FiberGraph.FiberNode>,
+    node: FiberGraph.FiberNode
+  ) => {
+    if (!evt.active) {
+      const circle = evt.sourceEvent.target as SVGCircleElement
+      dragSubject.current = circle
+      evt.sourceEvent.stopPropagation()
+
+      d3.select(circle).attr("r", 10)
+
+      setFilter({
+        ...props.filter,
+        pinned: HashSet.add(filterRef.current.pinned, node.fiber.id.id),
+      })
+
+      node.x = evt.x
+      node.y = evt.y
+      node.fx = evt.x
+      node.fy = evt.y
+    }
+  }
+
+  const dragged = (
+    evt: D3DragEvent<SVGCircleElement, FiberGraph.FiberNode, FiberGraph.FiberNode>,
+    node: FiberGraph.FiberNode
+  ) => {
+    if (dragSubject.current !== undefined) {
+      evt.sourceEvent.stopPropagation()
+
+      d3.select(dragSubject.current).attr("cx", evt.x).attr("cy", evt.y)
+
+      link()
+        .attr("x1", (d) => xAccessor(d.source))
+        .attr("y1", (d) => yAccessor(d.source))
+        .attr("x2", (d) => xAccessor(d.target))
+        .attr("y2", (d) => yAccessor(d.target))
+
+      node.x = evt.x
+      node.y = evt.y
+      node.fx = evt.x
+      node.fy = evt.y
+    }
+  }
+
+  const dragended = (
+    evt: D3DragEvent<SVGCircleElement, FiberGraph.FiberNode, FiberGraph.FiberNode>,
+    node: FiberGraph.FiberNode
+  ) => {
+    if (!evt.active) {
+      dragSubject.current = undefined
+    }
+  }
+
   return (
-    <SVGPanel.SVGPanel>
+    <SVGPanel.SVGPanel
+      id="D3Graph"
+      margins={{
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+      }}
+    >
       <SVGPanel.SVGDimensions.Consumer>
         {(dms) => {
           const [w, h] = D3Utils.boundedDimensions(dms)
           dimensions.current = dms
           simRef.current = simulation()
           return (
-            <g id="FiberGraph" transform="translate(10, 10)">
-              {circles(w, h)}
+            <g id="FiberGraph">
               {lines()}
+              {circles(w, h)}
             </g>
           )
         }}
