@@ -10,15 +10,17 @@ export const SVGDimensions = React.createContext<D3Utils.Dimensions>(
 )
 
 export interface SVGPanelProps {
-  id: string,
-  margins? : D3Utils.Margins
+  id: string
+  margins?: D3Utils.Margins
 }
 
 // SVGPanel component that renders a div with an SVG element inside
 export const SVGPanel: React.FC<React.PropsWithChildren<SVGPanelProps>> = (props) => {
   // Use useDimensions hook to get the dimensions of the div element
   const [ref, dimensions] = D3Utils.useDimensions<HTMLDivElement>(
-    undefined, undefined, props.margins
+    undefined,
+    undefined,
+    props.margins
   )
 
   // Create an SVG element using the dimensions

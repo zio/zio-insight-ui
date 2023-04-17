@@ -1,10 +1,11 @@
 import { RuntimeContext } from "@components/app/App"
 import { useInsightTheme } from "@components/theme/InsightTheme"
+import * as HashSet from "@effect/data/HashSet"
 import * as Effect from "@effect/io/Effect"
 import * as Runtime from "@effect/io/Runtime"
 import * as d3 from "d3"
+import type { D3DragEvent } from "d3"
 import * as React from "react"
-import * as HashSet from "@effect/data/HashSet"
 
 import * as FiberInfo from "@core/metrics/model/insight/fibers/FiberInfo"
 
@@ -14,11 +15,10 @@ import * as FiberFilter from "./FiberFilter"
 import * as FiberGraph from "./FiberGraph"
 import * as SVGPanel from "./SvgPanel"
 import * as D3Utils from "./Utils"
-import { D3DragEvent } from "d3"
 
 export interface FiberForceGraphProps {
-  filter: FiberFilter.FiberFilterParams,
-  onFilterChange: (f: FiberFilter.FiberFilterParams) => void,
+  filter: FiberFilter.FiberFilterParams
+  onFilterChange: (f: FiberFilter.FiberFilterParams) => void
 }
 
 export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
@@ -44,8 +44,7 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
   const simRef =
     React.useRef<d3.Simulation<FiberGraph.FiberNode, FiberGraph.FiberLink>>()
 
-  const zoomRef = 
-    React.useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>()
+  const zoomRef = React.useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>()
 
   const simulating = React.useRef<boolean>(false)
 
@@ -59,9 +58,9 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
   const idAccessor = (f: FiberGraph.FiberNode) => f.fiber.id.id
   const radiusAccessor = (f: FiberGraph.FiberNode) => f.radius
   const xAccessor = (f: FiberGraph.FiberNode) =>
-    f.fx ? f.fx : ( f.x ? f.x : Math.floor(Math.random() * boundedWidth()))
+    f.fx ? f.fx : f.x ? f.x : Math.floor(Math.random() * boundedWidth())
   const yAccessor = (f: FiberGraph.FiberNode) =>
-    f.fy ? f.fy : ( f.y ? f.y : Math.floor(Math.random() * boundedHeight()))
+    f.fy ? f.fy : f.y ? f.y : Math.floor(Math.random() * boundedHeight())
 
   const colorScale = d3
     .scaleOrdinal<string>()
@@ -126,23 +125,26 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
         grp.attr("transform", evt.transform)
       })
 
-      // Add the zoom behavior to the SVG element
-      svg
-        .attr("viewBox", [0, 0, dimensions.current.width, dimensions.current.height])
-        .call(res)
-        .call(
-          res.transform,
-          d3.zoomIdentity.translate(left(), top()).scale(1)
-        )
+    // Add the zoom behavior to the SVG element
+    svg
+      .attr("viewBox", [0, 0, dimensions.current.width, dimensions.current.height])
+      .call(res)
+      .call(res.transform, d3.zoomIdentity.translate(left(), top()).scale(1))
 
-      return res
-    }
+    return res
+  }
 
   const dragNode = d3
     .drag<SVGCircleElement, FiberGraph.FiberNode>()
-    .on("start", (evt: any, node: FiberGraph.FiberNode) => { dragstarted(evt, node) })
-    .on("drag", (evt: any, node: FiberGraph.FiberNode) => { dragged(evt, node) })
-    .on("end", (evt: any, node: FiberGraph.FiberNode) => { dragended(evt, node) })
+    .on("start", (evt: any, node: FiberGraph.FiberNode) => {
+      dragstarted(evt, node)
+    })
+    .on("drag", (evt: any, node: FiberGraph.FiberNode) => {
+      dragged(evt, node)
+    })
+    .on("end", (evt: any, node: FiberGraph.FiberNode) => {
+      dragended(evt, node)
+    })
 
   const node = () => {
     return group()
@@ -207,7 +209,7 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
       appRt,
       (infos: FiberInfo.FiberInfo[]) => {
         if (!simulating.current && dragSubject.current === undefined) {
-          if (zoomRef.current == undefined) { 
+          if (zoomRef.current == undefined) {
             zoomRef.current = zoom()
           }
           simulating.current = true
@@ -244,27 +246,33 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
     </>
   )
 
-  const dragstarted = (evt: D3DragEvent<SVGCircleElement, FiberGraph.FiberNode, FiberGraph.FiberNode>, node: FiberGraph.FiberNode) => {
-    if (!evt.active) { 
+  const dragstarted = (
+    evt: D3DragEvent<SVGCircleElement, FiberGraph.FiberNode, FiberGraph.FiberNode>,
+    node: FiberGraph.FiberNode
+  ) => {
+    if (!evt.active) {
       const circle = evt.sourceEvent.target as SVGCircleElement
       dragSubject.current = circle
       evt.sourceEvent.stopPropagation()
-    
+
       d3.select(circle).attr("r", 10)
-  
+
       setFilter({
         ...props.filter,
-        pinned: HashSet.add(filterRef.current.pinned, node.fiber.id.id)
+        pinned: HashSet.add(filterRef.current.pinned, node.fiber.id.id),
       })
-  
+
       node.x = evt.x
       node.y = evt.y
       node.fx = evt.x
       node.fy = evt.y
     }
   }
-  
-  const dragged = (evt: D3DragEvent<SVGCircleElement, FiberGraph.FiberNode, FiberGraph.FiberNode>, node: FiberGraph.FiberNode) => {
+
+  const dragged = (
+    evt: D3DragEvent<SVGCircleElement, FiberGraph.FiberNode, FiberGraph.FiberNode>,
+    node: FiberGraph.FiberNode
+  ) => {
     if (dragSubject.current !== undefined) {
       evt.sourceEvent.stopPropagation()
 
@@ -275,28 +283,31 @@ export const FiberForceGraph: React.FC<FiberForceGraphProps> = (props) => {
         .attr("y1", (d) => yAccessor(d.source))
         .attr("x2", (d) => xAccessor(d.target))
         .attr("y2", (d) => yAccessor(d.target))
-  
+
       node.x = evt.x
       node.y = evt.y
       node.fx = evt.x
       node.fy = evt.y
     }
   }
-  
-  const  dragended = (evt: D3DragEvent<SVGCircleElement, FiberGraph.FiberNode, FiberGraph.FiberNode>, node: FiberGraph.FiberNode) => {
+
+  const dragended = (
+    evt: D3DragEvent<SVGCircleElement, FiberGraph.FiberNode, FiberGraph.FiberNode>,
+    node: FiberGraph.FiberNode
+  ) => {
     if (!evt.active) {
       dragSubject.current = undefined
     }
   }
 
   return (
-    <SVGPanel.SVGPanel 
+    <SVGPanel.SVGPanel
       id="D3Graph"
       margins={{
         top: 10,
         bottom: 10,
         left: 10,
-        right: 10
+        right: 10,
       }}
     >
       <SVGPanel.SVGDimensions.Consumer>
