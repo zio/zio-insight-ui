@@ -136,6 +136,7 @@ export const FiberNavigator: React.FC<{}> = (props) => {
               ...fiberFilter,
               matchWords: false,
             }}
+            onFilterChange={setFiberFilter}
           />
         </ContentBox>
       </Box>
