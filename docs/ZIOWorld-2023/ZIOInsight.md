@@ -1,6 +1,7 @@
 ---
 marp: true
 theme: gaia
+header: 'ZIO Insight @ ZIO World 2023'
 --- 
 
 <style>
@@ -8,8 +9,15 @@ theme: gaia
         background-color: lightgrey;
     }
     h1 { 
-      color: #4422ee;
+      color: #00c;
       text-decoration: underline;
+    }
+    header, footer {
+      height: 60px;
+      background-color: #00c;
+      color: white;
+      text-align: right;
+      font-weight: bold;
     }
 </style>
 
