@@ -87,14 +87,14 @@ Software Engineer at @Ziverge
 
 ```typescript
 export interface GraphDataService {
-  subscription: string
-  setMetrics: (keys: HSet.HashSet<InsightKey>) => T.Effect<never, never, void>
-  metrics: () => T.Effect<never, never, HSet.HashSet<InsightKey>>
-  setMaxEntries: (newMax: number) => T.Effect<never, never, void>
-  maxEntries: () => T.Effect<never, never, number>
-  current: () => T.Effect<never, never, GraphData>
-  data: () => T.Effect<never, never, S.Stream<never, never, GraphData>>
-  close: () => T.Effect<never, never, void>
+  id: string
+  setMetrics: (keys: HashSet<InsightKey>) => Effect<never, never, void>
+  metrics: Effect<never, never, HashSet<InsightKey>>
+  setMaxEntries: (newMax: number) => Effect<never, never, void>
+  maxEntries: Effect<never, never, number>
+  latest: Effect<never, never, GraphData>
+  subscription: Queue.Dequeue<string>
+  close: Effect<never, never, void>
 }
 ```
 
@@ -168,6 +168,19 @@ def run(minChildren: Int, maxChildren: Int, maxDepth: Int): ZIO[Scope, Nothing, 
 
 --- 
 
+# Next Steps
+
+- More Navigation / Filtering for fibers and traces
+- Gantt Charting for a selected root fiber 
+- Dashboard save / restore 
+- Finish implementation of Generic Dashboard Frames
+- Service Dependency Graphs 
+- Ongoing Code Cleanup : More Effect / Less UI 
+- Protocol optimization: JSON -> Binary
+- Polling protocol -> Web Sockets streaming protocol  
+
+---
+
 # Resources
 
 - https://zio.dev/
@@ -187,11 +200,11 @@ def run(minChildren: Int, maxChildren: Int, maxDepth: Int): ZIO[Scope, Nothing, 
 
 # Thank you 
 
-## Check out the source code on GitHub 
+## Check out the cods and start exploring 
 - ZIO Insight UI :  https://github.com/zio/zio-insight-ui
 - ZIO Insight Server : https://github.com/zio/zio-insight-server
 - __atooni__ on Discord and Github 
 - __@andreasgies__ on Twitter
 - Join the Discord Servers : 
-  - https://discord.gg/cUkQdZn8 for information around ZIO 
-  - https://discord.gg/effect-ts for more information about Effect used in the front-end
+  - https://discord.gg/cUkQdZn8 -- All things ZIO
+  - https://discord.gg/effect-ts -- All things Effect 
