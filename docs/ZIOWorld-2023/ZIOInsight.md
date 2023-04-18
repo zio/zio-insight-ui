@@ -1,31 +1,67 @@
 ---
 marp: true
 theme: gaia
-header: 'ZIO Insight @ ZIO World 2023'
---- 
+paginate: true
+header: |
+  <div style="display: flex; flex-direction: row; align-items: center; flex-grow: 1">
+    <img src="ZIO.png" />
+    <span>Insight</span>
+  </div>
+  <span>ZIO World 2023</span>
+style: |
+  section {
+    background-color: white;
+    background-image: linear-gradient(40deg, #e2bee2ad 0%, #97e1e7ad 100%);
+  }
 
-<style>
-    section {
-        background-color: lightgrey;
-    }
-    h1 { 
-      color: #00c;
-      text-decoration: underline;
-    }
-    header, footer {
-      height: 60px;
-      background-color: #00c;
-      color: white;
-      text-align: right;
-      font-weight: bold;
-    }
-</style>
+  h1 { 
+    color: #404350;
+  }
 
-# ZIO Insight Preview
-## Andreas Gies, ZIO Team
-## ZIO World 2023
+  header {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    top: 0;
+    left: 0;
+    right: 0; 
+    width: 100%;
+    height: 60px;
+    background-color: #404350;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+  }
 
---- 
+  footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0; 
+    width: 100%;
+    height: 60px;
+    text-align: right;
+    font-weight: bold;
+  }
+---
+
+![bg left:33%](ZIOWorld.jpg)
+
+<h1 style="margin-top: 2em">ZIO Insight</h1>
+
+<h2 style="margin-top: 1.5em">Andreas Gies</h2>
+
+Software Engineer at @Ziverge
+
+---
+
+![bg contain](Insight-2022.png)
+
+---
+
+![bg contain](Insight-2023.png)
+
+---
 
 # ZIO Insight Server 
 
@@ -40,13 +76,33 @@ header: 'ZIO Insight @ ZIO World 2023'
 
 # ZIO Insight UI
 
-- Single Page Application based on Effect, a ZIO inspired Effect system in Typescript
-- Simple Dashboarding
-- Metrics Dashboard based on Chart.JS for metrics visualization
-- Force graph simulation for Fiber hierarchies with filtering and access to Fiber Stacktraces
-
+- Single Page Application leveraging Effect, a ZIO inspired Effect system in Typescript
+  - Simple Dashboarding
+  - Metrics Dashboard based on Chart.JS for metrics visualization
+  - Force graph simulation for Fiber hierarchies with filtering and access to Fiber Stacktraces
 
 --- 
+
+# Client Side Effects
+
+```typescript
+export interface GraphDataService {
+  subscription: string
+  setMetrics: (keys: HSet.HashSet<InsightKey>) => T.Effect<never, never, void>
+  metrics: () => T.Effect<never, never, HSet.HashSet<InsightKey>>
+  setMaxEntries: (newMax: number) => T.Effect<never, never, void>
+  maxEntries: () => T.Effect<never, never, number>
+  current: () => T.Effect<never, never, GraphData>
+  data: () => T.Effect<never, never, S.Stream<never, never, GraphData>>
+  close: () => T.Effect<never, never, void>
+}
+```
+
+<p style="text-align:center">
+  <img width="300px" src="effect_logo_name_black.svg" />
+</p>
+
+---
 
 # A small sample program 
 
@@ -60,6 +116,21 @@ header: 'ZIO Insight @ ZIO World 2023'
   } yield ()
 ```
 
+```scala
+def run(minChildren: Int, maxChildren: Int, maxDepth: Int): ZIO[Scope, Nothing, Int] =
+    for {
+      cnt <- ZIO.randomWith(_.nextIntBetween(minChildren, maxChildren))
+      res <- ZIO.foreachPar(0.to(cnt)) { _ =>
+               if (maxDepth > 0) run(minChildren, maxChildren, maxDepth - 1)
+               else
+                 for {
+                   d <- ZIO.randomWith(_.nextIntBetween(30, 60))
+                   f <- ZIO.randomWith(_.nextIntBetween(0, 10)).schedule(Schedule.spaced(200.millis)).forever.forkScoped
+                   _ <- f.interrupt.delay(d.seconds)
+                 } yield cnt
+             }
+    } yield res.sum
+```
 ---
 
 # Providing the ZIO Insight Services
