@@ -140,24 +140,19 @@ def run(minChildren: Int, maxChildren: Int, maxDepth: Int): ZIO[Scope, Nothing, 
       f <- ZIO.never.forkScoped
       _ <- program
       _ <- Server.serve[InsightPublisher with FiberEndpoint](InsightServer.routes)
-      _ <- Console.printLine("Started Insight Sample application ...")
       _ <- f.join
     } yield ())
       .provideSome[Scope](
         ZLayer.succeed(ServerConfig.default.port(8080)),
         Server.live,
-        // Update Metric State for the API endpoint every 5 seconds
         ZLayer.succeed(MetricsConfig(5.seconds)),
         insight.metricsLayer,
-        // Enable the ZIO internal metrics and the default JVM metricsConfig
         Runtime.enableRuntimeMetrics,
         Runtime.enableFiberRoots,
         DefaultJvmMetrics.live.unit,
         FiberEndpoint.live,
-        ZLayer.succeed(
-          fiberSupervisor,
-        ),                    // Required to give the HTTP endpoint access to the data collected by the supervisor
-        fiberSupervisor.layer,// maintain the supervisors data, i.e. remove stats for terminated fibers after a threshold time
+        ZLayer.succeed(fiberSupervisor),                   
+        fiberSupervisor.gc
       )
       .supervised(fiberSupervisor)
 ```
@@ -200,7 +195,7 @@ def run(minChildren: Int, maxChildren: Int, maxDepth: Int): ZIO[Scope, Nothing, 
 
 # Thank you 
 
-## Check out the cods and start exploring 
+## Check out the code and start exploring 
 - ZIO Insight UI :  https://github.com/zio/zio-insight-ui
 - ZIO Insight Server : https://github.com/zio/zio-insight-server
 - __atooni__ on Discord and Github 
