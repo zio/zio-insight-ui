@@ -88,13 +88,13 @@ Software Engineer at @Ziverge
 ```typescript
 export interface GraphDataService {
   subscription: string
-  setMetrics: (keys: HSet.HashSet<InsightKey>) => T.Effect<never, never, void>
-  metrics: () => T.Effect<never, never, HSet.HashSet<InsightKey>>
-  setMaxEntries: (newMax: number) => T.Effect<never, never, void>
-  maxEntries: () => T.Effect<never, never, number>
-  current: () => T.Effect<never, never, GraphData>
-  data: () => T.Effect<never, never, S.Stream<never, never, GraphData>>
-  close: () => T.Effect<never, never, void>
+  setMetrics: (keys: HashSet<InsightKey>) => Effect<never, never, void>
+  metrics: Effect<never, never, HashSet<InsightKey>>
+  setMaxEntries: (newMax: number) => Effect<never, never, void>
+  maxEntries: Effect<never, never, number>
+  current: Effect<never, never, GraphData>
+  open: Stream<never, never, GraphData>
+  close: Effect<never, never, void>
 }
 ```
 
