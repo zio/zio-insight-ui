@@ -87,12 +87,12 @@ Software Engineer at @Ziverge
 
 ```typescript
 export interface GraphDataService {
-  subscription: string
+  id: string
   setMetrics: (keys: HashSet<InsightKey>) => Effect<never, never, void>
   metrics: Effect<never, never, HashSet<InsightKey>>
   setMaxEntries: (newMax: number) => Effect<never, never, void>
   maxEntries: Effect<never, never, number>
-  current: Effect<never, never, GraphData>
+  latest: Effect<never, never, GraphData>
   open: Stream<never, never, GraphData>
   close: Effect<never, never, void>
 }
@@ -137,27 +137,19 @@ def run(minChildren: Int, maxChildren: Int, maxDepth: Int): ZIO[Scope, Nothing, 
 
 ```scala
     (for {
-      f <- ZIO.never.forkScoped
-      _ <- program
-      _ <- Server.serve[InsightPublisher with FiberEndpoint](InsightServer.routes)
-      _ <- Console.printLine("Started Insight Sample application ...")
-      _ <- f.join
+      // initialise and kick off the program
     } yield ())
       .provideSome[Scope](
         ZLayer.succeed(ServerConfig.default.port(8080)),
         Server.live,
-        // Update Metric State for the API endpoint every 5 seconds
         ZLayer.succeed(MetricsConfig(5.seconds)),
         insight.metricsLayer,
-        // Enable the ZIO internal metrics and the default JVM metricsConfig
         Runtime.enableRuntimeMetrics,
         Runtime.enableFiberRoots,
         DefaultJvmMetrics.live.unit,
         FiberEndpoint.live,
-        ZLayer.succeed(
-          fiberSupervisor,
-        ),                    // Required to give the HTTP endpoint access to the data collected by the supervisor
-        fiberSupervisor.layer,// maintain the supervisors data, i.e. remove stats for terminated fibers after a threshold time
+        ZLayer.succeed(fiberSupervisor),                   
+        fiberSupervisor.gc
       )
       .supervised(fiberSupervisor)
 ```
@@ -167,6 +159,19 @@ def run(minChildren: Int, maxChildren: Int, maxDepth: Int): ZIO[Scope, Nothing, 
 # Live Demo 
 
 --- 
+
+# Next Steps
+
+- More Navigation / Filtering for fibers and traces
+- Gantt Charting for a selected root fiber 
+- Dashboard save / restore 
+- Finish implementation of Generic Dashboard Frames
+- Service Dependency Graphs 
+- Ongoing Code Cleanup : More Effect / Less UI 
+- Protocol optimization: JSON -> Binary
+- Polling protocol -> Web Sockets streaming protocol  
+
+---
 
 # Resources
 
@@ -187,11 +192,11 @@ def run(minChildren: Int, maxChildren: Int, maxDepth: Int): ZIO[Scope, Nothing, 
 
 # Thank you 
 
-## Check out the source code on GitHub 
+## Check out the code and start exploring 
 - ZIO Insight UI :  https://github.com/zio/zio-insight-ui
 - ZIO Insight Server : https://github.com/zio/zio-insight-server
 - __atooni__ on Discord and Github 
 - __@andreasgies__ on Twitter
 - Join the Discord Servers : 
-  - https://discord.gg/cUkQdZn8 for information around ZIO 
-  - https://discord.gg/effect-ts for more information about Effect used in the front-end
+  - https://discord.gg/cUkQdZn8 -- All things ZIO
+  - https://discord.gg/effect-ts -- All things Effect 
