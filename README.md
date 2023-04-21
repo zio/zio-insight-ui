@@ -1,5 +1,7 @@
 # ZIO Insight UI
 
+For an overview of the ZIO Insight project, see [ZIO Insight](https://zio.dev/zio-insight/).
+
 ## Quick start (with static metric data):
 
 - Install Node 18

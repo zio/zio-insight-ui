@@ -93,7 +93,7 @@ export interface GraphDataService {
   setMaxEntries: (newMax: number) => Effect<never, never, void>
   maxEntries: Effect<never, never, number>
   latest: Effect<never, never, GraphData>
-  subscription: Queue.Dequeue<string>
+  open: Stream<never, never, GraphData>
   close: Effect<never, never, void>
 }
 ```
@@ -137,10 +137,7 @@ def run(minChildren: Int, maxChildren: Int, maxDepth: Int): ZIO[Scope, Nothing, 
 
 ```scala
     (for {
-      f <- ZIO.never.forkScoped
-      _ <- program
-      _ <- Server.serve[InsightPublisher with FiberEndpoint](InsightServer.routes)
-      _ <- f.join
+      // initialise and kick off the program
     } yield ())
       .provideSome[Scope](
         ZLayer.succeed(ServerConfig.default.port(8080)),
