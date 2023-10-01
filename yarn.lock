@@ -283,12 +283,10 @@
   resolved "https://registry.yarnpkg.com/@effect/data/-/data-0.11.7.tgz#c3b1c85dc8a7ddee467cdfc77bfe260a45dfae8f"
   integrity sha512-aMkSMpiBey3N4zewEs6XRf7S31meoErSqm9u3neXQ7re6lSfmvGQGrNckix+220Xh1rx7uCXWnQwvazSNMPREQ==
 
-"@effect/io@^0.19.0", "@effect/io@~0.19.2":
-  version "0.19.2"
-  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.19.2.tgz#43be6c90450984fb0464e2b9b4397cb56bfe3441"
-  integrity sha512-8h9rnVPf6afOO4a5NkgfOTdRMqgoyXYA9P1OKtj4IuFSstIf19TfBcJ2UYDGBAFMxWr36OjAOuz6gXZF87hzDQ==
-  dependencies:
-    "@effect/data" "~0.11.5"
+"@effect/io@^0.41.0", "@effect/io@~0.19.2":
+  version "0.41.2"
+  resolved "https://registry.yarnpkg.com/@effect/io/-/io-0.41.2.tgz#219ead2b87baea6d0ca3adef9b63dec0eefd51b0"
+  integrity sha512-kSMMQbowTPhUGQIo+B/5F6WWynY14IWr9avLAv4oaZ6PtjP+w8sOOdO0YU3a+idBaO12uIuvba2ZFR6LnASM6w==
 
 "@effect/stream@^0.18.0":
   version "0.18.0"
